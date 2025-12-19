@@ -1,0 +1,138 @@
+<resources>
+    <string name="app_name">Fid</string>
+    
+    <!-- Onboarding -->
+    <string name="welcome_to_fid">Welcome to Fid</string>
+    <string name="discover_new_way">Discover a New Way to Nourish Yourself</string>
+    <string name="effortless_ai_registration">Effortless AI registration (photos and voice)</string>
+    <string name="dynamic_personalized_goals">Dynamic and personalized goals</string>
+    <string name="healthy_conscious_relationship">A healthy and conscious relationship with food</string>
+    <string name="start_journey">Start My Journey</string>
+    <string name="already_have_account">I already have an account</string>
+    
+    <!-- Auth -->
+    <string name="sign_in">Sign In</string>
+    <string name="create_account">Create Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="remember_me">Remember me</string>
+    <string name="forgot_password">Forgot your password?</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_apple">Continue with Apple</string>
+    
+    <!-- Goal Setup -->
+    <string name="setup_goals">Goal Setup</string>
+    <string name="whats_your_goal">What\'s your goal?</string>
+    <string name="lose_weight">Lose weight</string>
+    <string name="maintain_weight">Maintain weight</string>
+    <string name="gain_muscle">Gain muscle</string>
+    <string name="tell_us_about_you">Tell us about you</string>
+    <string name="age">Age</string>
+    <string name="gender">Gender</string>
+    <string name="height_cm">Height (cm)</string>
+    <string name="current_weight_kg">Current Weight (kg)</string>
+    <string name="activity_level">Activity Level</string>
+    <string name="sedentary">Sedentary</string>
+    <string name="light">Light</string>
+    <string name="moderate">Moderate</string>
+    <string name="very_active">Very Active</string>
+    <string name="athlete">Athlete</string>
+    <string name="target_weight_kg">Target Weight (kg)</string>
+    <string name="confirm_goals">Confirm Goals</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    
+    <!-- Dashboard -->
+    <string name="hello">Hello, %1$s</string>
+    <string name="calories_consumed">Calories Consumed</string>
+    <string name="calories_remaining">Calories Remaining</string>
+    <string name="daily_goal">Daily Goal</string>
+    <string name="proteins">Proteins</string>
+    <string name="fats">Fats</string>
+    <string name="carbs">Carbohydrates</string>
+    <string name="hydration">Hydration</string>
+    <string name="sleep">Sleep</string>
+    <string name="register_food">Register Food</string>
+    
+    <!-- Food Registration -->
+    <string name="snap_it">Snap It!</string>
+    <string name="focus_your_food">Focus your food</string>
+    <string name="analyzing_food">Analyzing your food...</string>
+    <string name="voice_registration">Voice Registration</string>
+    <string name="say_what_you_ate">Say what you ate (e.g: \'I ate 100 grams of chicken and a salad\')</string>
+    <string name="manual_registration">Manual Registration</string>
+    <string name="search_food">Search food</string>
+    <string name="frequent_recent">Frequent and Recent Foods</string>
+    <string name="smart_suggestions">Smart Suggestions</string>
+    <string name="add_custom">Add Custom</string>
+    <string name="confirm_register">Confirm and Register</string>
+    
+    <!-- Food Detail -->
+    <string name="food_detail">Food Detail</string>
+    <string name="amount">Amount</string>
+    <string name="grams">grams</string>
+    <string name="unit">unit</string>
+    <string name="calories">Calories</string>
+    <string name="verified_manufacturer">Verified by Manufacturer/Restaurant</string>
+    <string name="verified_government">Verified by Government/USDA</string>
+    <string name="verified_community">Verified by Community (High Trust)</string>
+    <string name="user_submitted">User Submitted (Unverified)</string>
+    <string name="add_to_log">Add to my log</string>
+    
+    <!-- Progress -->
+    <string name="progress">Progress</string>
+    <string name="numberless_mode">Numberless Mode</string>
+    <string name="high_energy">You had High Energy today</string>
+    <string name="balanced_diet">Your diet today was Balanced</string>
+    <string name="need_more_veggies">Looks like you need more Fresh Vegetables</string>
+    <string name="prioritized_protein">You prioritized Proteins today</string>
+    
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="my_account">My Account</string>
+    <string name="personal_data">Personal Data</string>
+    <string name="my_goals">My Goals</string>
+    <string name="change_password">Change Password</string>
+    <string name="app_preferences">App Preferences</string>
+    <string name="numberless_mode_toggle">Numberless Mode</string>
+    <string name="measurement_units">Measurement Units</string>
+    <string name="notifications">Notifications</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="integrate_apple_health">Integrate with Apple Health</string>
+    <string name="integrate_google_fit">Integrate with Google Fit</string>
+    <string name="support_legal">Support &amp; Legal</string>
+    <string name="faq">FAQ</string>
+    <string name="contact">Contact</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="sign_out">Sign Out</string>
+    
+    <!-- Navigation -->
+    <string name="home">Home</string>
+    
+    <!-- Common -->
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="other">Other</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="today">Today</string>
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    
+    <!-- Errors -->
+    <string name="error_empty_field">This field cannot be empty</string>
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="error_invalid_password">Password must be at least 6 characters</string>
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_registration_failed">Account creation failed</string>
+    
+    <!-- Success Messages -->
+    <string name="success_food_added">Food added successfully</string>
+    <string name="success_profile_updated">Profile updated</string>
+    <string name="success_goals_set">Goals set</string>
+</resources>
+

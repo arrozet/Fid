@@ -1,3 +1,137 @@
 <resources>
     <string name="app_name">Fid</string>
+    
+    <!-- Onboarding -->
+    <string name="welcome_to_fid">Bienvenido a Fid</string>
+    <string name="discover_new_way">Descubre una Nueva Forma de Nutrirte</string>
+    <string name="effortless_ai_registration">Registro sin esfuerzo con IA (fotos y voz)</string>
+    <string name="dynamic_personalized_goals">Objetivos dinámicos y personalizados</string>
+    <string name="healthy_conscious_relationship">Una relación saludable y consciente con la comida</string>
+    <string name="start_journey">Empezar Mi Viaje</string>
+    <string name="already_have_account">Ya tengo una cuenta</string>
+    
+    <!-- Auth -->
+    <string name="sign_in">Iniciar Sesión</string>
+    <string name="create_account">Crear Cuenta</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="remember_me">Recordarme</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="or_continue_with">O continuar con</string>
+    <string name="continue_with_google">Continuar con Google</string>
+    <string name="continue_with_apple">Continuar con Apple</string>
+    
+    <!-- Goal Setup -->
+    <string name="setup_goals">Establecimiento de Objetivos</string>
+    <string name="whats_your_goal">¿Cuál es tu objetivo?</string>
+    <string name="lose_weight">Perder peso</string>
+    <string name="maintain_weight">Mantener peso</string>
+    <string name="gain_muscle">Ganar músculo</string>
+    <string name="tell_us_about_you">Cuéntanos sobre ti</string>
+    <string name="age">Edad</string>
+    <string name="gender">Género</string>
+    <string name="height_cm">Altura (cm)</string>
+    <string name="current_weight_kg">Peso Actual (kg)</string>
+    <string name="activity_level">Nivel de Actividad</string>
+    <string name="sedentary">Sedentario</string>
+    <string name="light">Ligero</string>
+    <string name="moderate">Moderado</string>
+    <string name="very_active">Muy Activo</string>
+    <string name="athlete">Atleta</string>
+    <string name="target_weight_kg">Peso Objetivo (kg)</string>
+    <string name="confirm_goals">Confirmar Objetivos</string>
+    <string name="next">Siguiente</string>
+    <string name="back">Atrás</string>
+    
+    <!-- Dashboard -->
+    <string name="hello">Hola, %1$s</string>
+    <string name="calories_consumed">Calorías Consumidas</string>
+    <string name="calories_remaining">Calorías Restantes</string>
+    <string name="daily_goal">Objetivo Diario</string>
+    <string name="proteins">Proteínas</string>
+    <string name="fats">Grasas</string>
+    <string name="carbs">Carbohidratos</string>
+    <string name="hydration">Hidratación</string>
+    <string name="sleep">Sueño</string>
+    <string name="register_food">Registrar Alimento</string>
+    
+    <!-- Food Registration -->
+    <string name="snap_it">Snap It!</string>
+    <string name="focus_your_food">Enfoca tu comida</string>
+    <string name="analyzing_food">Analizando tu comida...</string>
+    <string name="voice_registration">Registro por Voz</string>
+    <string name="say_what_you_ate">Di lo que comiste (ej: \'Comí 100 gramos de pollo y una ensalada\')</string>
+    <string name="manual_registration">Registro Manual</string>
+    <string name="search_food">Buscar alimento</string>
+    <string name="frequent_recent">Alimentos Frecuentes y Recientes</string>
+    <string name="smart_suggestions">Sugerencias Inteligentes</string>
+    <string name="add_custom">Añadir Personalizado</string>
+    <string name="confirm_register">Confirmar y Registrar</string>
+    
+    <!-- Food Detail -->
+    <string name="food_detail">Detalle de Alimento</string>
+    <string name="amount">Cantidad</string>
+    <string name="grams">gramos</string>
+    <string name="unit">unidad</string>
+    <string name="calories">Calorías</string>
+    <string name="verified_manufacturer">Verificado por Fabricante/Restaurante</string>
+    <string name="verified_government">Verificado por Gobierno/USDA</string>
+    <string name="verified_community">Verificado por la Comunidad (Alta Confianza)</string>
+    <string name="user_submitted">Enviado por el Usuario (Sin verificar)</string>
+    <string name="add_to_log">Añadir a mi registro</string>
+    
+    <!-- Progress -->
+    <string name="progress">Progreso</string>
+    <string name="numberless_mode">Modo sin Números</string>
+    <string name="high_energy">Hoy has tenido una Energía Alta</string>
+    <string name="balanced_diet">Tu dieta de hoy fue Equilibrada</string>
+    <string name="need_more_veggies">Parece que necesitas más Verduras Frescas</string>
+    <string name="prioritized_protein">Hoy priorizaste las Proteínas</string>
+    
+    <!-- Settings -->
+    <string name="settings">Ajustes</string>
+    <string name="my_account">Mi Cuenta</string>
+    <string name="personal_data">Datos Personales</string>
+    <string name="my_goals">Mis Objetivos</string>
+    <string name="change_password">Cambiar Contraseña</string>
+    <string name="app_preferences">Preferencias de la App</string>
+    <string name="numberless_mode_toggle">Modo sin Números</string>
+    <string name="measurement_units">Unidades de Medida</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="connectivity">Conectividad</string>
+    <string name="integrate_apple_health">Integrar con Apple Health</string>
+    <string name="integrate_google_fit">Integrar con Google Fit</string>
+    <string name="support_legal">Soporte y Legal</string>
+    <string name="faq">Preguntas Frecuentes</string>
+    <string name="contact">Contacto</string>
+    <string name="privacy_policy">Política de Privacidad</string>
+    <string name="terms_of_service">Términos de Servicio</string>
+    <string name="sign_out">Cerrar Sesión</string>
+    
+    <!-- Navigation -->
+    <string name="home">Inicio</string>
+    
+    <!-- Common -->
+    <string name="male">Masculino</string>
+    <string name="female">Femenino</string>
+    <string name="other">Otro</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="today">Hoy</string>
+    <string name="week">Semana</string>
+    <string name="month">Mes</string>
+    
+    <!-- Errors -->
+    <string name="error_empty_field">Este campo no puede estar vacío</string>
+    <string name="error_invalid_email">Correo electrónico inválido</string>
+    <string name="error_invalid_password">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_login_failed">Error al iniciar sesión</string>
+    <string name="error_registration_failed">Error al crear cuenta</string>
+    
+    <!-- Success Messages -->
+    <string name="success_food_added">Alimento añadido correctamente</string>
+    <string name="success_profile_updated">Perfil actualizado</string>
+    <string name="success_goals_set">Objetivos establecidos</string>
 </resources>
