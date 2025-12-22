@@ -10,6 +10,17 @@ android {
     namespace = "com.example.fid"
     compileSdk = 34
 
+    signingConfigs {
+        getByName("debug") {
+            // Buscamos el archivo en la carpeta que creaste
+            storeFile = file("keystore/debug.keystore")
+            // Estas son las claves estándar de depuración de Android
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.fid"
         minSdk = 24
@@ -27,6 +38,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

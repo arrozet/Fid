@@ -516,6 +516,9 @@ render.experimental.xml
 *.jks
 *.keystore
 
+# EXCEPCIÓN: Permitir debug.keystore para desarrollo en equipo
+!app/keystore/debug.keystore
+
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
