@@ -1,11 +1,9 @@
 package com.example.fid.data.database.entities
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "food_entries")
+/**
+ * FoodEntry entity - used for Firestore database
+ */
 data class FoodEntry(
-    @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val userId: Long,
     val foodName: String,

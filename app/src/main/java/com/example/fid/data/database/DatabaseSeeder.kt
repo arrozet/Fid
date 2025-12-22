@@ -1,14 +1,14 @@
 package com.example.fid.data.database
 
 import com.example.fid.data.database.entities.FoodItem
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
  * Seeds the database with initial food items
  */
-class DatabaseSeeder(private val repository: FidRepository) {
+class DatabaseSeeder(private val repository: FirebaseRepository) {
     
     suspend fun seedFoodItems() = withContext(Dispatchers.IO) {
         val sampleFoods = listOf(

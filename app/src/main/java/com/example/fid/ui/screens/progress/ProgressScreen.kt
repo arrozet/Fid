@@ -19,9 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
-import com.example.fid.data.database.FidDatabase
 import com.example.fid.data.database.entities.User
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
 
@@ -29,7 +28,7 @@ import com.example.fid.ui.theme.*
 @Composable
 fun ProgressScreen(navController: NavController) {
     val context = LocalContext.current
-    val repository = remember { FidRepository(FidDatabase.getDatabase(context)) }
+    val repository = remember { FirebaseRepository() }
     val scrollState = rememberScrollState()
     
     var user by remember { mutableStateOf<User?>(null) }

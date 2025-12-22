@@ -22,18 +22,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
-import com.example.fid.data.database.FidDatabase
 import com.example.fid.data.database.entities.User
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
-    val repository = remember { FidRepository(FidDatabase.getDatabase(context)) }
+    val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
@@ -243,8 +246,26 @@ fun SettingsScreen(navController: NavController) {
                     TextButton(
                         onClick = {
                             showSignOutDialog = false
-                            navController.navigate(Screen.Onboarding.route) {
-                                popUpTo(0) { inclusive = true }
+                            scope.launch {
+                                try {
+                                    // Cerrar sesión en Firebase Auth
+                                    Firebase.auth.signOut()
+                                    
+                                    // Cerrar sesión en Google Sign-In
+                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestIdToken(context.getString(R.string.default_web_client_id))
+                                        .requestEmail()
+                                        .build()
+                                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                    googleSignInClient.signOut()
+                                    
+                                    // Navegar a onboarding
+                                    navController.navigate(Screen.Onboarding.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error al cerrar sesión: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     ) {

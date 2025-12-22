@@ -22,10 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
-import com.example.fid.data.database.FidDatabase
 import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.database.entities.User
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
 import kotlinx.coroutines.launch
@@ -36,7 +35,7 @@ import java.util.*
 @Composable
 fun DashboardScreen(navController: NavController) {
     val context = LocalContext.current
-    val repository = remember { FidRepository(FidDatabase.getDatabase(context)) }
+    val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
@@ -490,6 +489,8 @@ fun AddFoodMenu(
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+    
     NavigationBar(
         containerColor = DarkSurface,
         contentColor = TextPrimary
@@ -497,8 +498,14 @@ fun BottomNavigationBar(navController: NavController) {
         NavigationBarItem(
             icon = { Text("🏠", fontSize = 24.sp) },
             label = { Text(stringResource(R.string.home), fontSize = 10.sp) },
-            selected = true,
-            onClick = { },
+            selected = currentRoute == Screen.Dashboard.route,
+            onClick = { 
+                if (currentRoute != Screen.Dashboard.route) {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Dashboard.route) { inclusive = true }
+                    }
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = PrimaryGreen,
                 selectedTextColor = PrimaryGreen,
@@ -511,8 +518,14 @@ fun BottomNavigationBar(navController: NavController) {
         NavigationBarItem(
             icon = { Text("📊", fontSize = 24.sp) },
             label = { Text(stringResource(R.string.progress), fontSize = 10.sp) },
-            selected = false,
-            onClick = { navController.navigate(Screen.Progress.route) },
+            selected = currentRoute == Screen.Progress.route,
+            onClick = { 
+                if (currentRoute != Screen.Progress.route) {
+                    navController.navigate(Screen.Progress.route) {
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = PrimaryGreen,
                 selectedTextColor = PrimaryGreen,
@@ -525,8 +538,14 @@ fun BottomNavigationBar(navController: NavController) {
         NavigationBarItem(
             icon = { Text("⚙️", fontSize = 24.sp) },
             label = { Text(stringResource(R.string.settings), fontSize = 10.sp) },
-            selected = false,
-            onClick = { navController.navigate(Screen.Settings.route) },
+            selected = currentRoute == Screen.Settings.route,
+            onClick = { 
+                if (currentRoute != Screen.Settings.route) {
+                    navController.navigate(Screen.Settings.route) {
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = PrimaryGreen,
                 selectedTextColor = PrimaryGreen,

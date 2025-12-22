@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Fid</string>
     
+    <!-- Firebase -->
+    <string name="default_web_client_id">84527428024-vmbo1uka7l338fl85n1e465ui8iophlj.apps.googleusercontent.com</string>
+    
     <!-- Onboarding -->
     <string name="welcome_to_fid">Bienvenido a Fid</string>
     <string name="discover_new_way">Descubre una Nueva Forma de Nutrirte</string>

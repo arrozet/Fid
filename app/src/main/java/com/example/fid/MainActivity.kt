@@ -11,8 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.compose.rememberNavController
 import com.example.fid.data.database.DatabaseSeeder
-import com.example.fid.data.database.FidDatabase
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.NavGraph
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.FidTheme
@@ -26,8 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         
         // Initialize database with sample data
-        val database = FidDatabase.getDatabase(applicationContext)
-        val repository = FidRepository(database)
+        val repository = FirebaseRepository()
         val seeder = DatabaseSeeder(repository)
         
         CoroutineScope(Dispatchers.IO).launch {

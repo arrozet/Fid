@@ -60,6 +60,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
     
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    
     // ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     

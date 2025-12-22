@@ -21,20 +21,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
-import com.example.fid.data.database.FidDatabase
 import com.example.fid.data.database.entities.User
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 @Composable
 fun GoalSetupScreen(navController: NavController) {
     val context = LocalContext.current
-    val repository = remember { FidRepository(FidDatabase.getDatabase(context)) }
+    val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
+    var currentUser by remember { mutableStateOf<User?>(null) }
     var step by remember { mutableIntStateOf(1) }
     var selectedGoal by remember { mutableStateOf("maintain_weight") }
     var age by remember { mutableStateOf("") }
@@ -43,6 +45,12 @@ fun GoalSetupScreen(navController: NavController) {
     var weight by remember { mutableStateOf("") }
     var selectedActivityLevel by remember { mutableStateOf("moderate") }
     var targetWeight by remember { mutableStateOf("") }
+    
+    // Obtener usuario actual si existe
+    LaunchedEffect(Unit) {
+        currentUser = repository.getCurrentUser()
+        android.util.Log.d("GoalSetupScreen", "Usuario actual cargado: ${currentUser?.name} (${currentUser?.email})")
+    }
     
     Box(
         modifier = Modifier
@@ -128,6 +136,10 @@ fun GoalSetupScreen(navController: NavController) {
                                     val weightFloat = weight.toFloatOrNull() ?: 70f
                                     val targetWeightFloat = targetWeight.toFloatOrNull()
                                     
+                                    android.util.Log.d("GoalSetupScreen", "=== INICIO GUARDADO ===")
+                                    android.util.Log.d("GoalSetupScreen", "Age input: '$age' -> parsed: $ageInt")
+                                    android.util.Log.d("GoalSetupScreen", "Height: $heightFloat, Weight: $weightFloat, Target: $targetWeightFloat")
+                                    
                                     val tdee = repository.calculateTDEE(
                                         selectedGender,
                                         weightFloat,
@@ -138,23 +150,81 @@ fun GoalSetupScreen(navController: NavController) {
                                     
                                     val (protein, fat, carb) = repository.calculateMacros(tdee, selectedGoal)
                                     
-                                    val user = User(
-                                        email = "user@fid.com", // This should come from auth
-                                        name = "User",
-                                        age = ageInt,
-                                        gender = selectedGender,
-                                        heightCm = heightFloat,
-                                        currentWeightKg = weightFloat,
-                                        targetWeightKg = targetWeightFloat,
-                                        activityLevel = selectedActivityLevel,
-                                        goal = selectedGoal,
-                                        tdee = tdee,
-                                        proteinGoalG = protein,
-                                        fatGoalG = fat,
-                                        carbGoalG = carb
-                                    )
+                                    // Obtener el email del usuario autenticado en Firebase Auth
+                                    val firebaseUser = Firebase.auth.currentUser
+                                    val userEmail = firebaseUser?.email ?: currentUser?.email ?: "user@fid.com"
+                                    val userName = firebaseUser?.displayName ?: currentUser?.name ?: "Usuario"
                                     
-                                    repository.insertUser(user)
+                                    android.util.Log.d("GoalSetupScreen", "Email a usar: $userEmail")
+                                    android.util.Log.d("GoalSetupScreen", "Nombre a usar: $userName")
+                                    android.util.Log.d("GoalSetupScreen", "CurrentUser antes de guardar: ID=${currentUser?.id}, email=${currentUser?.email}, age=${currentUser?.age}")
+                                    android.util.Log.d("GoalSetupScreen", "FirebaseUser: ${firebaseUser?.email}")
+                                    
+                                    // SIEMPRE actualizar, nunca insertar nuevo
+                                    // Porque AuthScreen ya creó el usuario
+                                    val userToSave = if (currentUser != null) {
+                                        android.util.Log.d("GoalSetupScreen", "✅ Actualizando usuario existente ID=${currentUser!!.id}")
+                                        // Actualizar usuario existente (ej: de Google Sign-In)
+                                        currentUser!!.copy(
+                                            age = ageInt,
+                                            gender = selectedGender,
+                                            heightCm = heightFloat,
+                                            currentWeightKg = weightFloat,
+                                            targetWeightKg = targetWeightFloat,
+                                            activityLevel = selectedActivityLevel,
+                                            goal = selectedGoal,
+                                            tdee = tdee,
+                                            proteinGoalG = protein,
+                                            fatGoalG = fat,
+                                            carbGoalG = carb
+                                        )
+                                    } else {
+                                        // NO debería llegar aquí si viene de Google Sign-In
+                                        android.util.Log.e("GoalSetupScreen", "⚠️ CurrentUser es NULL! Buscando usuario por email...")
+                                        
+                                        // Intentar recuperar el usuario que debería existir
+                                        val existingUser = repository.getUserByEmail(userEmail)
+                                        if (existingUser != null) {
+                                            android.util.Log.d("GoalSetupScreen", "✅ Usuario recuperado: ID=${existingUser.id}")
+                                            existingUser.copy(
+                                                age = ageInt,
+                                                gender = selectedGender,
+                                                heightCm = heightFloat,
+                                                currentWeightKg = weightFloat,
+                                                targetWeightKg = targetWeightFloat,
+                                                activityLevel = selectedActivityLevel,
+                                                goal = selectedGoal,
+                                                tdee = tdee,
+                                                proteinGoalG = protein,
+                                                fatGoalG = fat,
+                                                carbGoalG = carb
+                                            )
+                                        } else {
+                                            android.util.Log.e("GoalSetupScreen", "❌ No se encontró usuario existente, creando nuevo")
+                                            User(
+                                                id = System.currentTimeMillis(),
+                                                email = userEmail,
+                                                name = userName,
+                                                age = ageInt,
+                                                gender = selectedGender,
+                                                heightCm = heightFloat,
+                                                currentWeightKg = weightFloat,
+                                                targetWeightKg = targetWeightFloat,
+                                                activityLevel = selectedActivityLevel,
+                                                goal = selectedGoal,
+                                                tdee = tdee,
+                                                proteinGoalG = protein,
+                                                fatGoalG = fat,
+                                                carbGoalG = carb,
+                                                numberlessMode = false
+                                            )
+                                        }
+                                    }
+                                    
+                                    android.util.Log.d("GoalSetupScreen", "Usuario final a guardar: ID=${userToSave.id}, email=${userToSave.email}, age=${userToSave.age}")
+                                    
+                                    // SIEMPRE usar updateUser (porque el usuario ya debería existir)
+                                    repository.updateUser(userToSave)
                                     
                                     Toast.makeText(
                                         context,

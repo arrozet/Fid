@@ -23,9 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
-import com.example.fid.data.database.FidDatabase
 import com.example.fid.data.database.entities.FoodEntry
-import com.example.fid.data.repository.FidRepository
+import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -33,7 +32,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FoodDetailScreen(navController: NavController, foodId: Long) {
     val context = LocalContext.current
-    val repository = remember { FidRepository(FidDatabase.getDatabase(context)) }
+    val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     

@@ -1,6 +1,7 @@
 package com.example.fid.data.repository
 
 import com.example.fid.data.database.entities.*
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -34,23 +35,66 @@ class FirebaseRepository {
     
     suspend fun getUserByEmail(email: String): User? {
         return try {
+            android.util.Log.d("FirebaseRepository", "=== GET USER BY EMAIL ===")
+            android.util.Log.d("FirebaseRepository", "Buscando email: '$email'")
+            
             val snapshot = firestore.collection("users")
                 .whereEqualTo("email", email)
                 .limit(1)
                 .get()
                 .await()
             
-            snapshot.documents.firstOrNull()?.toObject<User>()
+            android.util.Log.d("FirebaseRepository", "Documentos encontrados: ${snapshot.documents.size}")
+            
+            val user = snapshot.documents.firstOrNull()?.toObject<User>()
+            
+            if (user != null) {
+                android.util.Log.d("FirebaseRepository", "✅ Usuario encontrado:")
+                android.util.Log.d("FirebaseRepository", "  - ID: ${user.id}")
+                android.util.Log.d("FirebaseRepository", "  - Email: ${user.email}")
+                android.util.Log.d("FirebaseRepository", "  - Name: ${user.name}")
+                android.util.Log.d("FirebaseRepository", "  - Age: ${user.age}")
+                android.util.Log.d("FirebaseRepository", "  - Height: ${user.heightCm}, Weight: ${user.currentWeightKg}")
+            } else {
+                android.util.Log.d("FirebaseRepository", "❌ No se encontró usuario con ese email")
+            }
+            
+            user
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "❌ Error buscando usuario: ${e.message}")
             null
         }
     }
     
     suspend fun insertUser(user: User): Long {
         return try {
+            // Verificar si ya existe un usuario con ese email para evitar duplicados
+            val existing = getUserByEmail(user.email)
+            if (existing != null) {
+                android.util.Log.d("FirebaseRepository", "Usuario ya existe con email ${user.email}, actualizando en lugar de insertar")
+                updateUser(existing.copy(
+                    name = user.name,
+                    age = user.age,
+                    gender = user.gender,
+                    heightCm = user.heightCm,
+                    currentWeightKg = user.currentWeightKg,
+                    targetWeightKg = user.targetWeightKg,
+                    activityLevel = user.activityLevel,
+                    goal = user.goal,
+                    tdee = user.tdee,
+                    proteinGoalG = user.proteinGoalG,
+                    fatGoalG = user.fatGoalG,
+                    carbGoalG = user.carbGoalG,
+                    numberlessMode = user.numberlessMode
+                ))
+                return existing.id
+            }
+            
             // Generamos un ID único basado en timestamp
             val newId = System.currentTimeMillis()
             val userWithId = user.copy(id = newId)
+            
+            android.util.Log.d("FirebaseRepository", "Insertando nuevo usuario: ${user.name} (${user.email})")
             
             firestore.collection("users")
                 .document(newId.toString())
@@ -59,31 +103,59 @@ class FirebaseRepository {
             
             newId
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error insertando usuario: ${e.message}")
             throw e
         }
     }
     
     suspend fun updateUser(user: User) {
         try {
+            android.util.Log.d("FirebaseRepository", "=== UPDATE USER ===")
+            android.util.Log.d("FirebaseRepository", "ID: ${user.id}")
+            android.util.Log.d("FirebaseRepository", "Email: ${user.email}")
+            android.util.Log.d("FirebaseRepository", "Name: ${user.name}")
+            android.util.Log.d("FirebaseRepository", "Age: ${user.age}")
+            android.util.Log.d("FirebaseRepository", "Height: ${user.heightCm}, Weight: ${user.currentWeightKg}")
+            android.util.Log.d("FirebaseRepository", "Goal: ${user.goal}, Activity: ${user.activityLevel}")
+            
             firestore.collection("users")
                 .document(user.id.toString())
                 .set(user)
                 .await()
+            
+            android.util.Log.d("FirebaseRepository", "✅ Usuario actualizado exitosamente en Firestore")
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "❌ Error actualizando usuario: ${e.message}")
             throw e
         }
     }
     
     suspend fun getCurrentUser(): User? {
         return try {
-            // Obtiene el primer usuario (asumimos un solo usuario por app)
-            val snapshot = firestore.collection("users")
-                .limit(1)
-                .get()
-                .await()
-            
-            snapshot.documents.firstOrNull()?.toObject<User>()
+            android.util.Log.d("FirebaseRepository", "=== GET CURRENT USER ===")
+            // Obtener el email del usuario autenticado en Firebase Auth
+            val currentUserEmail = Firebase.auth.currentUser?.email
+            android.util.Log.d("FirebaseRepository", "Firebase Auth email: '$currentUserEmail'")
+
+            if (currentUserEmail != null) {
+                // Buscar el usuario por email en Firestore
+                val user = getUserByEmail(currentUserEmail)
+                android.util.Log.d("FirebaseRepository", "getCurrentUser devuelve: ${user?.name} (age=${user?.age})")
+                user
+            } else {
+                android.util.Log.w("FirebaseRepository", "⚠️ No hay usuario autenticado en Firebase Auth")
+                // Si no hay usuario autenticado, buscar el primer usuario (fallback)
+                val snapshot = firestore.collection("users")
+                    .limit(1)
+                    .get()
+                    .await()
+
+                val user = snapshot.documents.firstOrNull()?.toObject<User>()
+                android.util.Log.d("FirebaseRepository", "Fallback - primer usuario: ${user?.name} (age=${user?.age})")
+                user
+            }
         } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "❌ Error en getCurrentUser: ${e.message}")
             null
         }
     }
