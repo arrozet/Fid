@@ -143,16 +143,9 @@ class FirebaseRepository {
                 android.util.Log.d("FirebaseRepository", "getCurrentUser devuelve: ${user?.name} (age=${user?.age})")
                 user
             } else {
-                android.util.Log.w("FirebaseRepository", "⚠️ No hay usuario autenticado en Firebase Auth")
-                // Si no hay usuario autenticado, buscar el primer usuario (fallback)
-                val snapshot = firestore.collection("users")
-                    .limit(1)
-                    .get()
-                    .await()
-
-                val user = snapshot.documents.firstOrNull()?.toObject<User>()
-                android.util.Log.d("FirebaseRepository", "Fallback - primer usuario: ${user?.name} (age=${user?.age})")
-                user
+                // NO hay usuario autenticado - devolver null para forzar login
+                android.util.Log.w("FirebaseRepository", "⚠️ No hay usuario autenticado en Firebase Auth - requiere login")
+                null
             }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "❌ Error en getCurrentUser: ${e.message}")
