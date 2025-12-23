@@ -48,8 +48,23 @@ fun GoalSetupScreen(navController: NavController) {
     
     // Obtener usuario actual si existe
     LaunchedEffect(Unit) {
-        currentUser = repository.getCurrentUser()
-        android.util.Log.d("GoalSetupScreen", "Usuario actual cargado: ${currentUser?.name} (${currentUser?.email})")
+        try {
+            currentUser = repository.getCurrentUser()
+            android.util.Log.d("GoalSetupScreen", "Usuario actual cargado: ${currentUser?.name} (${currentUser?.email})")
+            
+            // Pre-llenar campos si el usuario ya tiene datos
+            currentUser?.let { user ->
+                if (user.age > 0) age = user.age.toString()
+                if (user.heightCm > 0f) height = user.heightCm.toString()
+                if (user.currentWeightKg > 0f) weight = user.currentWeightKg.toString()
+                user.targetWeightKg?.let { targetWeight = it.toString() }
+                selectedGender = user.gender
+                selectedActivityLevel = user.activityLevel
+                selectedGoal = user.goal
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GoalSetupScreen", "Error cargando usuario: ${e.message}", e)
+        }
     }
     
     Box(
