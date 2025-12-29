@@ -3,6 +3,8 @@ package com.example.fid.ui.screens.dashboard
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -11,13 +13,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -104,11 +109,6 @@ fun DashboardScreen(navController: NavController) {
                             fontSize = 12.sp,
                             color = TextSecondary
                         )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -982,6 +982,15 @@ fun AddFoodMenu(
     onVoiceClick: () -> Unit,
     onManualClick: () -> Unit
 ) {
+    // InteractionSources para detectar el estado pressed de cada botón
+    val photoInteractionSource = remember { MutableInteractionSource() }
+    val voiceInteractionSource = remember { MutableInteractionSource() }
+    val manualInteractionSource = remember { MutableInteractionSource() }
+    
+    val isPhotoPressed by photoInteractionSource.collectIsPressedAsState()
+    val isVoicePressed by voiceInteractionSource.collectIsPressedAsState()
+    val isManualPressed by manualInteractionSource.collectIsPressedAsState()
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -1010,9 +1019,14 @@ fun AddFoodMenu(
                 onClick = onPhotoClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp)
+                    .graphicsLayer {
+                        scaleX = if (isPhotoPressed) 0.96f else 1f
+                        scaleY = if (isPhotoPressed) 0.96f else 1f
+                    },
+                interactionSource = photoInteractionSource,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryGreen,
+                    containerColor = if (isPhotoPressed) PrimaryGreenDark else PrimaryGreen,
                     contentColor = DarkBackground
                 ),
                 shape = RoundedCornerShape(16.dp)
@@ -1030,9 +1044,15 @@ fun AddFoodMenu(
                 onClick = onVoiceClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp)
+                    .graphicsLayer {
+                        scaleX = if (isVoicePressed) 0.96f else 1f
+                        scaleY = if (isVoicePressed) 0.96f else 1f
+                    },
+                interactionSource = voiceInteractionSource,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = PrimaryGreen
+                    contentColor = if (isVoicePressed) PrimaryGreenLight else PrimaryGreen,
+                    containerColor = if (isVoicePressed) PrimaryGreen.copy(alpha = 0.1f) else androidx.compose.ui.graphics.Color.Transparent
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -1049,9 +1069,15 @@ fun AddFoodMenu(
                 onClick = onManualClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp)
+                    .graphicsLayer {
+                        scaleX = if (isManualPressed) 0.96f else 1f
+                        scaleY = if (isManualPressed) 0.96f else 1f
+                    },
+                interactionSource = manualInteractionSource,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = PrimaryGreen
+                    contentColor = if (isManualPressed) PrimaryGreenLight else PrimaryGreen,
+                    containerColor = if (isManualPressed) PrimaryGreen.copy(alpha = 0.1f) else androidx.compose.ui.graphics.Color.Transparent
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -1086,7 +1112,13 @@ fun BottomNavigationBar(navController: NavController) {
         contentColor = TextPrimary
     ) {
         NavigationBarItem(
-            icon = { Text("🏠", fontSize = 24.sp) },
+            icon = { 
+                Icon(
+                    imageVector = Icons.Outlined.Home,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
             label = { Text(stringResource(R.string.home), fontSize = 10.sp) },
             selected = currentRoute == Screen.Dashboard.route,
             onClick = { 
@@ -1097,16 +1129,22 @@ fun BottomNavigationBar(navController: NavController) {
                 }
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PrimaryGreenLight,
+                selectedTextColor = PrimaryGreenLight,
                 indicatorColor = DarkCard,
-                unselectedIconColor = TextSecondary,
-                unselectedTextColor = TextSecondary
+                unselectedIconColor = TextTertiary,
+                unselectedTextColor = TextTertiary
             )
         )
         
         NavigationBarItem(
-            icon = { Text("📊", fontSize = 24.sp) },
+            icon = { 
+                Icon(
+                    imageVector = Icons.Outlined.BarChart,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
             label = { Text(stringResource(R.string.progress), fontSize = 10.sp) },
             selected = currentRoute == Screen.Progress.route,
             onClick = { 
@@ -1117,16 +1155,22 @@ fun BottomNavigationBar(navController: NavController) {
                 }
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PrimaryGreenLight,
+                selectedTextColor = PrimaryGreenLight,
                 indicatorColor = DarkCard,
-                unselectedIconColor = TextSecondary,
-                unselectedTextColor = TextSecondary
+                unselectedIconColor = TextTertiary,
+                unselectedTextColor = TextTertiary
             )
         )
         
         NavigationBarItem(
-            icon = { Text("⚙️", fontSize = 24.sp) },
+            icon = { 
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
             label = { Text(stringResource(R.string.settings), fontSize = 10.sp) },
             selected = currentRoute == Screen.Settings.route,
             onClick = { 
@@ -1137,11 +1181,11 @@ fun BottomNavigationBar(navController: NavController) {
                 }
             },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = PrimaryGreen,
-                selectedTextColor = PrimaryGreen,
+                selectedIconColor = PrimaryGreenLight,
+                selectedTextColor = PrimaryGreenLight,
                 indicatorColor = DarkCard,
-                unselectedIconColor = TextSecondary,
-                unselectedTextColor = TextSecondary
+                unselectedIconColor = TextTertiary,
+                unselectedTextColor = TextTertiary
             )
         )
     }
