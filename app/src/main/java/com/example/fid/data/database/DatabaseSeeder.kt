@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 class DatabaseSeeder(private val repository: FirebaseRepository) {
     
     suspend fun seedFoodItems() = withContext(Dispatchers.IO) {
+        android.util.Log.d("DatabaseSeeder", "Iniciando seed de alimentos...")
         val sampleFoods = listOf(
             FoodItem(
                 name = "Pollo a la plancha",
@@ -174,13 +175,17 @@ class DatabaseSeeder(private val repository: FirebaseRepository) {
             )
         )
         
+        var insertedCount = 0
         sampleFoods.forEach { food ->
             try {
                 repository.insertFoodItem(food)
+                insertedCount++
+                android.util.Log.d("DatabaseSeeder", "Alimento insertado: ${food.name}")
             } catch (e: Exception) {
-                // Food might already exist, ignore
+                android.util.Log.e("DatabaseSeeder", "Error insertando ${food.name}: ${e.message}")
             }
         }
+        android.util.Log.d("DatabaseSeeder", "Seed completado: $insertedCount alimentos insertados")
     }
 }
 

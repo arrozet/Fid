@@ -5,12 +5,12 @@ package com.example.fid.data.database.entities
  */
 data class FoodItem(
     val id: Long = 0,
-    val name: String,
-    val caloriesPer100g: Float,
-    val proteinPer100g: Float,
-    val fatPer100g: Float,
-    val carbPer100g: Float,
-    val verificationLevel: String,
+    val name: String = "",
+    val caloriesPer100g: Float = 0f,
+    val proteinPer100g: Float = 0f,
+    val fatPer100g: Float = 0f,
+    val carbPer100g: Float = 0f,
+    val verificationLevel: String = "user",
     val isFrequent: Boolean = false,
     val lastUsed: Long? = null
 )

@@ -25,26 +25,49 @@ import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualRegistrationScreen(navController: NavController) {
     val context = LocalContext.current
     val repository = remember { FirebaseRepository() }
+    val scope = rememberCoroutineScope()
     
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
     var frequentFoods by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
+    var suggestedFoods by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
     
     LaunchedEffect(Unit) {
+        // Obtener alimentos frecuentes
         repository.getFrequentFoodItems().collect { foods ->
+            android.util.Log.d("ManualRegistration", "Alimentos frecuentes obtenidos: ${foods.size}")
+            foods.forEach { food ->
+                android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+            }
             frequentFoods = foods
         }
     }
     
+    LaunchedEffect(Unit) {
+        // Obtener sugerencias (alimentos aleatorios para mostrar)
+        val suggestions = repository.getSuggestedFoods(3)
+        android.util.Log.d("ManualRegistration", "Sugerencias obtenidas: ${suggestions.size}")
+        suggestions.forEach { food ->
+            android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+        }
+        suggestedFoods = suggestions
+    }
+    
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotEmpty()) {
+            android.util.Log.d("ManualRegistration", "Buscando alimentos con query: '$searchQuery'")
             repository.searchFoodItems(searchQuery).collect { foods ->
+                android.util.Log.d("ManualRegistration", "Resultados de búsqueda obtenidos: ${foods.size}")
+                foods.forEach { food ->
+                    android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+                }
                 searchResults = foods
             }
         } else {
@@ -140,11 +163,20 @@ fun ManualRegistrationScreen(navController: NavController) {
                             }
                         } else {
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                items(frequentFoods) { food ->
+                                items(frequentFoods.size) { index ->
+                                    val food = frequentFoods[index]
                                     FrequentFoodCard(food) {
-                                        navController.navigate(Screen.FoodDetail.createRoute(food.id))
+                                        android.util.Log.d("ManualRegistration", "Clic en alimento frecuente: ${food.name}, ID: ${food.id}")
+                                        if (food.id > 0) {
+                                            val route = Screen.FoodDetail.createRoute(food.id)
+                                            android.util.Log.d("ManualRegistration", "Navegando a: $route")
+                                            navController.navigate(route)
+                                        } else {
+                                            android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                        }
                                     }
                                 }
                             }
@@ -162,20 +194,22 @@ fun ManualRegistrationScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                     
-                    // Mock suggestions
-                    items(3) { index ->
+                    // Smart suggestions - alimentos reales de la base de datos
+                    items(suggestedFoods.size) { index ->
+                        val food = suggestedFoods[index]
                         SuggestionCard(
-                            name = when (index) {
-                                0 -> "Pollo a la plancha"
-                                1 -> "Ensalada verde"
-                                else -> "Arroz integral"
-                            },
-                            calories = when (index) {
-                                0 -> 165
-                                1 -> 35
-                                else -> 216
-                            },
-                            onClick = { /* Navigate to detail */ }
+                            name = food.name,
+                            calories = food.caloriesPer100g.toInt(),
+                            onClick = {
+                                android.util.Log.d("ManualRegistration", "Clic en sugerencia: ${food.name}, ID: ${food.id}")
+                                if (food.id > 0) {
+                                    val route = Screen.FoodDetail.createRoute(food.id)
+                                    android.util.Log.d("ManualRegistration", "Navegando a: $route")
+                                    navController.navigate(route)
+                                } else {
+                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                }
+                            }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -202,9 +236,17 @@ fun ManualRegistrationScreen(navController: NavController) {
                             }
                         }
                     } else {
-                        items(searchResults) { food ->
+                        items(searchResults.size) { index ->
+                            val food = searchResults[index]
                             FoodSearchResultCard(food) {
-                                navController.navigate(Screen.FoodDetail.createRoute(food.id))
+                                android.util.Log.d("ManualRegistration", "Clic en resultado de búsqueda: ${food.name}, ID: ${food.id}")
+                                if (food.id > 0) {
+                                    val route = Screen.FoodDetail.createRoute(food.id)
+                                    android.util.Log.d("ManualRegistration", "Navegando a: $route")
+                                    navController.navigate(route)
+                                } else {
+                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -217,12 +259,18 @@ fun ManualRegistrationScreen(navController: NavController) {
 
 @Composable
 fun FrequentFoodCard(food: FoodItem, onClick: () -> Unit) {
+    android.util.Log.d("ManualRegistration", "Renderizando FrequentFoodCard: ${food.name}, ID: ${food.id}")
     Box(
         modifier = Modifier
             .width(120.dp)
             .height(140.dp)
+            .clickable(
+                onClick = {
+                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FrequentFoodCard: ${food.name}")
+                    onClick()
+                }
+            )
             .background(DarkCard, RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
             .padding(12.dp)
     ) {
         Column(
@@ -287,11 +335,17 @@ fun SuggestionCard(name: String, calories: Int, onClick: () -> Unit) {
 
 @Composable
 fun FoodSearchResultCard(food: FoodItem, onClick: () -> Unit) {
+    android.util.Log.d("ManualRegistration", "Renderizando FoodSearchResultCard: ${food.name}, ID: ${food.id}")
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(
+                onClick = {
+                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FoodSearchResultCard: ${food.name}")
+                    onClick()
+                }
+            )
             .background(DarkCard, RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
         Row(

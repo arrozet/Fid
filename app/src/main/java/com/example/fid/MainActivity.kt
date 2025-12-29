@@ -24,12 +24,29 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
-        // Initialize database with sample data
+        // Initialize database with sample data (solo la primera vez)
         val repository = FirebaseRepository()
         val seeder = DatabaseSeeder(repository)
         
-        CoroutineScope(Dispatchers.IO).launch {
-            seeder.seedFoodItems()
+        val prefs = getSharedPreferences("fid_prefs", MODE_PRIVATE)
+        val hasSeeded = prefs.getBoolean("has_seeded_db", false)
+        
+        // Limpiar duplicados una sola vez (si es necesario)
+        val hasCleaned = prefs.getBoolean("has_cleaned_duplicates", false)
+        if (!hasCleaned) {
+            CoroutineScope(Dispatchers.IO).launch {
+                repository.cleanDuplicateFoodItems()
+                prefs.edit().putBoolean("has_cleaned_duplicates", true).apply()
+                android.util.Log.d("MainActivity", "Duplicados limpiados")
+            }
+        }
+        
+        if (!hasSeeded) {
+            CoroutineScope(Dispatchers.IO).launch {
+                seeder.seedFoodItems()
+                prefs.edit().putBoolean("has_seeded_db", true).apply()
+                android.util.Log.d("MainActivity", "Base de datos inicializada con alimentos de ejemplo")
+            }
         }
         
         setContent {

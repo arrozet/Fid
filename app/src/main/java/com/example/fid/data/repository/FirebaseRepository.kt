@@ -226,7 +226,13 @@ class FirebaseRepository {
                     close(error)
                     return@addSnapshotListener
                 }
-                val items = snapshot?.documents?.mapNotNull { it.toObject<FoodItem>() } ?: emptyList()
+                val items = snapshot?.documents?.mapNotNull { doc ->
+                    val foodItem = doc.toObject<FoodItem>()
+                    val id = doc.id.toLongOrNull() ?: 0L
+                    android.util.Log.d("FirebaseRepository", "Documento ID: ${doc.id}, FoodItem: ${foodItem?.name}, ID asignado: $id")
+                    foodItem?.copy(id = id)
+                } ?: emptyList()
+                android.util.Log.d("FirebaseRepository", "Total items encontrados: ${items.size}")
                 trySend(items)
             }
         
@@ -236,15 +242,20 @@ class FirebaseRepository {
     fun getFrequentFoodItems(): Flow<List<FoodItem>> = callbackFlow {
         val listener = firestore.collection("food_items")
             .whereEqualTo("isFrequent", true)
-            .orderBy("lastUsed", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .limit(20)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
-                val items = snapshot?.documents?.mapNotNull { it.toObject<FoodItem>() } ?: emptyList()
-                trySend(items)
+                val items = snapshot?.documents?.mapNotNull { doc ->
+                    val foodItem = doc.toObject<FoodItem>()
+                    foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
+                } ?: emptyList()
+                // Ordenar en memoria por lastUsed descendente y limitar a 20
+                val sortedItems = items
+                    .sortedByDescending { it.lastUsed ?: 0L }
+                    .take(20)
+                trySend(sortedItems)
             }
         
         awaitClose { listener.remove() }
@@ -266,6 +277,72 @@ class FirebaseRepository {
         }
     }
     
+    suspend fun getFoodItemById(foodId: Long): FoodItem? {
+        return try {
+            val snapshot = firestore.collection("food_items")
+                .document(foodId.toString())
+                .get()
+                .await()
+            
+            snapshot.toObject<FoodItem>()?.copy(id = foodId)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo alimento: ${e.message}")
+            null
+        }
+    }
+    
+    suspend fun getFoodItemByName(name: String): FoodItem? {
+        return try {
+            val snapshot = firestore.collection("food_items")
+                .whereEqualTo("name", name)
+                .limit(1)
+                .get()
+                .await()
+            
+            val doc = snapshot.documents.firstOrNull()
+            if (doc != null) {
+                val foodItem = doc.toObject<FoodItem>()
+                foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo alimento por nombre '$name': ${e.message}")
+            null
+        }
+    }
+    
+    // Obtener sugerencias de alimentos (alimentos aleatorios de la base de datos)
+    suspend fun getSuggestedFoods(limit: Int = 3): List<FoodItem> {
+        return try {
+            android.util.Log.d("FirebaseRepository", "Obteniendo sugerencias de alimentos...")
+            
+            // Obtener todos los alimentos
+            val snapshot = firestore.collection("food_items")
+                .limit(20) // Limitar para no traer demasiados
+                .get()
+                .await()
+            
+            val allFoods = snapshot.documents.mapNotNull { doc ->
+                val foodItem = doc.toObject<FoodItem>()
+                foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
+            }
+            
+            // Seleccionar alimentos al azar
+            val suggestions = allFoods.shuffled().take(limit)
+            
+            android.util.Log.d("FirebaseRepository", "Sugerencias obtenidas: ${suggestions.size}")
+            suggestions.forEach { food ->
+                android.util.Log.d("FirebaseRepository", "  - ${food.name} (${food.caloriesPer100g.toInt()} kcal)")
+            }
+            
+            suggestions
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo sugerencias: ${e.message}")
+            emptyList()
+        }
+    }
+    
     suspend fun markFoodAsUsed(foodId: Long) {
         try {
             firestore.collection("food_items")
@@ -278,6 +355,53 @@ class FirebaseRepository {
                 )
                 .await()
         } catch (e: Exception) {
+            throw e
+        }
+    }
+    
+    // Función para limpiar alimentos duplicados
+    suspend fun cleanDuplicateFoodItems() {
+        try {
+            android.util.Log.d("FirebaseRepository", "Iniciando limpieza de alimentos duplicados...")
+            
+            val snapshot = firestore.collection("food_items")
+                .get()
+                .await()
+            
+            val foodsByName = mutableMapOf<String, MutableList<Pair<String, FoodItem>>>()
+            
+            // Agrupar por nombre
+            snapshot.documents.forEach { doc ->
+                val foodItem = doc.toObject<FoodItem>()
+                if (foodItem != null) {
+                    val name = foodItem.name
+                    if (!foodsByName.containsKey(name)) {
+                        foodsByName[name] = mutableListOf()
+                    }
+                    foodsByName[name]!!.add(Pair(doc.id, foodItem))
+                }
+            }
+            
+            // Eliminar duplicados (mantener solo el primero)
+            var deletedCount = 0
+            foodsByName.forEach { (name, items) ->
+                if (items.size > 1) {
+                    android.util.Log.d("FirebaseRepository", "Encontrados ${items.size} duplicados de '$name'")
+                    // Mantener solo el primero, eliminar el resto
+                    items.drop(1).forEach { (docId, _) ->
+                        firestore.collection("food_items")
+                            .document(docId)
+                            .delete()
+                            .await()
+                        deletedCount++
+                        android.util.Log.d("FirebaseRepository", "Eliminado duplicado: $name (ID: $docId)")
+                    }
+                }
+            }
+            
+            android.util.Log.d("FirebaseRepository", "Limpieza completada: $deletedCount duplicados eliminados")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error limpiando duplicados: ${e.message}")
             throw e
         }
     }

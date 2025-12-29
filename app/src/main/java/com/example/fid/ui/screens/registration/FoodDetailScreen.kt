@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
 import com.example.fid.data.database.entities.FoodEntry
+import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
 import kotlinx.coroutines.launch
@@ -38,14 +39,25 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
     
     var amount by remember { mutableStateOf("100") }
     var selectedUnit by remember { mutableStateOf("grams") }
+    var foodItem by remember { mutableStateOf<FoodItem?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
     
-    // Mock food data - in a real app, this would come from the repository
-    val foodName = "Pollo a la plancha"
-    val caloriesPer100g = 165f
-    val proteinPer100g = 31f
-    val fatPer100g = 3.6f
-    val carbPer100g = 0f
-    val verificationLevel = "government"
+    // Obtener datos del alimento desde Firestore
+    LaunchedEffect(foodId) {
+        android.util.Log.d("FoodDetailScreen", "FoodDetailScreen iniciado con foodId: $foodId")
+        isLoading = true
+        foodItem = repository.getFoodItemById(foodId)
+        android.util.Log.d("FoodDetailScreen", "Alimento obtenido: ${foodItem?.name ?: "null"}")
+        isLoading = false
+    }
+    
+    // Usar datos del alimento o valores por defecto
+    val foodName = foodItem?.name ?: ""
+    val caloriesPer100g = foodItem?.caloriesPer100g ?: 0f
+    val proteinPer100g = foodItem?.proteinPer100g ?: 0f
+    val fatPer100g = foodItem?.fatPer100g ?: 0f
+    val carbPer100g = foodItem?.carbPer100g ?: 0f
+    val verificationLevel = foodItem?.verificationLevel ?: "user"
     
     val amountFloat = amount.toFloatOrNull() ?: 100f
     val multiplier = when (selectedUnit) {
@@ -88,151 +100,174 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                 .verticalScroll(scrollState)
                 .padding(24.dp)
         ) {
-            // Food name
-            Text(
-                text = foodName,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Verification badge
-            VerificationBadge(verificationLevel)
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Amount input
-            Text(
-                text = stringResource(R.string.amount),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    modifier = Modifier.weight(1f),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryGreen,
-                        unfocusedBorderColor = DarkCard,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary,
-                        cursorColor = PrimaryGreen
-                    ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                )
-                
-                // Unit selector
+            if (isLoading) {
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp)
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    var expanded by remember { mutableStateOf(false) }
-                    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .border(1.dp, DarkCard, RoundedCornerShape(4.dp))
-                            .clickable { expanded = true }
-                            .padding(16.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Text(
-                            text = if (selectedUnit == "grams") stringResource(R.string.grams) 
-                                   else stringResource(R.string.unit),
-                            color = TextPrimary
-                        )
-                    }
-                    
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier.background(DarkCard)
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.grams)) },
-                            onClick = {
-                                selectedUnit = "grams"
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.unit)) },
-                            onClick = {
-                                selectedUnit = "unit"
-                                expanded = false
-                            }
-                        )
-                    }
+                    CircularProgressIndicator(color = PrimaryGreen)
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Nutritional information
-            Text(
-                text = "Información Nutricional",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Total calories card
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(DarkCard, RoundedCornerShape(16.dp))
-                    .padding(20.dp)
-            ) {
+            } else if (foodItem == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No se encontró el alimento",
+                        color = TextSecondary,
+                        fontSize = 16.sp
+                    )
+                }
+            } else {
+                // Food name
+                Text(
+                    text = foodName,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Verification badge
+                VerificationBadge(verificationLevel)
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Amount input
+                Text(
+                    text = stringResource(R.string.amount),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.calories),
-                        fontSize = 18.sp,
-                        color = TextPrimary
+                    OutlinedTextField(
+                        value = amount,
+                        onValueChange = { amount = it },
+                        modifier = Modifier.weight(1f),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
-                    Text(
-                        text = "${totalCalories.toInt()} kcal",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryGreen
-                    )
+                    
+                    // Unit selector
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp)
+                    ) {
+                        var expanded by remember { mutableStateOf(false) }
+                        
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(1.dp, DarkCard, RoundedCornerShape(4.dp))
+                                .clickable { expanded = true }
+                                .padding(16.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                text = if (selectedUnit == "grams") stringResource(R.string.grams) 
+                                       else stringResource(R.string.unit),
+                                color = TextPrimary
+                            )
+                        }
+                        
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier.background(DarkCard)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.grams)) },
+                                onClick = {
+                                    selectedUnit = "grams"
+                                    expanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.unit)) },
+                                onClick = {
+                                    selectedUnit = "unit"
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Macros
-            MacroInfoRow("Proteínas", totalProtein, ProteinColor)
-            Spacer(modifier = Modifier.height(12.dp))
-            MacroInfoRow("Grasas", totalFat, FatColor)
-            Spacer(modifier = Modifier.height(12.dp))
-            MacroInfoRow("Carbohidratos", totalCarbs, CarbColor)
-            
-            Spacer(modifier = Modifier.height(40.dp))
-            
-            // Add button
-            Button(
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Nutritional information
+                Text(
+                    text = "Información Nutricional",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Total calories card
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(DarkCard, RoundedCornerShape(16.dp))
+                        .padding(20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.calories),
+                            fontSize = 18.sp,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = "${totalCalories.toInt()} kcal",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryGreen
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Macros
+                MacroInfoRow("Proteínas", totalProtein, ProteinColor)
+                Spacer(modifier = Modifier.height(12.dp))
+                MacroInfoRow("Grasas", totalFat, FatColor)
+                Spacer(modifier = Modifier.height(12.dp))
+                MacroInfoRow("Carbohidratos", totalCarbs, CarbColor)
+                
+                Spacer(modifier = Modifier.height(40.dp))
+                
+                // Add button
+                Button(
                 onClick = {
                     scope.launch {
                         try {
                             val user = repository.getCurrentUser()
-                            if (user != null) {
+                            if (user != null && foodItem != null) {
                                 val foodEntry = FoodEntry(
                                     userId = user.id,
                                     foodName = foodName,
@@ -248,6 +283,11 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                                 
                                 repository.insertFoodEntry(foodEntry)
                                 
+                                // Marcar el alimento como usado
+                                repository.markFoodAsUsed(foodId)
+                                
+                                android.util.Log.d("FoodDetailScreen", "Alimento agregado: $foodName")
+                                
                                 Toast.makeText(
                                     context,
                                     context.getString(R.string.success_food_added),
@@ -255,8 +295,15 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                                 ).show()
                                 
                                 navController.popBackStack()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Error: No se pudo obtener la información del alimento",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         } catch (e: Exception) {
+                            android.util.Log.e("FoodDetailScreen", "Error agregando alimento: ${e.message}", e)
                             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -275,6 +322,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
             }
         }
     }
