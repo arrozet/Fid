@@ -31,14 +31,11 @@ class MainActivity : ComponentActivity() {
         val prefs = getSharedPreferences("fid_prefs", MODE_PRIVATE)
         val hasSeeded = prefs.getBoolean("has_seeded_db", false)
         
-        // Limpiar duplicados una sola vez (si es necesario)
-        val hasCleaned = prefs.getBoolean("has_cleaned_duplicates", false)
-        if (!hasCleaned) {
-            CoroutineScope(Dispatchers.IO).launch {
-                repository.cleanDuplicateFoodItems()
-                prefs.edit().putBoolean("has_cleaned_duplicates", true).apply()
-                android.util.Log.d("MainActivity", "Duplicados limpiados")
-            }
+        // TEMPORAL: Limpiar duplicados en el próximo inicio
+        // Después de que se ejecute una vez, puedes comentar este bloque
+        CoroutineScope(Dispatchers.IO).launch {
+            repository.cleanDuplicateFoodItems()
+            android.util.Log.d("MainActivity", "Duplicados limpiados")
         }
         
         if (!hasSeeded) {

@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
     
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.6")
@@ -88,6 +89,9 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.3.1")
     implementation("androidx.camera:camera-lifecycle:1.3.1")
     implementation("androidx.camera:camera-view:1.3.1")
+    
+    // Guava for CameraX ListenableFuture support
+    implementation("com.google.guava:guava:32.1.2-android")
     
     // Permissions
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")

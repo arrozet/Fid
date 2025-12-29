@@ -278,6 +278,13 @@ class FirebaseRepository {
     
     suspend fun insertFoodItem(foodItem: FoodItem): Long {
         return try {
+            // Verificar si ya existe un alimento con el mismo nombre
+            val existingFood = getFoodItemByName(foodItem.name)
+            if (existingFood != null) {
+                android.util.Log.d("FirebaseRepository", "Alimento '${foodItem.name}' ya existe, retornando ID existente")
+                return existingFood.id
+            }
+            
             val newId = System.currentTimeMillis()
             val itemWithId = foodItem.copy(id = newId)
             
@@ -286,6 +293,7 @@ class FirebaseRepository {
                 .set(itemWithId)
                 .await()
             
+            android.util.Log.d("FirebaseRepository", "Alimento '${foodItem.name}' insertado con ID: $newId")
             newId
         } catch (e: Exception) {
             throw e
