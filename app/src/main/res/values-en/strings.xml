@@ -277,4 +277,34 @@
     <string name="calories_per_100g">%1$d kcal per 100g</string>
     <string name="meals_registered_count">%1$d meals logged</string>
     <string name="percentage_of_goal">%1$d%% of goal</string>
+
+    <!-- Wellness Index -->
+    <string name="add_water">Add Water</string>
+    <string name="water_intake_today">Water intake today</string>
+    <string name="add_glass">+ 1 glass (250ml)</string>
+    <string name="add_bottle">+ 1 bottle (500ml)</string>
+    <string name="custom_amount">Custom amount</string>
+    <string name="water_goal">Goal: %1$.1f L</string>
+    <string name="liters_format">%1$.1f L</string>
+    <string name="milliliters_format">%1$d ml</string>
+    <string name="log_sleep">Log Sleep</string>
+    <string name="hours_slept">Hours slept</string>
+    <string name="sleep_last_night">How many hours did you sleep last night?</string>
+    <string name="hours_format">%1$.1f h</string>
+    <string name="no_data">No data</string>
+    <string name="tap_to_add">Tap to add</string>
+    <string name="reset">Reset</string>
+    <string name="water_added">Water added</string>
+    <string name="sleep_logged">Sleep logged</string>
+    <string name="enter_water_ml">Enter amount (ml)</string>
+    <string name="enter_sleep_hours">Enter sleep hours</string>
+    <string name="water_reset">Hydration reset</string>
+    <string name="sleep_excellent">Excellent!</string>
+    <string name="sleep_almost">Try to reach 7h</string>
+    <string name="sleep_improve">Improve your routine</string>
+    <string name="sleep_too_much">Too much sleep</string>
+    <string name="change_goal">Change goal</string>
+    <string name="water_goal_title">Daily goal</string>
+    <string name="enter_water_goal">Enter goal (ml)</string>
+    <string name="goal_updated">Goal updated</string>
 </resources>

@@ -280,4 +280,34 @@
     <string name="calories_per_100g">%1$d kcal por 100g</string>
     <string name="meals_registered_count">%1$d comidas registradas</string>
     <string name="percentage_of_goal">%1$d%% del objetivo</string>
+
+    <!-- Wellness Index -->
+    <string name="add_water">Añadir Agua</string>
+    <string name="water_intake_today">Agua consumida hoy</string>
+    <string name="add_glass">+ 1 vaso (250ml)</string>
+    <string name="add_bottle">+ 1 botella (500ml)</string>
+    <string name="custom_amount">Cantidad personalizada</string>
+    <string name="water_goal">Objetivo: %1$.1f L</string>
+    <string name="liters_format">%1$.1f L</string>
+    <string name="milliliters_format">%1$d ml</string>
+    <string name="log_sleep">Registrar Sueño</string>
+    <string name="hours_slept">Horas dormidas</string>
+    <string name="sleep_last_night">¿Cuántas horas dormiste anoche?</string>
+    <string name="hours_format">%1$.1f h</string>
+    <string name="no_data">Sin datos</string>
+    <string name="tap_to_add">Toca para añadir</string>
+    <string name="reset">Reiniciar</string>
+    <string name="water_added">Agua añadida</string>
+    <string name="sleep_logged">Sueño registrado</string>
+    <string name="enter_water_ml">Ingresa cantidad (ml)</string>
+    <string name="enter_sleep_hours">Ingresa horas de sueño</string>
+    <string name="water_reset">Hidratación reiniciada</string>
+    <string name="sleep_excellent">¡Excelente!</string>
+    <string name="sleep_almost">Intenta llegar a 7h</string>
+    <string name="sleep_improve">Mejora tu rutina</string>
+    <string name="sleep_too_much">Demasiado sueño</string>
+    <string name="change_goal">Cambiar objetivo</string>
+    <string name="water_goal_title">Objetivo diario</string>
+    <string name="enter_water_goal">Ingresa objetivo (ml)</string>
+    <string name="goal_updated">Objetivo actualizado</string>
 </resources>

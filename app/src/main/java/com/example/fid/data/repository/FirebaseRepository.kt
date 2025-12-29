@@ -491,6 +491,97 @@ class FirebaseRepository {
         }
     }
     
+    /**
+     * Obtiene la entrada de wellness del día actual para un usuario.
+     * Busca por el timestamp del inicio del día (00:00:00).
+     */
+    suspend fun getTodayWellnessEntry(userId: Long): WellnessEntry? {
+        return try {
+            val calendar = java.util.Calendar.getInstance()
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            calendar.set(java.util.Calendar.MILLISECOND, 0)
+            val startOfDay = calendar.timeInMillis
+            
+            val snapshot = firestore.collection("wellness_entries")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("date", startOfDay)
+                .limit(1)
+                .get()
+                .await()
+            
+            snapshot.documents.firstOrNull()?.toObject<WellnessEntry>()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo wellness entry: ${e.message}")
+            null
+        }
+    }
+    
+    /**
+     * Obtiene o crea una entrada de wellness para el día actual.
+     * Si no existe, crea una nueva con valores en 0.
+     */
+    suspend fun getOrCreateTodayWellnessEntry(userId: Long): WellnessEntry {
+        val existing = getTodayWellnessEntry(userId)
+        if (existing != null) {
+            return existing
+        }
+        
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        val startOfDay = calendar.timeInMillis
+        
+        val newEntry = WellnessEntry(
+            id = System.currentTimeMillis(),
+            userId = userId,
+            date = startOfDay,
+            waterIntakeMl = 0f,
+            sleepHours = 0f
+        )
+        
+        firestore.collection("wellness_entries")
+            .document(newEntry.id.toString())
+            .set(newEntry)
+            .await()
+        
+        return newEntry
+    }
+    
+    /**
+     * Actualiza la cantidad de agua consumida para el día actual.
+     * Añade la cantidad especificada al total existente.
+     */
+    suspend fun addWaterIntake(userId: Long, amountMl: Float): WellnessEntry {
+        val entry = getOrCreateTodayWellnessEntry(userId)
+        val updatedEntry = entry.copy(waterIntakeMl = entry.waterIntakeMl + amountMl)
+        updateWellnessEntry(updatedEntry)
+        return updatedEntry
+    }
+    
+    /**
+     * Establece las horas de sueño para el día actual.
+     */
+    suspend fun setSleepHours(userId: Long, hours: Float): WellnessEntry {
+        val entry = getOrCreateTodayWellnessEntry(userId)
+        val updatedEntry = entry.copy(sleepHours = hours)
+        updateWellnessEntry(updatedEntry)
+        return updatedEntry
+    }
+    
+    /**
+     * Reinicia la cantidad de agua a 0 para el día actual.
+     */
+    suspend fun resetWaterIntake(userId: Long): WellnessEntry {
+        val entry = getOrCreateTodayWellnessEntry(userId)
+        val updatedEntry = entry.copy(waterIntakeMl = 0f)
+        updateWellnessEntry(updatedEntry)
+        return updatedEntry
+    }
+    
     // Helper function to calculate TDEE using Mifflin-St Jeor equation
     fun calculateTDEE(
         gender: String,

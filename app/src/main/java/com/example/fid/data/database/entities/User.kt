@@ -21,6 +21,7 @@ data class User(
     val proteinGoalG: Float = 0f,
     val fatGoalG: Float = 0f,
     val carbGoalG: Float = 0f,
+    val waterGoalMl: Float = 2500f, // Objetivo de hidratación diaria en ml (por defecto 2.5L)
     val numberlessMode: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

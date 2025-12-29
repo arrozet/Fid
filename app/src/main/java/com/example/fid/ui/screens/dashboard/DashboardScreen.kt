@@ -1,10 +1,13 @@
 package com.example.fid.ui.screens.dashboard
 
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,12 +21,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.fid.R
 import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.database.entities.User
+import com.example.fid.data.database.entities.WellnessEntry
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
@@ -41,7 +46,10 @@ fun DashboardScreen(navController: NavController) {
     
     var user by remember { mutableStateOf<User?>(null) }
     var foodEntries by remember { mutableStateOf<List<FoodEntry>>(emptyList()) }
+    var wellnessEntry by remember { mutableStateOf<WellnessEntry?>(null) }
     var showAddMenu by remember { mutableStateOf(false) }
+    var showWaterDialog by remember { mutableStateOf(false) }
+    var showSleepDialog by remember { mutableStateOf(false) }
     
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -51,6 +59,13 @@ fun DashboardScreen(navController: NavController) {
     val startOfDay = calendar.timeInMillis
     val endOfDay = startOfDay + 24 * 60 * 60 * 1000
     
+    // Función para recargar wellness
+    fun refreshWellness(userId: Long) {
+        scope.launch {
+            wellnessEntry = repository.getTodayWellnessEntry(userId)
+        }
+    }
+    
     LaunchedEffect(Unit) {
         user = repository.getCurrentUser()
         user?.let { u ->
@@ -58,6 +73,9 @@ fun DashboardScreen(navController: NavController) {
             scope.launch {
                 repository.calculateAndSaveDailySummary(u.id, System.currentTimeMillis())
             }
+            
+            // Cargar wellness entry del día
+            wellnessEntry = repository.getTodayWellnessEntry(u.id)
             
             repository.getFoodEntriesByDateRange(u.id, startOfDay, endOfDay).collect { entries ->
                 foodEntries = entries
@@ -182,15 +200,20 @@ fun DashboardScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    WellnessCard(
-                        title = stringResource(R.string.hydration),
-                        value = "2.5 L",
+                    // Tarjeta de Hidratación (clickeable)
+                    val waterLiters = (wellnessEntry?.waterIntakeMl ?: 0f) / 1000f
+                    val waterGoalLiters = (user?.waterGoalMl ?: 2500f) / 1000f
+                    HydrationCard(
+                        currentLiters = waterLiters,
+                        goalLiters = waterGoalLiters,
+                        onClick = { showWaterDialog = true },
                         modifier = Modifier.weight(1f)
                     )
                     
-                    WellnessCard(
-                        title = stringResource(R.string.sleep),
-                        value = "7.5 h",
+                    // Tarjeta de Sueño (clickeable)
+                    SleepCard(
+                        sleepHours = wellnessEntry?.sleepHours ?: 0f,
+                        onClick = { showSleepDialog = true },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -232,6 +255,63 @@ fun DashboardScreen(navController: NavController) {
                     onManualClick = {
                         showAddMenu = false
                         navController.navigate(Screen.ManualRegistration.route)
+                    }
+                )
+            }
+            
+            // Dialog de Hidratación
+            if (showWaterDialog) {
+                WaterIntakeDialog(
+                    currentMl = wellnessEntry?.waterIntakeMl ?: 0f,
+                    goalMl = user?.waterGoalMl ?: 2500f,
+                    onDismiss = { showWaterDialog = false },
+                    onAddWater = { amountMl ->
+                        user?.let { u ->
+                            scope.launch {
+                                repository.addWaterIntake(u.id, amountMl)
+                                refreshWellness(u.id)
+                                Toast.makeText(context, context.getString(R.string.water_added), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        showWaterDialog = false
+                    },
+                    onReset = {
+                        user?.let { u ->
+                            scope.launch {
+                                repository.resetWaterIntake(u.id)
+                                refreshWellness(u.id)
+                                Toast.makeText(context, context.getString(R.string.water_reset), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        showWaterDialog = false
+                    },
+                    onChangeGoal = { newGoalMl ->
+                        user?.let { u ->
+                            scope.launch {
+                                val updatedUser = u.copy(waterGoalMl = newGoalMl)
+                                repository.updateUser(updatedUser)
+                                user = updatedUser
+                                Toast.makeText(context, context.getString(R.string.goal_updated), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                )
+            }
+            
+            // Dialog de Sueño
+            if (showSleepDialog) {
+                SleepLogDialog(
+                    currentHours = wellnessEntry?.sleepHours ?: 0f,
+                    onDismiss = { showSleepDialog = false },
+                    onSaveSleep = { hours ->
+                        user?.let { u ->
+                            scope.launch {
+                                repository.setSleepHours(u.id, hours)
+                                refreshWellness(u.id)
+                                Toast.makeText(context, context.getString(R.string.sleep_logged), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        showSleepDialog = false
                     }
                 )
             }
@@ -331,6 +411,509 @@ fun MacroProgressBar(label: String, current: Float, goal: Float, color: androidx
     }
 }
 
+@Composable
+fun HydrationCard(
+    currentLiters: Float,
+    goalLiters: Float,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val progress = (currentLiters / goalLiters).coerceIn(0f, 1f)
+    val displayValue = if (currentLiters > 0) {
+        String.format(Locale.getDefault(), "%.1f L", currentLiters)
+    } else {
+        stringResource(R.string.tap_to_add)
+    }
+    
+    Box(
+        modifier = modifier
+            .height(120.dp)
+            .background(DarkCard, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.hydration),
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+                Text(
+                    text = "💧",
+                    fontSize = 18.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = displayValue,
+                fontSize = if (currentLiters > 0) 22.sp else 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (currentLiters > 0) PrimaryGreen else TextSecondary
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            // Barra de progreso con objetivo al final
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = PrimaryGreen,
+                    trackColor = DarkSurface,
+                    strokeCap = StrokeCap.Round
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = String.format(Locale.getDefault(), "%.1fL", goalLiters),
+                    fontSize = 11.sp,
+                    color = TextSecondary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SleepCard(
+    sleepHours: Float,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val displayValue = if (sleepHours > 0) {
+        String.format(Locale.getDefault(), "%.1f h", sleepHours)
+    } else {
+        stringResource(R.string.tap_to_add)
+    }
+    
+    // Color basado en calidad de sueño
+    val sleepColor = when {
+        sleepHours == 0f -> TextSecondary
+        sleepHours < 6f -> ErrorRed       // Rojo - muy poco sueño
+        sleepHours < 7f -> FatColor       // Amarillo - casi óptimo
+        sleepHours > 9f -> FatColor       // Amarillo - mucho sueño
+        else -> PrimaryGreen              // Verde - óptimo (7-9h)
+    }
+    
+    // Mensaje y emoji según horas de sueño
+    val (sleepMessage, sleepEmoji) = when {
+        sleepHours == 0f -> "" to ""
+        sleepHours < 6f -> stringResource(R.string.sleep_improve) to "⚠️"
+        sleepHours < 7f -> stringResource(R.string.sleep_almost) to "💪"
+        sleepHours > 9f -> stringResource(R.string.sleep_too_much) to "💤"
+        else -> stringResource(R.string.sleep_excellent) to "✓"
+    }
+    
+    Box(
+        modifier = modifier
+            .height(120.dp)
+            .background(DarkCard, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.sleep),
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+                Text(
+                    text = "😴",
+                    fontSize = 18.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = displayValue,
+                fontSize = if (sleepHours > 0) 22.sp else 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = sleepColor
+            )
+            if (sleepHours > 0) {
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "$sleepEmoji $sleepMessage",
+                    fontSize = 11.sp,
+                    color = sleepColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WaterIntakeDialog(
+    currentMl: Float,
+    goalMl: Float,
+    onDismiss: () -> Unit,
+    onAddWater: (Float) -> Unit,
+    onReset: () -> Unit,
+    onChangeGoal: (Float) -> Unit
+) {
+    var showCustomInput by remember { mutableStateOf(false) }
+    var showGoalInput by remember { mutableStateOf(false) }
+    var customAmount by remember { mutableStateOf("") }
+    var goalAmount by remember { mutableStateOf(goalMl.toInt().toString()) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = DarkSurface,
+        title = {
+            Text(
+                text = stringResource(R.string.add_water),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                // Mostrar consumo actual y objetivo
+                Text(
+                    text = stringResource(R.string.water_intake_today),
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = String.format(Locale.getDefault(), "%.0f", currentMl),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen
+                    )
+                    Text(
+                        text = String.format(Locale.getDefault(), " / %.0f ml", goalMl),
+                        fontSize = 14.sp,
+                        color = TextSecondary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                when {
+                    showGoalInput -> {
+                        // Input para cambiar objetivo
+                        Text(
+                            text = stringResource(R.string.water_goal_title),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = goalAmount,
+                            onValueChange = { goalAmount = it.filter { c -> c.isDigit() } },
+                            label = { Text(stringResource(R.string.enter_water_goal)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            suffix = { Text("ml", color = TextSecondary) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = PrimaryGreen,
+                                unfocusedBorderColor = TextSecondary,
+                                focusedLabelColor = PrimaryGreen,
+                                unfocusedLabelColor = TextSecondary
+                            )
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        // Chips de selección rápida para objetivo
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(2000, 2500, 3000).forEach { ml ->
+                                FilterChip(
+                                    selected = goalAmount == ml.toString(),
+                                    onClick = { goalAmount = ml.toString() },
+                                    label = { Text("${ml/1000f}L", fontSize = 12.sp) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = PrimaryGreen,
+                                        selectedLabelColor = DarkBackground,
+                                        containerColor = DarkCard,
+                                        labelColor = TextPrimary
+                                    )
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { showGoalInput = false },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary)
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                            
+                            Button(
+                                onClick = {
+                                    goalAmount.toFloatOrNull()?.let { onChangeGoal(it) }
+                                    showGoalInput = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PrimaryGreen,
+                                    contentColor = DarkBackground
+                                ),
+                                enabled = goalAmount.isNotEmpty()
+                            ) {
+                                Text(stringResource(R.string.save))
+                            }
+                        }
+                    }
+                    showCustomInput -> {
+                        // Input personalizado
+                        OutlinedTextField(
+                            value = customAmount,
+                            onValueChange = { customAmount = it.filter { c -> c.isDigit() } },
+                            label = { Text(stringResource(R.string.enter_water_ml)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = PrimaryGreen,
+                                unfocusedBorderColor = TextSecondary,
+                                focusedLabelColor = PrimaryGreen,
+                                unfocusedLabelColor = TextSecondary
+                            )
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { showCustomInput = false },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary)
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                            
+                            Button(
+                                onClick = {
+                                    customAmount.toFloatOrNull()?.let { onAddWater(it) }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PrimaryGreen,
+                                    contentColor = DarkBackground
+                                ),
+                                enabled = customAmount.isNotEmpty()
+                            ) {
+                                Text(stringResource(R.string.add_water))
+                            }
+                        }
+                    }
+                    else -> {
+                        // Botones de añadir rápido
+                        Button(
+                            onClick = { onAddWater(250f) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PrimaryGreen,
+                                contentColor = DarkBackground
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.add_glass), fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Button(
+                            onClick = { onAddWater(500f) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PrimaryGreen,
+                                contentColor = DarkBackground
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.add_bottle), fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        OutlinedButton(
+                            onClick = { showCustomInput = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.custom_amount))
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Botón para cambiar objetivo
+                        OutlinedButton(
+                            onClick = { showGoalInput = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.change_goal))
+                        }
+                        
+                        // Botón de reiniciar si hay agua registrada
+                        if (currentMl > 0) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TextButton(
+                                onClick = onReset,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.reset),
+                                    color = FatColor
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            if (!showCustomInput && !showGoalInput) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel), color = TextSecondary)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun SleepLogDialog(
+    currentHours: Float,
+    onDismiss: () -> Unit,
+    onSaveSleep: (Float) -> Unit
+) {
+    var sleepInput by remember { mutableStateOf(if (currentHours > 0) currentHours.toString() else "") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = DarkSurface,
+        title = {
+            Text(
+                text = stringResource(R.string.log_sleep),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(R.string.sleep_last_night),
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = sleepInput,
+                    onValueChange = { 
+                        // Permitir números y punto decimal
+                        val filtered = it.filter { c -> c.isDigit() || c == '.' }
+                        // Solo un punto decimal
+                        if (filtered.count { c -> c == '.' } <= 1) {
+                            sleepInput = filtered
+                        }
+                    },
+                    label = { Text(stringResource(R.string.enter_sleep_hours)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    suffix = { Text("h", color = TextSecondary) },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryGreen,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Botones de selección rápida
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(6f, 7f, 8f, 9f).forEach { hours ->
+                        FilterChip(
+                            selected = sleepInput == hours.toString(),
+                            onClick = { sleepInput = hours.toString() },
+                            label = { Text("${hours.toInt()}h") },
+                            modifier = Modifier.weight(1f),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = PrimaryGreen,
+                                selectedLabelColor = DarkBackground,
+                                containerColor = DarkCard,
+                                labelColor = TextPrimary
+                            )
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    sleepInput.toFloatOrNull()?.let { onSaveSleep(it) }
+                },
+                enabled = sleepInput.isNotEmpty() && sleepInput.toFloatOrNull() != null,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryGreen,
+                    contentColor = DarkBackground
+                )
+            ) {
+                Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = TextSecondary)
+            }
+        }
+    )
+}
+
+// Mantener WellnessCard por retrocompatibilidad (puede eliminarse después)
 @Composable
 fun WellnessCard(title: String, value: String, modifier: Modifier = Modifier) {
     Box(
