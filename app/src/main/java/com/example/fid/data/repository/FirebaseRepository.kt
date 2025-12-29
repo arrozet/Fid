@@ -198,6 +198,14 @@ class FirebaseRepository {
                 .set(entryWithId)
                 .await()
             
+            // Recalcular y actualizar el resumen diario automáticamente
+            try {
+                calculateAndSaveDailySummary(entryWithId.userId, entryWithId.timestamp)
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseRepository", "Error actualizando resumen diario: ${e.message}")
+                // No lanzamos el error para no interrumpir el guardado de la comida
+            }
+            
             newId
         } catch (e: Exception) {
             throw e
@@ -210,6 +218,13 @@ class FirebaseRepository {
                 .document(foodEntry.id.toString())
                 .delete()
                 .await()
+            
+            // Recalcular y actualizar el resumen diario automáticamente
+            try {
+                calculateAndSaveDailySummary(foodEntry.userId, foodEntry.timestamp)
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseRepository", "Error actualizando resumen diario: ${e.message}")
+            }
         } catch (e: Exception) {
             throw e
         }
@@ -511,4 +526,202 @@ class FirebaseRepository {
         
         return Triple(proteinG, fatG, carbG)
     }
+    
+    // ============== DAILY SUMMARY OPERATIONS ==============
+    
+    /**
+     * Obtiene el resumen de un día específico
+     */
+    suspend fun getDailySummary(userId: Long, date: Long): DailySummary? {
+        return try {
+            val snapshot = firestore.collection("daily_summaries")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("date", date)
+                .limit(1)
+                .get()
+                .await()
+            
+            snapshot.documents.firstOrNull()?.toObject<DailySummary>()
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo resumen diario: ${e.message}")
+            null
+        }
+    }
+    
+    /**
+     * Obtiene resúmenes de un rango de fechas
+     */
+    suspend fun getDailySummariesByDateRange(userId: Long, startDate: Long, endDate: Long): List<DailySummary> {
+        return try {
+            val snapshot = firestore.collection("daily_summaries")
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("date", startDate)
+                .whereLessThanOrEqualTo("date", endDate)
+                .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .await()
+            
+            snapshot.documents.mapNotNull { it.toObject<DailySummary>() }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo resúmenes por rango: ${e.message}")
+            emptyList()
+        }
+    }
+    
+    /**
+     * Crea o actualiza el resumen diario
+     */
+    suspend fun saveDailySummary(summary: DailySummary) {
+        try {
+            // Buscar si ya existe un resumen para este día
+            val existing = getDailySummary(summary.userId, summary.date)
+            
+            val summaryToSave = if (existing != null) {
+                summary.copy(id = existing.id)
+            } else {
+                summary.copy(id = System.currentTimeMillis())
+            }
+            
+            firestore.collection("daily_summaries")
+                .document(summaryToSave.id.toString())
+                .set(summaryToSave)
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "Resumen diario guardado: ${summaryToSave.date}")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error guardando resumen diario: ${e.message}")
+            throw e
+        }
+    }
+    
+    /**
+     * Calcula y guarda el resumen diario basado en las entradas de comida
+     */
+    suspend fun calculateAndSaveDailySummary(userId: Long, date: Long) {
+        try {
+            val user = getCurrentUser() ?: return
+            
+            // Calcular inicio y fin del día
+            val calendar = java.util.Calendar.getInstance()
+            calendar.timeInMillis = date
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            calendar.set(java.util.Calendar.MILLISECOND, 0)
+            val startOfDay = calendar.timeInMillis
+            val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+            
+            // Obtener todas las entradas de comida del día
+            val snapshot = firestore.collection("food_entries")
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("timestamp", startOfDay)
+                .whereLessThanOrEqualTo("timestamp", endOfDay)
+                .get()
+                .await()
+            
+            val foodEntries = snapshot.documents.mapNotNull { it.toObject<FoodEntry>() }
+            
+            // Calcular totales
+            val totalCalories = foodEntries.sumOf { it.calories.toDouble() }.toFloat()
+            val totalProtein = foodEntries.sumOf { it.proteinG.toDouble() }.toFloat()
+            val totalFat = foodEntries.sumOf { it.fatG.toDouble() }.toFloat()
+            val totalCarbs = foodEntries.sumOf { it.carbG.toDouble() }.toFloat()
+            
+            // Obtener datos de wellness si existen
+            val wellnessSnapshot = firestore.collection("wellness_entries")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("date", startOfDay)
+                .limit(1)
+                .get()
+                .await()
+            
+            val wellness = wellnessSnapshot.documents.firstOrNull()?.toObject<WellnessEntry>()
+            
+            // Crear resumen
+            val summary = DailySummary(
+                userId = userId,
+                date = startOfDay,
+                totalCalories = totalCalories,
+                totalProteinG = totalProtein,
+                totalFatG = totalFat,
+                totalCarbG = totalCarbs,
+                calorieGoal = user.tdee,
+                proteinGoal = user.proteinGoalG,
+                fatGoal = user.fatGoalG,
+                carbGoal = user.carbGoalG,
+                mealsCount = foodEntries.size,
+                waterIntakeMl = wellness?.waterIntakeMl ?: 0f,
+                sleepHours = wellness?.sleepHours ?: 0f
+            )
+            
+            saveDailySummary(summary)
+            
+            android.util.Log.d("FirebaseRepository", "Resumen calculado y guardado para: $startOfDay")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error calculando resumen diario: ${e.message}")
+        }
+    }
+    
+    /**
+     * Obtiene estadísticas para un período
+     */
+    suspend fun getPeriodStats(userId: Long, startDate: Long, endDate: Long): PeriodStats {
+        return try {
+            val summaries = getDailySummariesByDateRange(userId, startDate, endDate)
+            
+            if (summaries.isEmpty()) {
+                return PeriodStats()
+            }
+            
+            val avgCalories = summaries.map { it.totalCalories }.average().toFloat()
+            val avgProtein = summaries.map { it.totalProteinG }.average().toFloat()
+            val avgFat = summaries.map { it.totalFatG }.average().toFloat()
+            val avgCarbs = summaries.map { it.totalCarbG }.average().toFloat()
+            
+            // Contar días que alcanzaron el objetivo (dentro del 10% del objetivo)
+            val daysOnTarget = summaries.count { summary ->
+                val targetCalories = summary.calorieGoal
+                val actual = summary.totalCalories
+                actual >= targetCalories * 0.9f && actual <= targetCalories * 1.1f
+            }
+            
+            val totalDays = summaries.size
+            
+            // Calcular distribución de macros promedio
+            val totalMacroCalories = avgProtein * 4 + avgFat * 9 + avgCarbs * 4
+            val proteinPercentage = if (totalMacroCalories > 0) (avgProtein * 4 / totalMacroCalories * 100).toInt() else 0
+            val fatPercentage = if (totalMacroCalories > 0) (avgFat * 9 / totalMacroCalories * 100).toInt() else 0
+            val carbPercentage = if (totalMacroCalories > 0) (avgCarbs * 4 / totalMacroCalories * 100).toInt() else 0
+            
+            PeriodStats(
+                avgCalories = avgCalories,
+                avgProteinG = avgProtein,
+                avgFatG = avgFat,
+                avgCarbG = avgCarbs,
+                daysOnTarget = daysOnTarget,
+                totalDays = totalDays,
+                proteinPercentage = proteinPercentage,
+                fatPercentage = fatPercentage,
+                carbPercentage = carbPercentage
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error obteniendo estadísticas del período: ${e.message}")
+            PeriodStats()
+        }
+    }
 }
+
+/**
+ * Clase de datos para estadísticas de período
+ */
+data class PeriodStats(
+    val avgCalories: Float = 0f,
+    val avgProteinG: Float = 0f,
+    val avgFatG: Float = 0f,
+    val avgCarbG: Float = 0f,
+    val daysOnTarget: Int = 0,
+    val totalDays: Int = 0,
+    val proteinPercentage: Int = 0,
+    val fatPercentage: Int = 0,
+    val carbPercentage: Int = 0
+)

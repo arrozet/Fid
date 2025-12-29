@@ -1,0 +1,396 @@
+package com.example.fid.ui.screens.progress
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.fid.data.database.entities.DailySummary
+import com.example.fid.data.database.entities.FoodEntry
+import com.example.fid.data.repository.FirebaseRepository
+import com.example.fid.ui.theme.*
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DailyDetailScreen(navController: NavController, date: Long) {
+    val context = LocalContext.current
+    val repository = remember { FirebaseRepository() }
+    val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    
+    var summary by remember { mutableStateOf<DailySummary?>(null) }
+    var foodEntries by remember { mutableStateOf<List<FoodEntry>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    
+    LaunchedEffect(date) {
+        val user = repository.getCurrentUser()
+        user?.let { u ->
+            // Calcular inicio y fin del día
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = date
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val startOfDay = calendar.timeInMillis
+            val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+            
+            // Obtener resumen
+            summary = repository.getDailySummary(u.id, startOfDay)
+            
+            // Si no existe resumen, calcularlo
+            if (summary == null) {
+                repository.calculateAndSaveDailySummary(u.id, startOfDay)
+                summary = repository.getDailySummary(u.id, startOfDay)
+            }
+            
+            // Obtener entradas de comida
+            repository.getFoodEntriesByDateRange(u.id, startOfDay, endOfDay).collect { entries ->
+                foodEntries = entries.sortedBy { it.timestamp }
+                isLoading = false
+            }
+        }
+    }
+    
+    val dateFormatter = remember { SimpleDateFormat("EEEE, d MMMM yyyy", Locale.getDefault()) }
+    val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Detalle del Día",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = dateFormatter.format(Date(date)),
+                            fontSize = 12.sp,
+                            color = TextSecondary
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = TextPrimary)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkBackground
+                )
+            )
+        },
+        containerColor = DarkBackground
+    ) { padding ->
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = PrimaryGreen)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Summary card
+                summary?.let { s ->
+                    // Calories ring
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(DarkCard, RoundedCornerShape(20.dp))
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(180.dp)
+                        ) {
+                            val progress = if (s.calorieGoal > 0) {
+                                (s.totalCalories / s.calorieGoal).coerceIn(0f, 1f)
+                            } else 0f
+                            
+                            CircularProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier.size(180.dp),
+                                color = PrimaryGreen,
+                                strokeWidth = 16.dp,
+                                trackColor = DarkSurface,
+                                strokeCap = StrokeCap.Round
+                            )
+                            
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "${s.totalCalories.toInt()}",
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PrimaryGreen
+                                )
+                                Text(
+                                    text = "/ ${s.calorieGoal.toInt()} kcal",
+                                    fontSize = 14.sp,
+                                    color = TextSecondary
+                                )
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Macros
+                    Text(
+                        text = "Macronutrientes",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    MacroProgressBar(
+                        label = "Proteínas",
+                        current = s.totalProteinG,
+                        goal = s.proteinGoal,
+                        color = ProteinColor
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    MacroProgressBar(
+                        label = "Grasas",
+                        current = s.totalFatG,
+                        goal = s.fatGoal,
+                        color = FatColor
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    MacroProgressBar(
+                        label = "Carbohidratos",
+                        current = s.totalCarbG,
+                        goal = s.carbGoal,
+                        color = CarbColor
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Food entries
+                Text(
+                    text = "Comidas (${foodEntries.size})",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (foodEntries.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .background(DarkCard, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "🍽️",
+                                fontSize = 48.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No hay comidas registradas",
+                                color = TextSecondary,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                } else {
+                    foodEntries.forEach { entry ->
+                        FoodEntryDetailCard(entry, timeFormatter)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun MacroProgressBar(
+    label: String,
+    current: Float,
+    goal: Float,
+    color: androidx.compose.ui.graphics.Color
+) {
+    val progress = if (goal > 0) (current / goal).coerceIn(0f, 1f) else 0f
+    
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                color = TextPrimary
+            )
+            Text(
+                text = "${current.toInt()}g / ${goal.toInt()}g",
+                fontSize = 14.sp,
+                color = TextSecondary
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            color = color,
+            trackColor = DarkCard,
+            strokeCap = StrokeCap.Round
+        )
+    }
+}
+
+@Composable
+fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(DarkCard, RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = getMealEmoji(entry.mealType),
+                        fontSize = 20.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = entry.foodName,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        Text(
+                            text = getMealTypeName(entry.mealType),
+                            fontSize = 12.sp,
+                            color = TextSecondary
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    NutrientChip("${entry.calories.toInt()} kcal", PrimaryGreen)
+                    NutrientChip("P: ${entry.proteinG.toInt()}g", ProteinColor)
+                    NutrientChip("G: ${entry.fatG.toInt()}g", FatColor)
+                    NutrientChip("C: ${entry.carbG.toInt()}g", CarbColor)
+                }
+            }
+            
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = timeFormatter.format(Date(entry.timestamp)),
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "${entry.amountGrams.toInt()}g",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NutrientChip(text: String, color: androidx.compose.ui.graphics.Color) {
+    Box(
+        modifier = Modifier
+            .background(color.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+    }
+}
+
+fun getMealEmoji(mealType: String): String {
+    return when (mealType) {
+        "breakfast" -> "🌅"
+        "lunch" -> "☀️"
+        "dinner" -> "🌙"
+        "snack" -> "🍎"
+        else -> "🍽️"
+    }
+}
+
+fun getMealTypeName(mealType: String): String {
+    return when (mealType) {
+        "breakfast" -> "Desayuno"
+        "lunch" -> "Almuerzo"
+        "dinner" -> "Cena"
+        "snack" -> "Snack"
+        else -> "Comida"
+    }
+}
+

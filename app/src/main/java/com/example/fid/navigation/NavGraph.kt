@@ -17,6 +17,9 @@ sealed class Screen(val route: String) {
         fun createRoute(foodId: Long) = "food_detail/$foodId"
     }
     object Progress : Screen("progress")
+    object DailyDetail : Screen("daily_detail/{date}") {
+        fun createRoute(date: Long) = "daily_detail/$date"
+    }
     object Settings : Screen("settings")
 }
 
@@ -64,6 +67,11 @@ fun NavGraph(
         
         composable(Screen.Progress.route) {
             com.example.fid.ui.screens.progress.ProgressScreen(navController)
+        }
+        
+        composable(Screen.DailyDetail.route) { backStackEntry ->
+            val date = backStackEntry.arguments?.getString("date")?.toLongOrNull() ?: System.currentTimeMillis()
+            com.example.fid.ui.screens.progress.DailyDetailScreen(navController, date)
         }
         
         composable(Screen.Settings.route) {

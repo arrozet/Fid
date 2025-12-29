@@ -54,6 +54,11 @@ fun DashboardScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         user = repository.getCurrentUser()
         user?.let { u ->
+            // Calcular y guardar resumen diario actual
+            scope.launch {
+                repository.calculateAndSaveDailySummary(u.id, System.currentTimeMillis())
+            }
+            
             repository.getFoodEntriesByDateRange(u.id, startOfDay, endOfDay).collect { entries ->
                 foodEntries = entries
             }
