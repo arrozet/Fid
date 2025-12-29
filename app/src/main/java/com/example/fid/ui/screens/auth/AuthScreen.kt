@@ -114,7 +114,7 @@ fun AuthScreen(navController: NavController) {
                     }
                 }
             } catch (e: ApiException) {
-                errorMessage = "Google Sign-In falló: ${e.message}"
+                errorMessage = context.getString(R.string.error_google_signin_failed, e.message)
             }
         }
     }
@@ -234,7 +234,7 @@ fun AuthScreen(navController: NavController) {
                             val existingUser = repository.getUserByEmail(email)
                             if (isSignUp) {
                                 if (existingUser != null) {
-                                    errorMessage = "User already exists"
+                                    errorMessage = context.getString(R.string.error_user_already_exists)
                                 } else {
                                     navController.navigate(Screen.GoalSetup.route)
                                 }
@@ -274,7 +274,8 @@ fun AuthScreen(navController: NavController) {
             // Toggle between sign in and sign up
             Row {
                 Text(
-                    text = if (isSignUp) "Already have an account? " else "Don't have an account? ",
+                    text = if (isSignUp) stringResource(R.string.already_have_account_question) + " " 
+                           else stringResource(R.string.dont_have_account) + " ",
                     color = TextSecondary,
                     fontSize = 14.sp
                 )
@@ -322,7 +323,7 @@ fun AuthScreen(navController: NavController) {
                 ),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                Text("Continuar con Google", fontSize = 14.sp)
+                Text(stringResource(R.string.continue_with_google), fontSize = 14.sp)
             }
         }
     }

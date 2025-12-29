@@ -98,7 +98,7 @@ fun GoalSetupScreen(navController: NavController) {
             )
             
             Text(
-                text = "Paso $step de 3",
+                text = stringResource(R.string.step_of_total, step, 3),
                 fontSize = 14.sp,
                 color = TextSecondary
             )
@@ -497,7 +497,7 @@ fun TargetWeightStep(targetWeight: String, onTargetWeightChange: (String) -> Uni
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Opcional: Establece un peso objetivo para ayudarnos a personalizar mejor tu plan.",
+            text = stringResource(R.string.target_weight_description),
             fontSize = 14.sp,
             color = TextSecondary
         )

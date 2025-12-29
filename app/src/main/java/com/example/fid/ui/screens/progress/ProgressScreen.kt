@@ -162,7 +162,7 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = "¡Te sientes radiante!",
+            text = stringResource(R.string.feeling_radiant),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = PrimaryGreen
@@ -172,7 +172,7 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         
         // Qualitative messages
         QualitativeCard(
-            title = "Estado de hoy",
+            title = stringResource(R.string.today_status),
             message = stringResource(R.string.balanced_diet),
             color = PrimaryGreen
         )
@@ -180,7 +180,7 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         
         QualitativeCard(
-            title = "Energía",
+            title = stringResource(R.string.energy),
             message = stringResource(R.string.high_energy),
             color = ProteinColor
         )
@@ -188,8 +188,8 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         
         QualitativeCard(
-            title = "Consejo suave",
-            message = "Hoy has consumido mucho azúcar natural de la fruta. Para mantener tus niveles de energía, considera un snack rico en proteínas.",
+            title = stringResource(R.string.gentle_tip),
+            message = stringResource(R.string.sugar_tip_message),
             color = WarningYellow
         )
         
@@ -197,7 +197,7 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         
         // Wellness trends (without numbers)
         Text(
-            text = "Tendencias de Bienestar",
+            text = stringResource(R.string.wellness_trends),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
@@ -206,11 +206,11 @@ fun NumberlessProgressView(modifier: Modifier = Modifier) {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        SimpleTrendCard("Hidratación", "Mejorando ↗", PrimaryGreen)
+        SimpleTrendCard(stringResource(R.string.hydration_trend), stringResource(R.string.improving), PrimaryGreen)
         Spacer(modifier = Modifier.height(12.dp))
-        SimpleTrendCard("Diversidad Dietética", "Estable →", ProteinColor)
+        SimpleTrendCard(stringResource(R.string.dietary_diversity), stringResource(R.string.stable), ProteinColor)
         Spacer(modifier = Modifier.height(12.dp))
-        SimpleTrendCard("Consistencia", "Excelente ✓", PrimaryGreen)
+        SimpleTrendCard(stringResource(R.string.consistency), stringResource(R.string.excellent), PrimaryGreen)
     }
 }
 
@@ -238,19 +238,19 @@ fun DetailedProgressView(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             PeriodButton(
-                text = "Semana",
+                text = stringResource(R.string.week),
                 selected = selectedPeriod == TimePeriod.WEEK,
                 onClick = { onPeriodChange(TimePeriod.WEEK) },
                 modifier = Modifier.weight(1f)
             )
             PeriodButton(
-                text = "Mes",
+                text = stringResource(R.string.month),
                 selected = selectedPeriod == TimePeriod.MONTH,
                 onClick = { onPeriodChange(TimePeriod.MONTH) },
                 modifier = Modifier.weight(1f)
             )
             PeriodButton(
-                text = "Año",
+                text = stringResource(R.string.year),
                 selected = selectedPeriod == TimePeriod.YEAR,
                 onClick = { onPeriodChange(TimePeriod.YEAR) },
                 modifier = Modifier.weight(1f)
@@ -270,14 +270,17 @@ fun DetailedProgressView(
             }
         } else if (periodStats != null && dailySummaries.isNotEmpty()) {
             // Period overview
+            val periodNameWeekly = stringResource(R.string.period_weekly)
+            val periodNameMonthly = stringResource(R.string.period_monthly)
+            val periodNameYearly = stringResource(R.string.period_yearly)
             val periodName = when (selectedPeriod) {
-                TimePeriod.WEEK -> "Semanal"
-                TimePeriod.MONTH -> "Mensual"
-                TimePeriod.YEAR -> "Anual"
+                TimePeriod.WEEK -> periodNameWeekly
+                TimePeriod.MONTH -> periodNameMonthly
+                TimePeriod.YEAR -> periodNameYearly
             }
             
             Text(
-                text = "Resumen $periodName",
+                text = stringResource(R.string.summary_period, periodName),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -293,19 +296,19 @@ fun DetailedProgressView(
             ) {
                 Column {
                     StatRow(
-                        "Promedio diario", 
+                        stringResource(R.string.daily_average), 
                         "${periodStats.avgCalories.toInt()} kcal", 
                         PrimaryGreen
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     StatRow(
-                        "Días en objetivo", 
+                        stringResource(R.string.days_on_target), 
                         "${periodStats.daysOnTarget} / ${periodStats.totalDays}", 
                         ProteinColor
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     StatRow(
-                        "Proteína promedio", 
+                        stringResource(R.string.average_protein), 
                         "${periodStats.avgProteinG.toInt()}g", 
                         ProteinColor
                     )
@@ -316,7 +319,7 @@ fun DetailedProgressView(
             
             // Macro distribution
             Text(
-                text = "Distribución de Macros ($periodName)",
+                text = stringResource(R.string.macro_distribution_period, periodName),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -329,19 +332,19 @@ fun DetailedProgressView(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 MacroDistributionCard(
-                    "Proteínas", 
+                    stringResource(R.string.proteins), 
                     "${periodStats.proteinPercentage}%", 
                     ProteinColor, 
                     Modifier.weight(1f)
                 )
                 MacroDistributionCard(
-                    "Grasas", 
+                    stringResource(R.string.fats), 
                     "${periodStats.fatPercentage}%", 
                     FatColor, 
                     Modifier.weight(1f)
                 )
                 MacroDistributionCard(
-                    "Carbos", 
+                    stringResource(R.string.carbs_short), 
                     "${periodStats.carbPercentage}%", 
                     CarbColor, 
                     Modifier.weight(1f)
@@ -352,7 +355,7 @@ fun DetailedProgressView(
             
             // Daily summaries list
             Text(
-                text = "Historial Diario",
+                text = stringResource(R.string.daily_history),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -389,7 +392,7 @@ fun DetailedProgressView(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No hay datos para este período",
+                        text = stringResource(R.string.no_data_for_period),
                         color = TextSecondary,
                         fontSize = 16.sp,
                         textAlign = TextAlign.Center
@@ -558,7 +561,7 @@ fun DailySummaryCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${summary.mealsCount} comidas registradas",
+                        text = stringResource(R.string.meals_registered_count, summary.mealsCount),
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -576,7 +579,7 @@ fun DailySummaryCard(
                     } else 0
                     
                     Text(
-                        text = "$caloriePercentage% del objetivo",
+                        text = stringResource(R.string.percentage_of_goal, caloriePercentage),
                         fontSize = 12.sp,
                         color = TextSecondary
                     )

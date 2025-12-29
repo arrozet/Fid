@@ -133,7 +133,7 @@ fun DashboardScreen(navController: NavController) {
                 
                 // Macronutrients
                 Text(
-                    text = "Macronutrientes",
+                    text = stringResource(R.string.macronutrients),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -170,7 +170,7 @@ fun DashboardScreen(navController: NavController) {
                 
                 // Wellness Index
                 Text(
-                    text = "Índice de Bienestar",
+                    text = stringResource(R.string.wellness_index),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -200,7 +200,7 @@ fun DashboardScreen(navController: NavController) {
                 // Recent meals
                 if (foodEntries.isNotEmpty()) {
                     Text(
-                        text = "Comidas de Hoy",
+                        text = stringResource(R.string.todays_meals),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary

@@ -54,10 +54,13 @@ fun ConfirmationDialog(
     message: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    confirmText: String = "Confirmar",
-    cancelText: String = "Cancelar",
+    confirmText: String? = null,
+    cancelText: String? = null,
     isDestructive: Boolean = false
 ) {
+    val actualConfirmText = confirmText ?: stringResource(R.string.confirm)
+    val actualCancelText = cancelText ?: stringResource(R.string.cancel)
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -75,7 +78,7 @@ fun ConfirmationDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = confirmText,
+                    text = actualConfirmText,
                     color = if (isDestructive) ErrorRed else PrimaryGreen
                 )
             }
@@ -83,7 +86,7 @@ fun ConfirmationDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = cancelText,
+                    text = actualCancelText,
                     color = TextSecondary
                 )
             }
@@ -115,7 +118,7 @@ fun InfoDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = "OK",
+                    text = stringResource(R.string.ok),
                     color = PrimaryGreen
                 )
             }

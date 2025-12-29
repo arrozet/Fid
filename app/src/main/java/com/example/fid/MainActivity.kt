@@ -1,5 +1,6 @@
 package com.example.fid
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,11 +16,17 @@ import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.NavGraph
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.FidTheme
+import com.example.fid.utils.LocaleHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.applyLanguage(newBase))
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

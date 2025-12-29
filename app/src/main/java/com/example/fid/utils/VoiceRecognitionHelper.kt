@@ -7,6 +7,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import com.example.fid.R
 import java.util.*
 
 class VoiceRecognitionHelper(
@@ -25,7 +26,7 @@ class VoiceRecognitionHelper(
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
             setupRecognitionListener()
         } else {
-            onError("El reconocimiento de voz no está disponible en este dispositivo")
+            onError(context.getString(R.string.voice_recognition_unavailable))
         }
     }
 
@@ -66,16 +67,16 @@ class VoiceRecognitionHelper(
                 Log.e(TAG, "onError: $error")
                 isListening = false
                 val errorMessage = when (error) {
-                    SpeechRecognizer.ERROR_AUDIO -> "Error de audio. Verifica el micrófono"
-                    SpeechRecognizer.ERROR_CLIENT -> "Error del cliente"
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permisos insuficientes. Activa el micrófono"
-                    SpeechRecognizer.ERROR_NETWORK -> "Error de red. Verifica tu conexión a internet"
-                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Tiempo de espera agotado. Verifica tu conexión"
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No se entendió lo que dijiste. Intenta hablar más claro y cerca del micrófono"
-                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "El reconocedor está ocupado. Espera un momento"
-                    SpeechRecognizer.ERROR_SERVER -> "Error del servidor de Google. Intenta de nuevo"
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No se detectó voz. Habla más fuerte o acerca el micrófono"
-                    else -> "Error desconocido ($error)"
+                    SpeechRecognizer.ERROR_AUDIO -> context.getString(R.string.error_audio)
+                    SpeechRecognizer.ERROR_CLIENT -> context.getString(R.string.error_client)
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> context.getString(R.string.error_insufficient_permissions)
+                    SpeechRecognizer.ERROR_NETWORK -> context.getString(R.string.error_network)
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> context.getString(R.string.error_network_timeout)
+                    SpeechRecognizer.ERROR_NO_MATCH -> context.getString(R.string.error_no_match)
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> context.getString(R.string.error_recognizer_busy)
+                    SpeechRecognizer.ERROR_SERVER -> context.getString(R.string.error_server)
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> context.getString(R.string.error_speech_timeout)
+                    else -> context.getString(R.string.error_unknown, error)
                 }
                 onError(errorMessage)
             }
@@ -101,7 +102,7 @@ class VoiceRecognitionHelper(
                     onResult(recognizedText)
                 } else {
                     Log.w(TAG, "⚠️ Results bundle was empty or null")
-                    onError("No se recibieron resultados del reconocedor")
+                    onError(context.getString(R.string.error_no_results))
                 }
             }
 
@@ -179,7 +180,7 @@ class VoiceRecognitionHelper(
             Log.e(TAG, "Exception type: ${e.javaClass.simpleName}")
             Log.e(TAG, "Exception message: ${e.message}")
             e.printStackTrace()
-            onError("Error al iniciar el reconocimiento: ${e.message}")
+            onError(context.getString(R.string.error_starting_recognition, e.message))
         }
     }
 

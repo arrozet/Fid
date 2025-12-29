@@ -15,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.fid.R
 import com.example.fid.data.database.entities.DailySummary
 import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.repository.FirebaseRepository
@@ -78,7 +80,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                 title = {
                     Column {
                         Text(
-                            text = "Detalle del Día",
+                            text = stringResource(R.string.day_detail),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -92,7 +94,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = TextPrimary)
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back), tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -170,7 +172,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                     
                     // Macros
                     Text(
-                        text = "Macronutrientes",
+                        text = stringResource(R.string.macronutrients),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
@@ -179,7 +181,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     MacroProgressBar(
-                        label = "Proteínas",
+                        label = stringResource(R.string.proteins),
                         current = s.totalProteinG,
                         goal = s.proteinGoal,
                         color = ProteinColor
@@ -188,7 +190,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                     Spacer(modifier = Modifier.height(12.dp))
                     
                     MacroProgressBar(
-                        label = "Grasas",
+                        label = stringResource(R.string.fats),
                         current = s.totalFatG,
                         goal = s.fatGoal,
                         color = FatColor
@@ -197,7 +199,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                     Spacer(modifier = Modifier.height(12.dp))
                     
                     MacroProgressBar(
-                        label = "Carbohidratos",
+                        label = stringResource(R.string.carbs),
                         current = s.totalCarbG,
                         goal = s.carbGoal,
                         color = CarbColor
@@ -208,7 +210,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                 
                 // Food entries
                 Text(
-                    text = "Comidas (${foodEntries.size})",
+                    text = stringResource(R.string.meals_count, foodEntries.size),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -231,7 +233,7 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "No hay comidas registradas",
+                                text = stringResource(R.string.no_meals_registered),
                                 color = TextSecondary,
                                 fontSize = 14.sp
                             )
@@ -318,7 +320,7 @@ fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
                             color = TextPrimary
                         )
                         Text(
-                            text = getMealTypeName(entry.mealType),
+                            text = getMealTypeNameLocalized(entry.mealType),
                             fontSize = 12.sp,
                             color = TextSecondary
                         )
@@ -384,13 +386,14 @@ fun getMealEmoji(mealType: String): String {
     }
 }
 
-fun getMealTypeName(mealType: String): String {
+@Composable
+fun getMealTypeNameLocalized(mealType: String): String {
     return when (mealType) {
-        "breakfast" -> "Desayuno"
-        "lunch" -> "Almuerzo"
-        "dinner" -> "Cena"
-        "snack" -> "Snack"
-        else -> "Comida"
+        "breakfast" -> stringResource(R.string.meal_breakfast)
+        "lunch" -> stringResource(R.string.meal_lunch)
+        "dinner" -> stringResource(R.string.meal_dinner)
+        "snack" -> stringResource(R.string.meal_snack)
+        else -> stringResource(R.string.meal_food)
     }
 }
 

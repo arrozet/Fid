@@ -117,7 +117,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No se encontró el alimento",
+                        text = stringResource(R.string.food_not_found),
                         color = TextSecondary,
                         fontSize = 16.sp
                     )
@@ -216,7 +216,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                 
                 // Nutritional information
                 Text(
-                    text = "Información Nutricional",
+                    text = stringResource(R.string.nutritional_information),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
@@ -253,11 +253,11 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Macros
-                MacroInfoRow("Proteínas", totalProtein, ProteinColor)
+                MacroInfoRow(stringResource(R.string.proteins), totalProtein, ProteinColor)
                 Spacer(modifier = Modifier.height(12.dp))
-                MacroInfoRow("Grasas", totalFat, FatColor)
+                MacroInfoRow(stringResource(R.string.fats), totalFat, FatColor)
                 Spacer(modifier = Modifier.height(12.dp))
-                MacroInfoRow("Carbohidratos", totalCarbs, CarbColor)
+                MacroInfoRow(stringResource(R.string.carbs), totalCarbs, CarbColor)
                 
                 Spacer(modifier = Modifier.height(40.dp))
                 
@@ -298,13 +298,13 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                             } else {
                                 Toast.makeText(
                                     context,
-                                    "Error: No se pudo obtener la información del alimento",
+                                    context.getString(R.string.error_food_info),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                         } catch (e: Exception) {
                             android.util.Log.e("FoodDetailScreen", "Error agregando alimento: ${e.message}", e)
-                            Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.error_saving, e.message ?: ""), Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

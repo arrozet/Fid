@@ -14,8 +14,6 @@ class NotificationHelper(private val context: Context) {
     
     companion object {
         private const val CHANNEL_ID = "fid_notifications"
-        private const val CHANNEL_NAME = "Fid Notifications"
-        private const val CHANNEL_DESCRIPTION = "Notifications for meal reminders and progress updates"
     }
     
     init {
@@ -25,8 +23,12 @@ class NotificationHelper(private val context: Context) {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
-                description = CHANNEL_DESCRIPTION
+            val channel = NotificationChannel(
+                CHANNEL_ID, 
+                context.getString(R.string.notification_channel_name), 
+                importance
+            ).apply {
+                description = context.getString(R.string.notification_channel_description)
             }
             
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -42,8 +44,8 @@ class NotificationHelper(private val context: Context) {
         
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Hora de registrar tu comida")
-            .setContentText("No olvides registrar tu $mealType")
+            .setContentTitle(context.getString(R.string.notification_meal_reminder_title))
+            .setContentText(context.getString(R.string.notification_meal_reminder_text, mealType))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()
@@ -59,7 +61,7 @@ class NotificationHelper(private val context: Context) {
         
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Actualización de progreso")
+            .setContentTitle(context.getString(R.string.notification_progress_title))
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)
@@ -76,7 +78,7 @@ class NotificationHelper(private val context: Context) {
         
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("¡Sigue así!")
+            .setContentTitle(context.getString(R.string.notification_motivational_title))
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)

@@ -56,7 +56,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                 partialText = ""
                 isListening = false
                 errorMessage = ""
-                Toast.makeText(context, "✓ Reconocido: $text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.voice_recognized, text), Toast.LENGTH_SHORT).show()
             },
             onError = { error ->
                 errorMessage = error
@@ -68,12 +68,12 @@ fun VoiceRegistrationScreen(navController: NavController) {
             onReadyForSpeech = {
                 errorMessage = ""
                 isReady = true
-                Toast.makeText(context, "🎤 Listo, puedes hablar", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.ready_to_listen), Toast.LENGTH_SHORT).show()
             },
             onBeginningOfSpeech = {
                 errorMessage = ""
                 isReady = true
-                Toast.makeText(context, "👂 Te estoy escuchando...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.listening_to_you), Toast.LENGTH_SHORT).show()
             },
             onPartialResult = { partial ->
                 partialText = partial
@@ -92,7 +92,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
         } else {
             Toast.makeText(
                 context,
-                "Se necesita permiso de micrófono para usar esta función",
+                context.getString(R.string.microphone_permission_needed),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -160,7 +160,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Ejemplo: \"200 gramos de pollo a la plancha\"",
+                    text = stringResource(R.string.voice_example),
                     color = TextSecondary.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
@@ -213,7 +213,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                     ) {
                         Column {
                             Text(
-                                text = "✓ Reconocido:",
+                                text = stringResource(R.string.recognized_label),
                                 color = PrimaryGreen,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
@@ -235,7 +235,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                     ) {
                         Column {
                             Text(
-                                text = "🎤 Escuchando...",
+                                text = stringResource(R.string.listening_label),
                                 color = PrimaryGreen,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
@@ -250,16 +250,18 @@ fun VoiceRegistrationScreen(navController: NavController) {
                         }
                     }
                 } else if (isListening) {
+                    val speakingLabel = stringResource(R.string.speaking_label)
+                    val startingLabel = stringResource(R.string.starting_label)
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (isReady) "👂 Hablando..." else "⏳ Iniciando...",
+                            text = if (isReady) speakingLabel else startingLabel,
                             color = PrimaryGreen,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Habla claro y cerca del micrófono",
+                            text = stringResource(R.string.speak_clearly),
                             color = TextSecondary,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
@@ -281,7 +283,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                     ) {
                         Column {
                             Text(
-                                text = "⚠️ Error",
+                                text = stringResource(R.string.error_label),
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
@@ -294,7 +296,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "💡 Consejos:\n• Verifica tu conexión a internet\n• Habla claro y cerca del micrófono\n• Reduce el ruido ambiental\n• Asegúrate de tener Google App instalada",
+                                text = stringResource(R.string.voice_tips),
                                 color = TextSecondary,
                                 fontSize = 11.sp
                             )
@@ -314,7 +316,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                                 if (currentUser == null) {
                                     Toast.makeText(
                                         context,
-                                        "Error: Usuario no autenticado",
+                                        context.getString(R.string.error_user_not_authenticated),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     isSaving = false
@@ -326,7 +328,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                                 if (user == null) {
                                     Toast.makeText(
                                         context,
-                                        "Error: No se encontró el usuario",
+                                        context.getString(R.string.error_user_not_found),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     isSaving = false
@@ -350,7 +352,7 @@ fun VoiceRegistrationScreen(navController: NavController) {
                             } catch (e: Exception) {
                                 Toast.makeText(
                                     context,
-                                    "Error al guardar: ${e.message}",
+                                    context.getString(R.string.error_saving, e.message ?: ""),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 isSaving = false

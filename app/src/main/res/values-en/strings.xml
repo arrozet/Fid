@@ -9,6 +9,7 @@
     <string name="healthy_conscious_relationship">A healthy and conscious relationship with food</string>
     <string name="start_journey">Start My Journey</string>
     <string name="already_have_account">I already have an account</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
     
     <!-- Auth -->
     <string name="sign_in">Sign In</string>
@@ -20,6 +21,7 @@
     <string name="or_continue_with">Or continue with</string>
     <string name="continue_with_google">Continue with Google</string>
     <string name="continue_with_apple">Continue with Apple</string>
+    <string name="error_google_signin">Google Sign-In failed: %1$s</string>
     
     <!-- Goal Setup -->
     <string name="setup_goals">Goal Setup</string>
@@ -39,9 +41,11 @@
     <string name="very_active">Very Active</string>
     <string name="athlete">Athlete</string>
     <string name="target_weight_kg">Target Weight (kg)</string>
+    <string name="target_weight_description">Optional: Set a target weight to help us better personalize your plan.</string>
     <string name="confirm_goals">Confirm Goals</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
+    <string name="step_of_total">Step %1$d of %2$d</string>
     
     <!-- Dashboard -->
     <string name="hello">Hello, %1$s</string>
@@ -54,11 +58,22 @@
     <string name="hydration">Hydration</string>
     <string name="sleep">Sleep</string>
     <string name="register_food">Register Food</string>
+    <string name="macronutrients">Macronutrients</string>
+    <string name="wellness_index">Wellness Index</string>
+    <string name="todays_meals">Today\'s Meals</string>
+    <string name="default_user_name">User</string>
+    
+    <!-- Meal Types -->
+    <string name="meal_breakfast">Breakfast</string>
+    <string name="meal_lunch">Lunch</string>
+    <string name="meal_dinner">Dinner</string>
+    <string name="meal_snack">Snack</string>
+    <string name="meal_food">Meal</string>
     
     <!-- Food Registration -->
     <string name="snap_it">Snap It!</string>
     <string name="focus_your_food">Focus your food</string>
-    <string name="analyzing_food">Analyzing your food...</string>
+    <string name="analyzing_food">Analyzing your food…</string>
     <string name="voice_registration">Voice Registration</string>
     <string name="say_what_you_ate">Say what you ate (e.g: \'I ate 100 grams of chicken and a salad\')</string>
     <string name="manual_registration">Manual Registration</string>
@@ -67,6 +82,36 @@
     <string name="smart_suggestions">Smart Suggestions</string>
     <string name="add_custom">Add Custom</string>
     <string name="confirm_register">Confirm and Register</string>
+    <string name="take_photo">Take photo</string>
+    <string name="captured_photo">Photo captured</string>
+    <string name="retake_photo">Take another photo</string>
+    <string name="enter_food_details">Enter the details of your meal:</string>
+    <string name="food_name_label">Food name</string>
+    <string name="meal_type_label">Meal type</string>
+    <string name="amount_grams_label">Amount (grams)</string>
+    <string name="macronutrients_label">Macronutrients:</string>
+    <string name="calories_kcal_label">Calories (kcal)</string>
+    <string name="protein_g_label">Protein (g)</string>
+    <string name="fat_g_label">Fat (g)</string>
+    <string name="carbs_g_label">Carbohydrates (g)</string>
+    <string name="food_registered_success">Food registered successfully</string>
+    <string name="no_frequent_foods">No frequent foods yet</string>
+    <string name="no_results_found">No results found</string>
+    <string name="suggested_for_this_time">Suggested for this time</string>
+    
+    <!-- Voice Registration -->
+    <string name="voice_recognized">✓ Recognized: %1$s</string>
+    <string name="ready_to_listen">🎤 Ready, you can speak</string>
+    <string name="listening_to_you">👂 I\'m listening to you…</string>
+    <string name="microphone_permission_needed">Microphone permission is needed to use this feature</string>
+    <string name="voice_example">Example: \"200 grams of grilled chicken\"</string>
+    <string name="recognized_label">✓ Recognized:</string>
+    <string name="listening_label">🎤 Listening…</string>
+    <string name="speaking_label">👂 Speaking…</string>
+    <string name="starting_label">⏳ Starting…</string>
+    <string name="speak_clearly">Speak clearly and close to the microphone</string>
+    <string name="error_label">⚠️ Error</string>
+    <string name="voice_tips">💡 Tips:\n• Check your internet connection\n• Speak clearly and close to the microphone\n• Avoid background noise</string>
     
     <!-- Food Detail -->
     <string name="food_detail">Food Detail</string>
@@ -79,6 +124,14 @@
     <string name="verified_community">Verified by Community (High Trust)</string>
     <string name="user_submitted">User Submitted (Unverified)</string>
     <string name="add_to_log">Add to my log</string>
+    <string name="nutritional_information">Nutritional Information</string>
+    <string name="food_not_found">Food not found</string>
+    
+    <!-- Day Detail -->
+    <string name="day_detail">Day Detail</string>
+    <string name="go_back">Go back</string>
+    <string name="meals_count">Meals (%1$d)</string>
+    <string name="no_meals_registered">No meals registered</string>
     
     <!-- Progress -->
     <string name="progress">Progress</string>
@@ -87,6 +140,32 @@
     <string name="balanced_diet">Your diet today was Balanced</string>
     <string name="need_more_veggies">Looks like you need more Fresh Vegetables</string>
     <string name="prioritized_protein">You prioritized Proteins today</string>
+    <string name="feeling_radiant">You\'re feeling radiant!</string>
+    <string name="today_status">Today\'s status</string>
+    <string name="energy">Energy</string>
+    <string name="gentle_tip">Gentle tip</string>
+    <string name="sugar_tip_message">Today you\'ve consumed quite a bit of natural sugar from fruit. Try balancing with more protein tomorrow.</string>
+    <string name="wellness_trends">Wellness Trends</string>
+    <string name="hydration_trend">Hydration</string>
+    <string name="improving">Improving ↗</string>
+    <string name="dietary_diversity">Dietary Diversity</string>
+    <string name="stable">Stable →</string>
+    <string name="consistency">Consistency</string>
+    <string name="excellent">Excellent ✓</string>
+    <string name="year">Year</string>
+    <string name="period_weekly">Weekly</string>
+    <string name="period_monthly">Monthly</string>
+    <string name="period_yearly">Yearly</string>
+    <string name="summary_period">%1$s Summary</string>
+    <string name="daily_average">Daily average</string>
+    <string name="days_on_target">Days on target</string>
+    <string name="average_protein">Average protein</string>
+    <string name="macro_distribution_period">Macro Distribution (%1$s)</string>
+    <string name="carbs_short">Carbs</string>
+    <string name="daily_history">Daily History</string>
+    <string name="no_data_for_period">No data for this period</string>
+    <string name="meals_registered">meals registered</string>
+    <string name="of_goal">of goal</string>
     
     <!-- Settings -->
     <string name="settings">Settings</string>
@@ -96,6 +175,9 @@
     <string name="change_password">Change Password</string>
     <string name="app_preferences">App Preferences</string>
     <string name="numberless_mode_toggle">Numberless Mode</string>
+    <string name="numberless_mode_description">Hide calorie numbers</string>
+    <string name="numberless_mode_enabled">Numberless mode enabled</string>
+    <string name="numberless_mode_disabled">Numberless mode disabled</string>
     <string name="measurement_units">Measurement Units</string>
     <string name="notifications">Notifications</string>
     <string name="connectivity">Connectivity</string>
@@ -107,6 +189,15 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_service">Terms of Service</string>
     <string name="sign_out">Sign Out</string>
+    <string name="sign_out_confirmation">Are you sure you want to sign out?</string>
+    <string name="error_sign_out">Error signing out: %1$s</string>
+    
+    <!-- Language Settings -->
+    <string name="language">Language</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+    <string name="language_changed">Language changed. The app will restart.</string>
+    <string name="select_language">Select language</string>
     
     <!-- Navigation -->
     <string name="home">Home</string>
@@ -117,11 +208,18 @@
     <string name="other">Other</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="today">Today</string>
     <string name="week">Week</string>
     <string name="month">Month</string>
+    <string name="grant_permission">Grant permission</string>
+    
+    <!-- Permissions -->
+    <string name="camera_permission_required">Camera permission required</string>
+    <string name="camera_permission_explanation">To take photos of your meals, we need access to the camera</string>
     
     <!-- Errors -->
     <string name="error_empty_field">This field cannot be empty</string>
@@ -129,10 +227,54 @@
     <string name="error_invalid_password">Password must be at least 6 characters</string>
     <string name="error_login_failed">Login failed</string>
     <string name="error_registration_failed">Account creation failed</string>
+    <string name="error_user_not_authenticated">User not authenticated</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_user_already_exists">User already exists</string>
+    <string name="error_google_signin_failed">Google Sign-In failed: %1$s</string>
+    <string name="already_have_account_question">Already have an account?</string>
+    <string name="error_food_info">Error: Could not get food information</string>
+    <string name="error_saving">Error saving: %1$s</string>
+    
+    <!-- Voice Recognition Errors -->
+    <string name="voice_recognition_unavailable">Voice recognition is not available on this device</string>
+    <string name="error_audio">Audio error. Check the microphone</string>
+    <string name="error_client">Client error</string>
+    <string name="error_insufficient_permissions">Insufficient permissions. Enable microphone</string>
+    <string name="error_network">Network error. Check your internet connection</string>
+    <string name="error_network_timeout">Timeout. Check your connection</string>
+    <string name="error_no_match">Did not understand what you said. Try speaking more clearly</string>
+    <string name="error_recognizer_busy">Recognizer is busy. Wait a moment</string>
+    <string name="error_server">Google server error. Try again</string>
+    <string name="error_speech_timeout">No voice detected. Speak louder or move closer to the microphone</string>
+    <string name="error_unknown">Unknown error (%1$d)</string>
+    <string name="error_no_results">No results received from recognizer</string>
+    <string name="error_starting_recognition">Error starting recognition: %1$s</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Fid Notifications</string>
+    <string name="notification_channel_description">Notifications for meal reminders and progress updates</string>
+    <string name="notification_meal_reminder_title">Time to log your meal</string>
+    <string name="notification_meal_reminder_text">Don\'t forget to log your %1$s</string>
+    <string name="notification_progress_title">Progress update</string>
+    <string name="notification_motivational_title">Keep it up!</string>
     
     <!-- Success Messages -->
     <string name="success_food_added">Food added successfully</string>
     <string name="success_profile_updated">Profile updated</string>
     <string name="success_goals_set">Goals set</string>
+    
+    <!-- Camera/Permissions -->
+    <string name="camera_permission_granted">Camera permission granted</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="camera_activity_started">Camera activity started</string>
+    
+    <!-- Content Descriptions -->
+    <string name="cd_settings">Settings</string>
+    <string name="cd_add_food">Add food</string>
+    <string name="cd_back">Back</string>
+    
+    <!-- Food Info -->
+    <string name="calories_per_100g">%1$d kcal per 100g</string>
+    <string name="meals_registered_count">%1$d meals logged</string>
+    <string name="percentage_of_goal">%1$d%% of goal</string>
 </resources>
-

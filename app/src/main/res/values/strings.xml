@@ -12,6 +12,7 @@
     <string name="healthy_conscious_relationship">Una relación saludable y consciente con la comida</string>
     <string name="start_journey">Empezar Mi Viaje</string>
     <string name="already_have_account">Ya tengo una cuenta</string>
+    <string name="dont_have_account">¿No tienes una cuenta?</string>
     
     <!-- Auth -->
     <string name="sign_in">Iniciar Sesión</string>
@@ -23,6 +24,7 @@
     <string name="or_continue_with">O continuar con</string>
     <string name="continue_with_google">Continuar con Google</string>
     <string name="continue_with_apple">Continuar con Apple</string>
+    <string name="error_google_signin">Error en Google Sign-In: %1$s</string>
     
     <!-- Goal Setup -->
     <string name="setup_goals">Establecimiento de Objetivos</string>
@@ -42,9 +44,11 @@
     <string name="very_active">Muy Activo</string>
     <string name="athlete">Atleta</string>
     <string name="target_weight_kg">Peso Objetivo (kg)</string>
+    <string name="target_weight_description">Opcional: Establece un peso objetivo para ayudarnos a personalizar mejor tu plan.</string>
     <string name="confirm_goals">Confirmar Objetivos</string>
     <string name="next">Siguiente</string>
     <string name="back">Atrás</string>
+    <string name="step_of_total">Paso %1$d de %2$d</string>
     
     <!-- Dashboard -->
     <string name="hello">Hola, %1$s</string>
@@ -57,11 +61,22 @@
     <string name="hydration">Hidratación</string>
     <string name="sleep">Sueño</string>
     <string name="register_food">Registrar Alimento</string>
+    <string name="macronutrients">Macronutrientes</string>
+    <string name="wellness_index">Índice de Bienestar</string>
+    <string name="todays_meals">Comidas de Hoy</string>
+    <string name="default_user_name">Usuario</string>
+    
+    <!-- Meal Types -->
+    <string name="meal_breakfast">Desayuno</string>
+    <string name="meal_lunch">Almuerzo</string>
+    <string name="meal_dinner">Cena</string>
+    <string name="meal_snack">Snack</string>
+    <string name="meal_food">Comida</string>
     
     <!-- Food Registration -->
-    <string name="snap_it">Snap It!</string>
+    <string name="snap_it">¡Fotografía!</string>
     <string name="focus_your_food">Enfoca tu comida</string>
-    <string name="analyzing_food">Analizando tu comida...</string>
+    <string name="analyzing_food">Analizando tu comida…</string>
     <string name="voice_registration">Registro por Voz</string>
     <string name="say_what_you_ate">Di lo que comiste (ej: \'Comí 100 gramos de pollo y una ensalada\')</string>
     <string name="manual_registration">Registro Manual</string>
@@ -70,6 +85,36 @@
     <string name="smart_suggestions">Sugerencias Inteligentes</string>
     <string name="add_custom">Añadir Personalizado</string>
     <string name="confirm_register">Confirmar y Registrar</string>
+    <string name="take_photo">Tomar foto</string>
+    <string name="captured_photo">Foto capturada</string>
+    <string name="retake_photo">Tomar otra foto</string>
+    <string name="enter_food_details">Ingresa los detalles de tu comida:</string>
+    <string name="food_name_label">Nombre de la comida</string>
+    <string name="meal_type_label">Tipo de comida</string>
+    <string name="amount_grams_label">Cantidad (gramos)</string>
+    <string name="macronutrients_label">Macronutrientes:</string>
+    <string name="calories_kcal_label">Calorías (kcal)</string>
+    <string name="protein_g_label">Proteína (g)</string>
+    <string name="fat_g_label">Grasa (g)</string>
+    <string name="carbs_g_label">Carbohidratos (g)</string>
+    <string name="food_registered_success">Comida registrada exitosamente</string>
+    <string name="no_frequent_foods">No hay alimentos frecuentes aún</string>
+    <string name="no_results_found">No se encontraron resultados</string>
+    <string name="suggested_for_this_time">Sugerido para esta hora</string>
+    
+    <!-- Voice Registration -->
+    <string name="voice_recognized">✓ Reconocido: %1$s</string>
+    <string name="ready_to_listen">🎤 Listo, puedes hablar</string>
+    <string name="listening_to_you">👂 Te estoy escuchando…</string>
+    <string name="microphone_permission_needed">Se necesita permiso de micrófono para usar esta función</string>
+    <string name="voice_example">Ejemplo: \"200 gramos de pollo a la plancha\"</string>
+    <string name="recognized_label">✓ Reconocido:</string>
+    <string name="listening_label">🎤 Escuchando…</string>
+    <string name="speaking_label">👂 Hablando…</string>
+    <string name="starting_label">⏳ Iniciando…</string>
+    <string name="speak_clearly">Habla claro y cerca del micrófono</string>
+    <string name="error_label">⚠️ Error</string>
+    <string name="voice_tips">💡 Consejos:\n• Verifica tu conexión a internet\n• Habla claro y cerca del micrófono\n• Evita ruido de fondo</string>
     
     <!-- Food Detail -->
     <string name="food_detail">Detalle de Alimento</string>
@@ -82,6 +127,14 @@
     <string name="verified_community">Verificado por la Comunidad (Alta Confianza)</string>
     <string name="user_submitted">Enviado por el Usuario (Sin verificar)</string>
     <string name="add_to_log">Añadir a mi registro</string>
+    <string name="nutritional_information">Información Nutricional</string>
+    <string name="food_not_found">No se encontró el alimento</string>
+    
+    <!-- Day Detail -->
+    <string name="day_detail">Detalle del Día</string>
+    <string name="go_back">Volver</string>
+    <string name="meals_count">Comidas (%1$d)</string>
+    <string name="no_meals_registered">No hay comidas registradas</string>
     
     <!-- Progress -->
     <string name="progress">Progreso</string>
@@ -90,6 +143,32 @@
     <string name="balanced_diet">Tu dieta de hoy fue Equilibrada</string>
     <string name="need_more_veggies">Parece que necesitas más Verduras Frescas</string>
     <string name="prioritized_protein">Hoy priorizaste las Proteínas</string>
+    <string name="feeling_radiant">¡Te sientes radiante!</string>
+    <string name="today_status">Estado de hoy</string>
+    <string name="energy">Energía</string>
+    <string name="gentle_tip">Consejo suave</string>
+    <string name="sugar_tip_message">Hoy has consumido bastante azúcar natural de la fruta. Prueba equilibrar con más proteínas mañana.</string>
+    <string name="wellness_trends">Tendencias de Bienestar</string>
+    <string name="hydration_trend">Hidratación</string>
+    <string name="improving">Mejorando ↗</string>
+    <string name="dietary_diversity">Diversidad Dietética</string>
+    <string name="stable">Estable →</string>
+    <string name="consistency">Consistencia</string>
+    <string name="excellent">Excelente ✓</string>
+    <string name="year">Año</string>
+    <string name="period_weekly">Semanal</string>
+    <string name="period_monthly">Mensual</string>
+    <string name="period_yearly">Anual</string>
+    <string name="summary_period">Resumen %1$s</string>
+    <string name="daily_average">Promedio diario</string>
+    <string name="days_on_target">Días en objetivo</string>
+    <string name="average_protein">Proteína promedio</string>
+    <string name="macro_distribution_period">Distribución de Macros (%1$s)</string>
+    <string name="carbs_short">Carbos</string>
+    <string name="daily_history">Historial Diario</string>
+    <string name="no_data_for_period">No hay datos para este período</string>
+    <string name="meals_registered">comidas registradas</string>
+    <string name="of_goal">del objetivo</string>
     
     <!-- Settings -->
     <string name="settings">Ajustes</string>
@@ -99,6 +178,9 @@
     <string name="change_password">Cambiar Contraseña</string>
     <string name="app_preferences">Preferencias de la App</string>
     <string name="numberless_mode_toggle">Modo sin Números</string>
+    <string name="numberless_mode_description">Oculta los números de calorías</string>
+    <string name="numberless_mode_enabled">Modo sin números activado</string>
+    <string name="numberless_mode_disabled">Modo sin números desactivado</string>
     <string name="measurement_units">Unidades de Medida</string>
     <string name="notifications">Notificaciones</string>
     <string name="connectivity">Conectividad</string>
@@ -110,6 +192,15 @@
     <string name="privacy_policy">Política de Privacidad</string>
     <string name="terms_of_service">Términos de Servicio</string>
     <string name="sign_out">Cerrar Sesión</string>
+    <string name="sign_out_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
+    <string name="error_sign_out">Error al cerrar sesión: %1$s</string>
+    
+    <!-- Language Settings -->
+    <string name="language">Idioma</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+    <string name="language_changed">Idioma cambiado. La aplicación se reiniciará.</string>
+    <string name="select_language">Seleccionar idioma</string>
     
     <!-- Navigation -->
     <string name="home">Inicio</string>
@@ -120,11 +211,18 @@
     <string name="other">Otro</string>
     <string name="save">Guardar</string>
     <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="ok">OK</string>
     <string name="edit">Editar</string>
     <string name="delete">Eliminar</string>
     <string name="today">Hoy</string>
     <string name="week">Semana</string>
     <string name="month">Mes</string>
+    <string name="grant_permission">Conceder permiso</string>
+    
+    <!-- Permissions -->
+    <string name="camera_permission_required">Permiso de cámara requerido</string>
+    <string name="camera_permission_explanation">Para tomar fotos de tus comidas, necesitamos acceso a la cámara</string>
     
     <!-- Errors -->
     <string name="error_empty_field">Este campo no puede estar vacío</string>
@@ -132,9 +230,54 @@
     <string name="error_invalid_password">La contraseña debe tener al menos 6 caracteres</string>
     <string name="error_login_failed">Error al iniciar sesión</string>
     <string name="error_registration_failed">Error al crear cuenta</string>
+    <string name="error_user_not_authenticated">Usuario no autenticado</string>
+    <string name="error_user_not_found">No se encontró el usuario</string>
+    <string name="error_user_already_exists">El usuario ya existe</string>
+    <string name="error_google_signin_failed">Google Sign-In falló: %1$s</string>
+    <string name="already_have_account_question">¿Ya tienes una cuenta?</string>
+    <string name="error_food_info">Error: No se pudo obtener la información del alimento</string>
+    <string name="error_saving">Error al guardar: %1$s</string>
+    
+    <!-- Voice Recognition Errors -->
+    <string name="voice_recognition_unavailable">El reconocimiento de voz no está disponible en este dispositivo</string>
+    <string name="error_audio">Error de audio. Verifica el micrófono</string>
+    <string name="error_client">Error del cliente</string>
+    <string name="error_insufficient_permissions">Permisos insuficientes. Activa el micrófono</string>
+    <string name="error_network">Error de red. Verifica tu conexión a internet</string>
+    <string name="error_network_timeout">Tiempo de espera agotado. Verifica tu conexión</string>
+    <string name="error_no_match">No se entendió lo que dijiste. Intenta hablar más claro</string>
+    <string name="error_recognizer_busy">El reconocedor está ocupado. Espera un momento</string>
+    <string name="error_server">Error del servidor de Google. Intenta de nuevo</string>
+    <string name="error_speech_timeout">No se detectó voz. Habla más fuerte o acerca el micrófono</string>
+    <string name="error_unknown">Error desconocido (%1$d)</string>
+    <string name="error_no_results">No se recibieron resultados del reconocedor</string>
+    <string name="error_starting_recognition">Error al iniciar el reconocimiento: %1$s</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Notificaciones de Fid</string>
+    <string name="notification_channel_description">Notificaciones para recordatorios de comidas y actualizaciones de progreso</string>
+    <string name="notification_meal_reminder_title">Hora de registrar tu comida</string>
+    <string name="notification_meal_reminder_text">No olvides registrar tu %1$s</string>
+    <string name="notification_progress_title">Actualización de progreso</string>
+    <string name="notification_motivational_title">¡Sigue así!</string>
     
     <!-- Success Messages -->
     <string name="success_food_added">Alimento añadido correctamente</string>
     <string name="success_profile_updated">Perfil actualizado</string>
     <string name="success_goals_set">Objetivos establecidos</string>
+    
+    <!-- Camera/Permissions -->
+    <string name="camera_permission_granted">Permiso de cámara concedido</string>
+    <string name="camera_permission_denied">Permiso de cámara denegado</string>
+    <string name="camera_activity_started">Actividad de cámara iniciada</string>
+    
+    <!-- Content Descriptions -->
+    <string name="cd_settings">Ajustes</string>
+    <string name="cd_add_food">Añadir alimento</string>
+    <string name="cd_back">Atrás</string>
+    
+    <!-- Food Info -->
+    <string name="calories_per_100g">%1$d kcal por 100g</string>
+    <string name="meals_registered_count">%1$d comidas registradas</string>
+    <string name="percentage_of_goal">%1$d%% del objetivo</string>
 </resources>

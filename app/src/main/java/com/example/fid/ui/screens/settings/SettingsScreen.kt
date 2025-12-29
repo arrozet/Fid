@@ -1,5 +1,7 @@
 package com.example.fid.ui.screens.settings
 
+import android.app.Activity
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,11 +23,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.fid.MainActivity
 import com.example.fid.R
 import com.example.fid.data.database.entities.User
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.LocaleHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.ktx.auth
@@ -42,6 +46,8 @@ fun SettingsScreen(navController: NavController) {
     
     var user by remember { mutableStateOf<User?>(null) }
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var currentLanguage by remember { mutableStateOf(LocaleHelper.getLanguage(context)) }
     
     LaunchedEffect(Unit) {
         user = repository.getCurrentUser()
@@ -107,7 +113,7 @@ fun SettingsScreen(navController: NavController) {
                     
                     Column {
                         Text(
-                            text = user?.name ?: "Usuario",
+                            text = user?.name ?: stringResource(R.string.default_user_name),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -145,7 +151,7 @@ fun SettingsScreen(navController: NavController) {
             
             SettingsToggleItem(
                 title = stringResource(R.string.numberless_mode_toggle),
-                description = "Oculta los números de calorías",
+                description = stringResource(R.string.numberless_mode_description),
                 checked = user?.numberlessMode ?: false,
                 onCheckedChange = { enabled ->
                     scope.launch {
@@ -155,7 +161,7 @@ fun SettingsScreen(navController: NavController) {
                             user = updatedUser
                             Toast.makeText(
                                 context,
-                                if (enabled) "Modo sin números activado" else "Modo sin números desactivado",
+                                if (enabled) context.getString(R.string.numberless_mode_enabled) else context.getString(R.string.numberless_mode_disabled),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -163,11 +169,18 @@ fun SettingsScreen(navController: NavController) {
                 }
             )
             
+            // Language selector
+            SettingsItemWithValue(
+                title = stringResource(R.string.language),
+                value = LocaleHelper.getLanguageDisplayName(currentLanguage),
+                onClick = { showLanguageDialog = true }
+            )
+            
             SettingsItem(stringResource(R.string.measurement_units)) {
-                Toast.makeText(context, "Measurement Units", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.measurement_units), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.notifications)) {
-                Toast.makeText(context, "Notifications", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.notifications), Toast.LENGTH_SHORT).show()
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -177,10 +190,10 @@ fun SettingsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
             
             SettingsItem(stringResource(R.string.integrate_google_fit)) {
-                Toast.makeText(context, "Google Fit Integration", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.integrate_google_fit), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.integrate_apple_health)) {
-                Toast.makeText(context, "Apple Health Integration (iOS)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.integrate_apple_health), Toast.LENGTH_SHORT).show()
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -190,16 +203,16 @@ fun SettingsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
             
             SettingsItem(stringResource(R.string.faq)) {
-                Toast.makeText(context, "FAQ", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.faq), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.contact)) {
-                Toast.makeText(context, "Contact", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.contact), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.privacy_policy)) {
-                Toast.makeText(context, "Privacy Policy", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.privacy_policy), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.terms_of_service)) {
-                Toast.makeText(context, "Terms of Service", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.terms_of_service), Toast.LENGTH_SHORT).show()
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -238,7 +251,7 @@ fun SettingsScreen(navController: NavController) {
                 },
                 text = {
                     Text(
-                        text = "¿Estás seguro de que quieres cerrar sesión?",
+                        text = stringResource(R.string.sign_out_confirmation),
                         color = TextSecondary
                     )
                 },
@@ -264,7 +277,7 @@ fun SettingsScreen(navController: NavController) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 } catch (e: Exception) {
-                                    Toast.makeText(context, "Error al cerrar sesión: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.error_sign_out, e.message), Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -277,6 +290,81 @@ fun SettingsScreen(navController: NavController) {
                 },
                 dismissButton = {
                     TextButton(onClick = { showSignOutDialog = false }) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = PrimaryGreen
+                        )
+                    }
+                },
+                containerColor = DarkCard
+            )
+        }
+        
+        // Language selection dialog
+        if (showLanguageDialog) {
+            AlertDialog(
+                onDismissRequest = { showLanguageDialog = false },
+                title = {
+                    Text(
+                        text = stringResource(R.string.select_language),
+                        color = TextPrimary
+                    )
+                },
+                text = {
+                    Column {
+                        LocaleHelper.getSupportedLanguages().forEach { (code, displayName) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (code != currentLanguage) {
+                                            LocaleHelper.setLanguage(context, code)
+                                            currentLanguage = code
+                                            showLanguageDialog = false
+                                            
+                                            // Show toast and restart activity
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.language_changed),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            
+                                            // Restart the activity to apply the new locale
+                                            val activity = context as? Activity
+                                            activity?.let {
+                                                val intent = Intent(it, MainActivity::class.java)
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                it.startActivity(intent)
+                                                it.finish()
+                                            }
+                                        } else {
+                                            showLanguageDialog = false
+                                        }
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = code == currentLanguage,
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = PrimaryGreen,
+                                        unselectedColor = TextSecondary
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = displayName,
+                                    fontSize = 16.sp,
+                                    color = if (code == currentLanguage) PrimaryGreen else TextPrimary
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showLanguageDialog = false }) {
                         Text(
                             text = stringResource(R.string.cancel),
                             color = PrimaryGreen
@@ -374,6 +462,45 @@ fun SettingsToggleItem(
                     uncheckedTrackColor = DarkSurface
                 )
             )
+        }
+    }
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+fun SettingsItemWithValue(title: String, value: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(DarkCard, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                color = TextPrimary
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = value,
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = TextSecondary
+                )
+            }
         }
     }
     Spacer(modifier = Modifier.height(8.dp))

@@ -156,7 +156,7 @@ fun ManualRegistrationScreen(navController: NavController) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No hay alimentos frecuentes aún",
+                                    text = stringResource(R.string.no_frequent_foods),
                                     color = TextSecondary,
                                     fontSize = 14.sp
                                 )
@@ -229,7 +229,7 @@ fun ManualRegistrationScreen(navController: NavController) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No se encontraron resultados",
+                                    text = stringResource(R.string.no_results_found),
                                     color = TextSecondary,
                                     fontSize = 14.sp
                                 )
@@ -317,7 +317,7 @@ fun SuggestionCard(name: String, calories: Int, onClick: () -> Unit) {
                     color = TextPrimary
                 )
                 Text(
-                    text = "Sugerido para esta hora",
+                    text = stringResource(R.string.suggested_for_this_time),
                     fontSize = 12.sp,
                     color = TextSecondary
                 )
@@ -361,7 +361,7 @@ fun FoodSearchResultCard(food: FoodItem, onClick: () -> Unit) {
                     color = TextPrimary
                 )
                 Text(
-                    text = "${food.caloriesPer100g.toInt()} kcal por 100g",
+                    text = stringResource(R.string.calories_per_100g, food.caloriesPer100g.toInt()),
                     fontSize = 12.sp,
                     color = TextSecondary
                 )

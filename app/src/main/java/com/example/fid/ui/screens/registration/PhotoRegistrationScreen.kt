@@ -114,7 +114,7 @@ fun PhotoRegistrationScreen(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Permiso de cámara requerido",
+                            text = stringResource(R.string.camera_permission_required),
                             color = TextPrimary,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -122,7 +122,7 @@ fun PhotoRegistrationScreen(navController: NavController) {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Para tomar fotos de tus comidas, necesitamos acceso a la cámara",
+                            text = stringResource(R.string.camera_permission_explanation),
                             color = TextSecondary,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center
@@ -134,7 +134,7 @@ fun PhotoRegistrationScreen(navController: NavController) {
                                 containerColor = PrimaryGreen
                             )
                         ) {
-                            Text("Conceder permiso")
+                            Text(stringResource(R.string.grant_permission))
                         }
                     }
                 }
@@ -159,7 +159,7 @@ fun PhotoRegistrationScreen(navController: NavController) {
                                 onSuccess = {
                                     Toast.makeText(
                                         context,
-                                        "Comida registrada exitosamente",
+                                        context.getString(R.string.food_registered_success),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     navController.popBackStack()
@@ -263,7 +263,7 @@ fun CameraPreviewScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "Enfoca tu comida",
+                        text = stringResource(R.string.focus_your_food),
                         color = TextPrimary,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
@@ -302,7 +302,7 @@ fun CameraPreviewScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CameraAlt,
-                        contentDescription = "Tomar foto",
+                        contentDescription = stringResource(R.string.take_photo),
                         modifier = Modifier.size(40.dp)
                     )
                 }
@@ -341,11 +341,16 @@ fun FoodConfirmationScreen(
     var selectedMealType by remember { mutableStateOf("snack") }
     var showMealTypeMenu by remember { mutableStateOf(false) }
     
+    val breakfastLabel = stringResource(R.string.meal_breakfast)
+    val lunchLabel = stringResource(R.string.meal_lunch)
+    val dinnerLabel = stringResource(R.string.meal_dinner)
+    val snackLabel = stringResource(R.string.meal_snack)
+    
     val mealTypes = listOf(
-        "breakfast" to "Desayuno",
-        "lunch" to "Almuerzo",
-        "dinner" to "Cena",
-        "snack" to "Snack"
+        "breakfast" to breakfastLabel,
+        "lunch" to lunchLabel,
+        "dinner" to dinnerLabel,
+        "snack" to snackLabel
     )
     
     Column(
@@ -363,7 +368,7 @@ fun FoodConfirmationScreen(
         ) {
             Image(
                 bitmap = image.asImageBitmap(),
-                contentDescription = "Foto capturada",
+                contentDescription = stringResource(R.string.captured_photo),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -385,14 +390,14 @@ fun FoodConfirmationScreen(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Tomar otra foto")
+            Text(stringResource(R.string.retake_photo))
         }
         
         Spacer(modifier = Modifier.height(24.dp))
         
         // Info text
         Text(
-            text = "Ingresa los detalles de tu comida:",
+            text = stringResource(R.string.enter_food_details),
             color = TextPrimary,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
@@ -404,7 +409,7 @@ fun FoodConfirmationScreen(
         OutlinedTextField(
             value = foodName,
             onValueChange = { foodName = it },
-            label = { Text("Nombre de la comida") },
+            label = { Text(stringResource(R.string.food_name_label)) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryGreen,
@@ -424,10 +429,10 @@ fun FoodConfirmationScreen(
             onExpandedChange = { showMealTypeMenu = it }
         ) {
             OutlinedTextField(
-                value = mealTypes.find { it.first == selectedMealType }?.second ?: "Snack",
+                value = mealTypes.find { it.first == selectedMealType }?.second ?: snackLabel,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Tipo de comida") },
+                label = { Text(stringResource(R.string.meal_type_label)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showMealTypeMenu) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -464,7 +469,7 @@ fun FoodConfirmationScreen(
         OutlinedTextField(
             value = amount,
             onValueChange = { amount = it },
-            label = { Text("Cantidad (gramos)") },
+            label = { Text(stringResource(R.string.amount_grams_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -480,7 +485,7 @@ fun FoodConfirmationScreen(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Macronutrientes:",
+            text = stringResource(R.string.macronutrients_label),
             color = TextPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold
@@ -492,7 +497,7 @@ fun FoodConfirmationScreen(
         OutlinedTextField(
             value = calories,
             onValueChange = { calories = it },
-            label = { Text("Calorías (kcal)") },
+            label = { Text(stringResource(R.string.calories_kcal_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -515,7 +520,7 @@ fun FoodConfirmationScreen(
             OutlinedTextField(
                 value = protein,
                 onValueChange = { protein = it },
-                label = { Text("Proteína (g)") },
+                label = { Text(stringResource(R.string.protein_g_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -532,7 +537,7 @@ fun FoodConfirmationScreen(
             OutlinedTextField(
                 value = fat,
                 onValueChange = { fat = it },
-                label = { Text("Grasa (g)") },
+                label = { Text(stringResource(R.string.fat_g_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -552,7 +557,7 @@ fun FoodConfirmationScreen(
         OutlinedTextField(
             value = carbs,
             onValueChange = { carbs = it },
-            label = { Text("Carbohidratos (g)") },
+            label = { Text(stringResource(R.string.carbs_g_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -579,7 +584,7 @@ fun FoodConfirmationScreen(
                     contentColor = TextSecondary
                 )
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
             
             Button(
@@ -608,7 +613,7 @@ fun FoodConfirmationScreen(
                 ),
                 enabled = foodName.isNotEmpty() && amount.toFloatOrNull() != null && amount.toFloatOrNull()!! > 0
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.save))
             }
         }
         
@@ -682,13 +687,13 @@ private suspend fun saveFoodEntry(
     try {
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {
-            onError("Usuario no autenticado")
+            onError(context.getString(R.string.error_user_not_authenticated))
             return
         }
         
         val user = repository.getUserByEmail(currentUser.email ?: "")
         if (user == null) {
-            onError("No se encontró el usuario")
+            onError(context.getString(R.string.error_user_not_found))
             return
         }
         
