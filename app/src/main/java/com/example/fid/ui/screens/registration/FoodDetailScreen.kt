@@ -46,13 +46,36 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
     LaunchedEffect(foodId) {
         android.util.Log.d("FoodDetailScreen", "FoodDetailScreen iniciado con foodId: $foodId")
         isLoading = true
-        foodItem = repository.getFoodItemById(foodId)
-        android.util.Log.d("FoodDetailScreen", "Alimento obtenido: ${foodItem?.name ?: "null"}")
+        val retrievedItem = repository.getFoodItemById(foodId)
+        android.util.Log.d("FoodDetailScreen", "Alimento recuperado de repository: ${retrievedItem != null}")
+        foodItem = retrievedItem
+        if (foodItem == null) {
+            android.util.Log.e("FoodDetailScreen", "ERROR: foodItem es null después de obtenerlo")
+        } else {
+            foodItem?.let { item ->
+                android.util.Log.d("FoodDetailScreen", "Alimento obtenido:")
+                android.util.Log.d("FoodDetailScreen", "  - ID: ${item.id}")
+                android.util.Log.d("FoodDetailScreen", "  - name: '${item.name}'")
+                android.util.Log.d("FoodDetailScreen", "  - nameEs: '${item.nameEs}'")
+                android.util.Log.d("FoodDetailScreen", "  - nameEn: '${item.nameEn}'")
+                android.util.Log.d("FoodDetailScreen", "  - getLocalizedName: '${item.getLocalizedName(context)}'")
+            }
+        }
         isLoading = false
     }
     
     // Usar datos del alimento o valores por defecto
-    val foodName = foodItem?.name ?: ""
+    // Obtener el nombre localizado directamente - se recalcula automáticamente cuando foodItem cambia
+    val foodName = foodItem?.let { item ->
+        val localized = item.getLocalizedName(context)
+        when {
+            localized.isNotBlank() -> localized
+            item.nameEs.isNotBlank() -> item.nameEs
+            item.nameEn.isNotBlank() -> item.nameEn
+            item.name.isNotBlank() -> item.name
+            else -> "Alimento"
+        }
+    } ?: ""
     val caloriesPer100g = foodItem?.caloriesPer100g ?: 0f
     val proteinPer100g = foodItem?.proteinPer100g ?: 0f
     val fatPer100g = foodItem?.fatPer100g ?: 0f
@@ -124,8 +147,12 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                 }
             } else {
                 // Food name
+                // Log para depuración
+                LaunchedEffect(foodName) {
+                    android.util.Log.d("FoodDetailScreen", "foodName actualizado: '$foodName'")
+                }
                 Text(
-                    text = foodName,
+                    text = foodName.ifBlank { "Alimento" },
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary

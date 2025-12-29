@@ -231,27 +231,39 @@ class FirebaseRepository {
     }
     
     // Food Item operations
-    fun searchFoodItems(query: String): Flow<List<FoodItem>> = callbackFlow {
+    fun searchFoodItems(query: String, language: String = "es"): Flow<List<FoodItem>> = callbackFlow {
+        // Determinar el campo de búsqueda según el idioma
+        val searchField = if (language == "en") "nameEn" else "nameEs"
+        
+        // Convertir la query a minúsculas para búsqueda case-insensitive
+        val queryLower = query.lowercase()
+        
         val listener = firestore.collection("food_items")
-            .orderBy("name")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-                val items = snapshot?.documents?.mapNotNull { doc ->
+            .orderBy(searchField)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                // Filtrar en memoria para búsqueda parcial case-insensitive
+                val items = snapshot.documents.mapNotNull { doc ->
                     val foodItem = doc.toObject<FoodItem>()
                     val id = doc.id.toLongOrNull() ?: 0L
-                    android.util.Log.d("FirebaseRepository", "Documento ID: ${doc.id}, FoodItem: ${foodItem?.name}, ID asignado: $id")
                     foodItem?.copy(id = id)
-                } ?: emptyList()
-                android.util.Log.d("FirebaseRepository", "Total items encontrados: ${items.size}")
+                }.filter { foodItem ->
+                    val nameToSearch = if (language == "en") {
+                        foodItem.nameEn.lowercase()
+                    } else {
+                        foodItem.nameEs.lowercase()
+                    }
+                    nameToSearch.contains(queryLower)
+                }
+                android.util.Log.d("FirebaseRepository", "Búsqueda en $searchField con query '$query': ${items.size} resultados")
                 trySend(items)
             }
+            .addOnFailureListener { error ->
+                android.util.Log.e("FirebaseRepository", "Error en búsqueda: ${error.message}")
+                close(error)
+            }
         
-        awaitClose { listener.remove() }
+        awaitClose { }
     }
     
     fun getFrequentFoodItems(): Flow<List<FoodItem>> = callbackFlow {
@@ -278,10 +290,11 @@ class FirebaseRepository {
     
     suspend fun insertFoodItem(foodItem: FoodItem): Long {
         return try {
-            // Verificar si ya existe un alimento con el mismo nombre
-            val existingFood = getFoodItemByName(foodItem.name)
+            // Verificar si ya existe un alimento con el mismo nombre (buscar por nameEs o nameEn)
+            val nameToCheck = foodItem.nameEs.ifEmpty { foodItem.nameEn.ifEmpty { foodItem.name } }
+            val existingFood = getFoodItemByName(nameToCheck)
             if (existingFood != null) {
-                android.util.Log.d("FirebaseRepository", "Alimento '${foodItem.name}' ya existe, retornando ID existente")
+                android.util.Log.d("FirebaseRepository", "Alimento '$nameToCheck' ya existe, retornando ID existente")
                 return existingFood.id
             }
             
@@ -293,7 +306,7 @@ class FirebaseRepository {
                 .set(itemWithId)
                 .await()
             
-            android.util.Log.d("FirebaseRepository", "Alimento '${foodItem.name}' insertado con ID: $newId")
+            android.util.Log.d("FirebaseRepository", "Alimento '${foodItem.nameEs}/${foodItem.nameEn}' insertado con ID: $newId")
             newId
         } catch (e: Exception) {
             throw e
@@ -301,28 +314,81 @@ class FirebaseRepository {
     }
     
     suspend fun getFoodItemById(foodId: Long): FoodItem? {
+        // Mapeo manual para evitar problemas con Firestore CustomClassMapper
         return try {
+            android.util.Log.d("FirebaseRepository", "Buscando alimento con ID: $foodId")
             val snapshot = firestore.collection("food_items")
                 .document(foodId.toString())
                 .get()
                 .await()
             
-            snapshot.toObject<FoodItem>()?.copy(id = foodId)
+            android.util.Log.d("FirebaseRepository", "Snapshot existe: ${snapshot.exists()}")
+            if (!snapshot.exists()) {
+                android.util.Log.e("FirebaseRepository", "Documento no existe en Firebase")
+                return null
+            }
+            
+            val data = snapshot.data
+            android.util.Log.d("FirebaseRepository", "Datos del snapshot: $data")
+            
+            // Mapeo manual para evitar problemas con campos que no coinciden
+            val foodItem = FoodItem(
+                id = foodId,
+                name = data?.get("name") as? String ?: "",
+                nameEs = data?.get("nameEs") as? String ?: "",
+                nameEn = data?.get("nameEn") as? String ?: "",
+                caloriesPer100g = (data?.get("caloriesPer100g") as? Number)?.toFloat() ?: 0f,
+                proteinPer100g = (data?.get("proteinPer100g") as? Number)?.toFloat() ?: 0f,
+                fatPer100g = (data?.get("fatPer100g") as? Number)?.toFloat() ?: 0f,
+                carbPer100g = (data?.get("carbPer100g") as? Number)?.toFloat() ?: 0f,
+                verificationLevel = data?.get("verificationLevel") as? String ?: "user",
+                isFrequent = (data?.get("isFrequent") as? Boolean) ?: (data?.get("frequent") as? Boolean) ?: false,
+                lastUsed = (data?.get("lastUsed") as? Long)
+            )
+            
+            android.util.Log.d("FirebaseRepository", "FoodItem mapeado manualmente:")
+            android.util.Log.d("FirebaseRepository", "  - nameEs: '${foodItem.nameEs}'")
+            android.util.Log.d("FirebaseRepository", "  - nameEn: '${foodItem.nameEn}'")
+            android.util.Log.d("FirebaseRepository", "  - name: '${foodItem.name}'")
+            
+            foodItem
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRepository", "Error obteniendo alimento: ${e.message}")
+            android.util.Log.e("FirebaseRepository", "Error obteniendo alimento: ${e.message}", e)
             null
         }
     }
     
     suspend fun getFoodItemByName(name: String): FoodItem? {
         return try {
-            val snapshot = firestore.collection("food_items")
-                .whereEqualTo("name", name)
+            // Buscar primero por nameEs
+            var snapshot = firestore.collection("food_items")
+                .whereEqualTo("nameEs", name)
                 .limit(1)
                 .get()
                 .await()
             
-            val doc = snapshot.documents.firstOrNull()
+            var doc = snapshot.documents.firstOrNull()
+            
+            // Si no se encuentra, buscar por nameEn
+            if (doc == null) {
+                snapshot = firestore.collection("food_items")
+                    .whereEqualTo("nameEn", name)
+                    .limit(1)
+                    .get()
+                    .await()
+                doc = snapshot.documents.firstOrNull()
+            }
+            
+            // Si aún no se encuentra, buscar por el campo deprecado "name"
+            if (doc == null) {
+                snapshot = firestore.collection("food_items")
+                    .whereEqualTo("name", name)
+                    .limit(1)
+                    .get()
+                    .await()
+                doc = snapshot.documents.firstOrNull()
+            }
+            
             if (doc != null) {
                 val foodItem = doc.toObject<FoodItem>()
                 foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
@@ -356,7 +422,7 @@ class FirebaseRepository {
             
             android.util.Log.d("FirebaseRepository", "Sugerencias obtenidas: ${suggestions.size}")
             suggestions.forEach { food ->
-                android.util.Log.d("FirebaseRepository", "  - ${food.name} (${food.caloriesPer100g.toInt()} kcal)")
+                android.util.Log.d("FirebaseRepository", "  - ${food.nameEs}/${food.nameEn} (${food.caloriesPer100g.toInt()} kcal)")
             }
             
             suggestions
@@ -425,6 +491,57 @@ class FirebaseRepository {
             android.util.Log.d("FirebaseRepository", "Limpieza completada: $deletedCount duplicados eliminados")
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Error limpiando duplicados: ${e.message}")
+            throw e
+        }
+    }
+    
+    // Función para limpiar TODOS los alimentos (usar con precaución)
+    suspend fun cleanAllFoodItems() {
+        try {
+            android.util.Log.d("FirebaseRepository", "Iniciando limpieza de TODOS los alimentos...")
+            
+            val snapshot = firestore.collection("food_items")
+                .get()
+                .await()
+            
+            var deletedCount = 0
+            snapshot.documents.forEach { doc ->
+                firestore.collection("food_items")
+                    .document(doc.id)
+                    .delete()
+                    .await()
+                deletedCount++
+            }
+            
+            android.util.Log.d("FirebaseRepository", "Limpieza completada: $deletedCount alimentos eliminados")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error limpiando todos los alimentos: ${e.message}")
+            throw e
+        }
+    }
+    
+    // Función para limpiar TODOS los registros de comidas (opcional)
+    suspend fun cleanAllFoodEntries(userId: Long) {
+        try {
+            android.util.Log.d("FirebaseRepository", "Limpiando registros de comidas del usuario $userId...")
+            
+            val snapshot = firestore.collection("food_entries")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            var deletedCount = 0
+            snapshot.documents.forEach { doc ->
+                firestore.collection("food_entries")
+                    .document(doc.id)
+                    .delete()
+                    .await()
+                deletedCount++
+            }
+            
+            android.util.Log.d("FirebaseRepository", "Limpieza completada: $deletedCount registros eliminados")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error limpiando registros: ${e.message}")
             throw e
         }
     }

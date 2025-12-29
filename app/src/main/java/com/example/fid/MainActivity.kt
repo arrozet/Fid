@@ -38,12 +38,24 @@ class MainActivity : ComponentActivity() {
         val prefs = getSharedPreferences("fid_prefs", MODE_PRIVATE)
         val hasSeeded = prefs.getBoolean("has_seeded_db", false)
         
-        // TEMPORAL: Limpiar duplicados en el próximo inicio
-        // Después de que se ejecute una vez, puedes comentar este bloque
+        // IMPORTANTE: Si actualizaste el modelo FoodItem con soporte multiidioma,
+        // necesitas re-sembrar la base de datos. Para hacer esto:
+        // 1. Descomenta las siguientes líneas
+        // 2. Ejecuta la app una vez
+        // 3. Vuelve a comentar las líneas
+        
+        // DESCOMENTA ESTO PARA ACTUALIZAR LOS ALIMENTOS CON SOPORTE MULTIIDIOMA:
+        // ⚠️ EJECUTA LA APP UNA VEZ CON ESTO DESCOMENTADO, LUEGO VUELVE A COMENTAR
+        // YA SE EJECUTÓ - Los alimentos tienen nameEs y nameEn correctamente
+        /*
         CoroutineScope(Dispatchers.IO).launch {
-            repository.cleanDuplicateFoodItems()
-            android.util.Log.d("MainActivity", "Duplicados limpiados")
+            android.util.Log.d("MainActivity", "Limpiando y re-sembrando base de datos...")
+            repository.cleanAllFoodItems()
+            seeder.seedFoodItems()
+            prefs.edit().putBoolean("has_seeded_db", true).apply()
+            android.util.Log.d("MainActivity", "Base de datos re-inicializada con alimentos multiidioma")
         }
+        */
         
         if (!hasSeeded) {
             CoroutineScope(Dispatchers.IO).launch {

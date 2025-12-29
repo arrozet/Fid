@@ -25,6 +25,7 @@ import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.LocaleHelper
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,7 +45,7 @@ fun ManualRegistrationScreen(navController: NavController) {
         repository.getFrequentFoodItems().collect { foods ->
             android.util.Log.d("ManualRegistration", "Alimentos frecuentes obtenidos: ${foods.size}")
             foods.forEach { food ->
-                android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+                android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
             }
             frequentFoods = foods
         }
@@ -55,18 +56,19 @@ fun ManualRegistrationScreen(navController: NavController) {
         val suggestions = repository.getSuggestedFoods(3)
         android.util.Log.d("ManualRegistration", "Sugerencias obtenidas: ${suggestions.size}")
         suggestions.forEach { food ->
-            android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+            android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
         }
         suggestedFoods = suggestions
     }
     
     LaunchedEffect(searchQuery) {
         if (searchQuery.isNotEmpty()) {
-            android.util.Log.d("ManualRegistration", "Buscando alimentos con query: '$searchQuery'")
-            repository.searchFoodItems(searchQuery).collect { foods ->
+            val currentLanguage = LocaleHelper.getCurrentLanguage(context)
+            android.util.Log.d("ManualRegistration", "Buscando alimentos con query: '$searchQuery' en idioma: $currentLanguage")
+            repository.searchFoodItems(searchQuery, currentLanguage).collect { foods ->
                 android.util.Log.d("ManualRegistration", "Resultados de búsqueda obtenidos: ${foods.size}")
                 foods.forEach { food ->
-                    android.util.Log.d("ManualRegistration", "  - ${food.name}, ID: ${food.id}")
+                    android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
                 }
                 searchResults = foods
             }
@@ -169,13 +171,13 @@ fun ManualRegistrationScreen(navController: NavController) {
                                 items(frequentFoods.size) { index ->
                                     val food = frequentFoods[index]
                                     FrequentFoodCard(food) {
-                                        android.util.Log.d("ManualRegistration", "Clic en alimento frecuente: ${food.name}, ID: ${food.id}")
+                                        android.util.Log.d("ManualRegistration", "Clic en alimento frecuente: ${food.getLocalizedName(context)}, ID: ${food.id}")
                                         if (food.id > 0) {
                                             val route = Screen.FoodDetail.createRoute(food.id)
                                             android.util.Log.d("ManualRegistration", "Navegando a: $route")
                                             navController.navigate(route)
                                         } else {
-                                            android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                            android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.getLocalizedName(context)}")
                                         }
                                     }
                                 }
@@ -198,16 +200,16 @@ fun ManualRegistrationScreen(navController: NavController) {
                     items(suggestedFoods.size) { index ->
                         val food = suggestedFoods[index]
                         SuggestionCard(
-                            name = food.name,
+                            name = food.getLocalizedName(context),
                             calories = food.caloriesPer100g.toInt(),
                             onClick = {
-                                android.util.Log.d("ManualRegistration", "Clic en sugerencia: ${food.name}, ID: ${food.id}")
+                                android.util.Log.d("ManualRegistration", "Clic en sugerencia: ${food.getLocalizedName(context)}, ID: ${food.id}")
                                 if (food.id > 0) {
                                     val route = Screen.FoodDetail.createRoute(food.id)
                                     android.util.Log.d("ManualRegistration", "Navegando a: $route")
                                     navController.navigate(route)
                                 } else {
-                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.getLocalizedName(context)}")
                                 }
                             }
                         )
@@ -239,13 +241,13 @@ fun ManualRegistrationScreen(navController: NavController) {
                         items(searchResults.size) { index ->
                             val food = searchResults[index]
                             FoodSearchResultCard(food) {
-                                android.util.Log.d("ManualRegistration", "Clic en resultado de búsqueda: ${food.name}, ID: ${food.id}")
+                                android.util.Log.d("ManualRegistration", "Clic en resultado de búsqueda: ${food.getLocalizedName(context)}, ID: ${food.id}")
                                 if (food.id > 0) {
                                     val route = Screen.FoodDetail.createRoute(food.id)
                                     android.util.Log.d("ManualRegistration", "Navegando a: $route")
                                     navController.navigate(route)
                                 } else {
-                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.name}")
+                                    android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.getLocalizedName(context)}")
                                 }
                             }
                             Spacer(modifier = Modifier.height(8.dp))
@@ -259,14 +261,16 @@ fun ManualRegistrationScreen(navController: NavController) {
 
 @Composable
 fun FrequentFoodCard(food: FoodItem, onClick: () -> Unit) {
-    android.util.Log.d("ManualRegistration", "Renderizando FrequentFoodCard: ${food.name}, ID: ${food.id}")
+    val context = LocalContext.current
+    val localizedName = food.getLocalizedName(context)
+    android.util.Log.d("ManualRegistration", "Renderizando FrequentFoodCard: $localizedName, ID: ${food.id}")
     Box(
         modifier = Modifier
             .width(120.dp)
             .height(140.dp)
             .clickable(
                 onClick = {
-                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FrequentFoodCard: ${food.name}")
+                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FrequentFoodCard: $localizedName")
                     onClick()
                 }
             )
@@ -279,7 +283,7 @@ fun FrequentFoodCard(food: FoodItem, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         ) {
             Text(
-                text = food.name,
+                text = localizedName,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
@@ -335,13 +339,15 @@ fun SuggestionCard(name: String, calories: Int, onClick: () -> Unit) {
 
 @Composable
 fun FoodSearchResultCard(food: FoodItem, onClick: () -> Unit) {
-    android.util.Log.d("ManualRegistration", "Renderizando FoodSearchResultCard: ${food.name}, ID: ${food.id}")
+    val context = LocalContext.current
+    val localizedName = food.getLocalizedName(context)
+    android.util.Log.d("ManualRegistration", "Renderizando FoodSearchResultCard: $localizedName, ID: ${food.id}")
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FoodSearchResultCard: ${food.name}")
+                    android.util.Log.d("ManualRegistration", "CLICK DETECTADO en FoodSearchResultCard: $localizedName")
                     onClick()
                 }
             )
@@ -355,7 +361,7 @@ fun FoodSearchResultCard(food: FoodItem, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = food.name,
+                    text = localizedName,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary

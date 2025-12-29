@@ -27,6 +27,13 @@ object LocaleHelper {
     }
     
     /**
+     * Alias for getLanguage - gets the current language
+     */
+    fun getCurrentLanguage(context: Context): String {
+        return getLanguage(context)
+    }
+    
+    /**
      * Save the language preference
      */
     fun setLanguage(context: Context, language: String) {
