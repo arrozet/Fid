@@ -633,9 +633,18 @@ class FirebaseRepository {
      */
     suspend fun getDailySummary(userId: Long, date: Long): DailySummary? {
         return try {
+            // Normalizar la fecha al inicio del día para garantizar consistencia
+            val calendar = java.util.Calendar.getInstance()
+            calendar.timeInMillis = date
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            calendar.set(java.util.Calendar.MILLISECOND, 0)
+            val normalizedDate = calendar.timeInMillis
+            
             val snapshot = firestore.collection("daily_summaries")
                 .whereEqualTo("userId", userId)
-                .whereEqualTo("date", date)
+                .whereEqualTo("date", normalizedDate)
                 .limit(1)
                 .get()
                 .await()
@@ -649,6 +658,7 @@ class FirebaseRepository {
     
     /**
      * Obtiene resúmenes de un rango de fechas
+     * Elimina duplicados por fecha, quedándose con el resumen más actualizado (mayor id)
      */
     suspend fun getDailySummariesByDateRange(userId: Long, startDate: Long, endDate: Long): List<DailySummary> {
         return try {
@@ -660,7 +670,39 @@ class FirebaseRepository {
                 .get()
                 .await()
             
-            snapshot.documents.mapNotNull { it.toObject<DailySummary>() }
+            val allSummaries = snapshot.documents.mapNotNull { it.toObject<DailySummary>() }
+            
+            // Agrupar por fecha y quedarse con el resumen más reciente (mayor id) para cada fecha
+            // También eliminar duplicados de la base de datos
+            val groupedByDate = allSummaries.groupBy { it.date }
+            val uniqueSummaries = mutableListOf<DailySummary>()
+            
+            for ((_, summariesForDate) in groupedByDate) {
+                if (summariesForDate.size > 1) {
+                    // Hay duplicados, eliminar los antiguos
+                    val sortedByIdDesc = summariesForDate.sortedByDescending { it.id }
+                    val newest = sortedByIdDesc.first()
+                    uniqueSummaries.add(newest)
+                    
+                    // Eliminar los duplicados antiguos de la base de datos
+                    sortedByIdDesc.drop(1).forEach { duplicate ->
+                        try {
+                            firestore.collection("daily_summaries")
+                                .document(duplicate.id.toString())
+                                .delete()
+                                .await()
+                            android.util.Log.d("FirebaseRepository", "Duplicado eliminado: ${duplicate.id} para fecha ${duplicate.date}")
+                        } catch (e: Exception) {
+                            android.util.Log.e("FirebaseRepository", "Error eliminando duplicado: ${e.message}")
+                        }
+                    }
+                } else {
+                    uniqueSummaries.add(summariesForDate.first())
+                }
+            }
+            
+            // Ordenar por fecha descendente
+            uniqueSummaries.sortedByDescending { it.date }
         } catch (e: Exception) {
             android.util.Log.e("FirebaseRepository", "Error obteniendo resúmenes por rango: ${e.message}")
             emptyList()

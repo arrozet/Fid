@@ -986,6 +986,7 @@ fun AddFoodMenu(
         modifier = Modifier
             .fillMaxSize()
             .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.7f))
+            .clickable(onClick = onDismiss)
             .padding(24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
@@ -993,6 +994,7 @@ fun AddFoodMenu(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(DarkSurface, RoundedCornerShape(20.dp))
+                .clickable(enabled = false, onClick = {}) // Intercepta clics para que no se propaguen al fondo
                 .padding(20.dp)
         ) {
             Text(
