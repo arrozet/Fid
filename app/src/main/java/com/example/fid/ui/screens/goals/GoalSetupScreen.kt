@@ -124,6 +124,7 @@ fun GoalSetupScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Botón de Cancelar (siempre visible en step 1) o Atrás (en otros steps)
                 if (step > 1) {
                     OutlinedButton(
                         onClick = { step-- },
@@ -135,7 +136,16 @@ fun GoalSetupScreen(navController: NavController) {
                         Text(stringResource(R.string.back))
                     }
                 } else {
-                    Spacer(modifier = Modifier.width(1.dp))
+                    // Botón de Cancelar en el primer paso
+                    OutlinedButton(
+                        onClick = { navController.popBackStack() },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = TextSecondary
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
                 
                 Button(

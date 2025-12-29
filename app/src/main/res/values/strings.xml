@@ -195,6 +195,36 @@
     <string name="sign_out_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
     <string name="error_sign_out">Error al cerrar sesión: %1$s</string>
     
+    <!-- Personal Data -->
+    <string name="edit_personal_data">Editar Datos Personales</string>
+    <string name="name">Nombre</string>
+    <string name="personal_data_saved">Datos personales guardados</string>
+    
+    <!-- Support &amp; Legal Content -->
+    <string name="faq_title">Preguntas Frecuentes</string>
+    <string name="faq_q1">¿Cómo registro mis comidas?</string>
+    <string name="faq_a1">Puedes registrar comidas usando la cámara para tomar fotos, por voz describiendo lo que comiste, o manualmente buscando alimentos en nuestra base de datos.</string>
+    <string name="faq_q2">¿Cómo se calculan mis objetivos nutricionales?</string>
+    <string name="faq_a2">Usamos la fórmula de Mifflin-St Jeor junto con tu nivel de actividad para calcular tu TDEE (gasto energético total diario) y ajustamos los macronutrientes según tu objetivo.</string>
+    <string name="faq_q3">¿Qué es el modo sin números?</string>
+    <string name="faq_a3">El modo sin números oculta las cifras de calorías y gramos, mostrando solo indicadores visuales. Es útil para personas que prefieren un enfoque más intuitivo.</string>
+    <string name="faq_q4">¿Mis datos están seguros?</string>
+    <string name="faq_a4">Sí, utilizamos Firebase con autenticación de Google. Tus datos se almacenan de forma segura en la nube.</string>
+    
+    <string name="contact_title">Contacto</string>
+    <string name="contact_email">Email: soporte@fid-app.com</string>
+    <string name="contact_description">¿Tienes preguntas, sugerencias o encontraste un problema? Escríbenos y te responderemos lo antes posible.</string>
+    <string name="send_email">Enviar Email</string>
+    <string name="contact_subject">Contacto desde Fid App</string>
+    
+    <string name="privacy_policy_title">Política de Privacidad</string>
+    <string name="privacy_policy_content">Fid respeta tu privacidad. Recopilamos únicamente la información necesaria para proporcionarte nuestros servicios:\n\n• Datos de cuenta (email, nombre)\n• Información física (edad, peso, altura) para calcular objetivos\n• Registro de comidas y bienestar\n\nNunca vendemos ni compartimos tu información personal con terceros. Tus datos se almacenan de forma segura en Firebase.\n\nPuedes solicitar la eliminación de tus datos en cualquier momento contactándonos.</string>
+    
+    <string name="terms_of_service_title">Términos de Servicio</string>
+    <string name="terms_of_service_content">Al usar Fid, aceptas estos términos:\n\n1. Uso Personal: Fid es para uso personal y no comercial.\n\n2. Información Nutricional: La información proporcionada es orientativa y no sustituye el consejo médico profesional.\n\n3. Cuenta: Eres responsable de mantener la seguridad de tu cuenta.\n\n4. Contenido: No subas contenido inapropiado o ilegal.\n\n5. Modificaciones: Nos reservamos el derecho de modificar estos términos.\n\nÚltima actualización: Diciembre 2025</string>
+    
+    <string name="close">Cerrar</string>
+    
     <!-- Language Settings -->
     <string name="language">Idioma</string>
     <string name="language_spanish">Español</string>

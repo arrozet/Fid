@@ -192,6 +192,36 @@
     <string name="sign_out_confirmation">Are you sure you want to sign out?</string>
     <string name="error_sign_out">Error signing out: %1$s</string>
     
+    <!-- Personal Data -->
+    <string name="edit_personal_data">Edit Personal Data</string>
+    <string name="name">Name</string>
+    <string name="personal_data_saved">Personal data saved</string>
+    
+    <!-- Support &amp; Legal Content -->
+    <string name="faq_title">Frequently Asked Questions</string>
+    <string name="faq_q1">How do I log my meals?</string>
+    <string name="faq_a1">You can log meals using the camera to take photos, by voice describing what you ate, or manually by searching foods in our database.</string>
+    <string name="faq_q2">How are my nutritional goals calculated?</string>
+    <string name="faq_a2">We use the Mifflin-St Jeor formula along with your activity level to calculate your TDEE (Total Daily Energy Expenditure) and adjust macros based on your goal.</string>
+    <string name="faq_q3">What is numberless mode?</string>
+    <string name="faq_a3">Numberless mode hides calorie and gram figures, showing only visual indicators. It\'s useful for people who prefer a more intuitive approach.</string>
+    <string name="faq_q4">Is my data secure?</string>
+    <string name="faq_a4">Yes, we use Firebase with Google authentication. Your data is securely stored in the cloud.</string>
+    
+    <string name="contact_title">Contact</string>
+    <string name="contact_email">Email: support@fid-app.com</string>
+    <string name="contact_description">Have questions, suggestions, or found a bug? Write to us and we\'ll get back to you as soon as possible.</string>
+    <string name="send_email">Send Email</string>
+    <string name="contact_subject">Contact from Fid App</string>
+    
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_content">Fid respects your privacy. We only collect the information necessary to provide our services:\n\n• Account data (email, name)\n• Physical information (age, weight, height) to calculate goals\n• Food and wellness logs\n\nWe never sell or share your personal information with third parties. Your data is securely stored in Firebase.\n\nYou can request deletion of your data at any time by contacting us.</string>
+    
+    <string name="terms_of_service_title">Terms of Service</string>
+    <string name="terms_of_service_content">By using Fid, you agree to these terms:\n\n1. Personal Use: Fid is for personal, non-commercial use.\n\n2. Nutritional Information: Information provided is for guidance only and does not replace professional medical advice.\n\n3. Account: You are responsible for maintaining the security of your account.\n\n4. Content: Do not upload inappropriate or illegal content.\n\n5. Modifications: We reserve the right to modify these terms.\n\nLast updated: December 2025</string>
+    
+    <string name="close">Close</string>
+    
     <!-- Language Settings -->
     <string name="language">Language</string>
     <string name="language_spanish">Español</string>

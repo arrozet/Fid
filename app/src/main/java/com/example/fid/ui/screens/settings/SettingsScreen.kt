@@ -2,6 +2,7 @@ package com.example.fid.ui.screens.settings
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,6 +48,11 @@ fun SettingsScreen(navController: NavController) {
     var user by remember { mutableStateOf<User?>(null) }
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showPersonalDataDialog by remember { mutableStateOf(false) }
+    var showFaqDialog by remember { mutableStateOf(false) }
+    var showContactDialog by remember { mutableStateOf(false) }
+    var showPrivacyDialog by remember { mutableStateOf(false) }
+    var showTermsDialog by remember { mutableStateOf(false) }
     var currentLanguage by remember { mutableStateOf(LocaleHelper.getLanguage(context)) }
     
     LaunchedEffect(Unit) {
@@ -134,13 +140,10 @@ fun SettingsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
             
             SettingsItem(stringResource(R.string.personal_data)) {
-                Toast.makeText(context, "Personal Data", Toast.LENGTH_SHORT).show()
+                showPersonalDataDialog = true
             }
             SettingsItem(stringResource(R.string.my_goals)) {
                 navController.navigate(Screen.GoalSetup.route)
-            }
-            SettingsItem(stringResource(R.string.change_password)) {
-                Toast.makeText(context, "Change Password", Toast.LENGTH_SHORT).show()
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -185,34 +188,21 @@ fun SettingsScreen(navController: NavController) {
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Connectivity Section
-            SectionTitle(stringResource(R.string.connectivity))
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            SettingsItem(stringResource(R.string.integrate_google_fit)) {
-                Toast.makeText(context, context.getString(R.string.integrate_google_fit), Toast.LENGTH_SHORT).show()
-            }
-            SettingsItem(stringResource(R.string.integrate_apple_health)) {
-                Toast.makeText(context, context.getString(R.string.integrate_apple_health), Toast.LENGTH_SHORT).show()
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
             // Support Section
             SectionTitle(stringResource(R.string.support_legal))
             Spacer(modifier = Modifier.height(12.dp))
             
             SettingsItem(stringResource(R.string.faq)) {
-                Toast.makeText(context, context.getString(R.string.faq), Toast.LENGTH_SHORT).show()
+                showFaqDialog = true
             }
             SettingsItem(stringResource(R.string.contact)) {
-                Toast.makeText(context, context.getString(R.string.contact), Toast.LENGTH_SHORT).show()
+                showContactDialog = true
             }
             SettingsItem(stringResource(R.string.privacy_policy)) {
-                Toast.makeText(context, context.getString(R.string.privacy_policy), Toast.LENGTH_SHORT).show()
+                showPrivacyDialog = true
             }
             SettingsItem(stringResource(R.string.terms_of_service)) {
-                Toast.makeText(context, context.getString(R.string.terms_of_service), Toast.LENGTH_SHORT).show()
+                showTermsDialog = true
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -374,6 +364,64 @@ fun SettingsScreen(navController: NavController) {
                 containerColor = DarkCard
             )
         }
+        
+        // Personal Data Dialog
+        if (showPersonalDataDialog) {
+            PersonalDataDialog(
+                user = user,
+                onDismiss = { showPersonalDataDialog = false },
+                onSave = { name, age, height, weight ->
+                    scope.launch {
+                        user?.let { u ->
+                            val updatedUser = u.copy(
+                                name = name,
+                                age = age,
+                                heightCm = height,
+                                currentWeightKg = weight
+                            )
+                            repository.updateUser(updatedUser)
+                            user = updatedUser
+                            Toast.makeText(context, context.getString(R.string.personal_data_saved), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    showPersonalDataDialog = false
+                }
+            )
+        }
+        
+        // FAQ Dialog
+        if (showFaqDialog) {
+            FaqDialog(onDismiss = { showFaqDialog = false })
+        }
+        
+        // Contact Dialog
+        if (showContactDialog) {
+            ContactDialog(
+                onDismiss = { showContactDialog = false },
+                onSendEmail = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:soporte@fid-app.com")
+                        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.contact_subject))
+                    }
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "No email app found", Toast.LENGTH_SHORT).show()
+                    }
+                    showContactDialog = false
+                }
+            )
+        }
+        
+        // Privacy Policy Dialog
+        if (showPrivacyDialog) {
+            PrivacyPolicyDialog(onDismiss = { showPrivacyDialog = false })
+        }
+        
+        // Terms of Service Dialog
+        if (showTermsDialog) {
+            TermsOfServiceDialog(onDismiss = { showTermsDialog = false })
+        }
     }
 }
 
@@ -504,4 +552,302 @@ fun SettingsItemWithValue(title: String, value: String, onClick: () -> Unit) {
         }
     }
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+fun PersonalDataDialog(
+    user: User?,
+    onDismiss: () -> Unit,
+    onSave: (name: String, age: Int, height: Float, weight: Float) -> Unit
+) {
+    var name by remember { mutableStateOf(user?.name ?: "") }
+    var age by remember { mutableStateOf(user?.age?.toString() ?: "") }
+    var height by remember { mutableStateOf(user?.heightCm?.toString() ?: "") }
+    var weight by remember { mutableStateOf(user?.currentWeightKg?.toString() ?: "") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.edit_personal_data),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryGreen,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+                
+                OutlinedTextField(
+                    value = age,
+                    onValueChange = { age = it.filter { c -> c.isDigit() } },
+                    label = { Text(stringResource(R.string.age)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryGreen,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+                
+                OutlinedTextField(
+                    value = height,
+                    onValueChange = { height = it.filter { c -> c.isDigit() || c == '.' } },
+                    label = { Text(stringResource(R.string.height_cm)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryGreen,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+                
+                OutlinedTextField(
+                    value = weight,
+                    onValueChange = { weight = it.filter { c -> c.isDigit() || c == '.' } },
+                    label = { Text(stringResource(R.string.current_weight_kg)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        focusedBorderColor = PrimaryGreen,
+                        unfocusedBorderColor = TextSecondary,
+                        focusedLabelColor = PrimaryGreen,
+                        unfocusedLabelColor = TextSecondary
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val ageInt = age.toIntOrNull() ?: 25
+                    val heightFloat = height.toFloatOrNull() ?: 170f
+                    val weightFloat = weight.toFloatOrNull() ?: 70f
+                    onSave(name, ageInt, heightFloat, weightFloat)
+                }
+            ) {
+                Text(stringResource(R.string.save), color = PrimaryGreen)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = TextSecondary)
+            }
+        },
+        containerColor = DarkCard
+    )
+}
+
+@Composable
+fun FaqDialog(onDismiss: () -> Unit) {
+    val scrollState = rememberScrollState()
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.faq_title),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FaqItem(
+                    question = stringResource(R.string.faq_q1),
+                    answer = stringResource(R.string.faq_a1)
+                )
+                FaqItem(
+                    question = stringResource(R.string.faq_q2),
+                    answer = stringResource(R.string.faq_a2)
+                )
+                FaqItem(
+                    question = stringResource(R.string.faq_q3),
+                    answer = stringResource(R.string.faq_a3)
+                )
+                FaqItem(
+                    question = stringResource(R.string.faq_q4),
+                    answer = stringResource(R.string.faq_a4)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close), color = PrimaryGreen)
+            }
+        },
+        containerColor = DarkCard
+    )
+}
+
+@Composable
+fun FaqItem(question: String, answer: String) {
+    Column {
+        Text(
+            text = question,
+            color = PrimaryGreen,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = answer,
+            color = TextSecondary,
+            fontSize = 13.sp
+        )
+    }
+}
+
+@Composable
+fun ContactDialog(
+    onDismiss: () -> Unit,
+    onSendEmail: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.contact_title),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.contact_description),
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = stringResource(R.string.contact_email),
+                    color = PrimaryGreen,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onSendEmail) {
+                Text(stringResource(R.string.send_email), color = PrimaryGreen)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close), color = TextSecondary)
+            }
+        },
+        containerColor = DarkCard
+    )
+}
+
+@Composable
+fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
+    val scrollState = rememberScrollState()
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.privacy_policy_title),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                Text(
+                    text = stringResource(R.string.privacy_policy_content),
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close), color = PrimaryGreen)
+            }
+        },
+        containerColor = DarkCard
+    )
+}
+
+@Composable
+fun TermsOfServiceDialog(onDismiss: () -> Unit) {
+    val scrollState = rememberScrollState()
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.terms_of_service_title),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                Text(
+                    text = stringResource(R.string.terms_of_service_content),
+                    color = TextSecondary,
+                    fontSize = 13.sp
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close), color = PrimaryGreen)
+            }
+        },
+        containerColor = DarkCard
+    )
 }
