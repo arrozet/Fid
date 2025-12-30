@@ -1,12 +1,18 @@
 package com.example.fid.data.database.entities
 
+import android.content.Context
+import com.example.fid.utils.LocaleHelper
+
 /**
  * FoodEntry entity - used for Firestore database
+ * Supports multiple languages through foodNameEs and foodNameEn fields
  */
 data class FoodEntry(
     val id: Long = 0,
     val userId: Long = 0,
-    val foodName: String = "",
+    val foodName: String = "", // Fallback: se usa español como valor por defecto
+    val foodNameEs: String = "", // Nombre en español
+    val foodNameEn: String = "", // Nombre en inglés
     val amountGrams: Float = 0f,
     val calories: Float = 0f,
     val proteinG: Float = 0f,
@@ -16,5 +22,44 @@ data class FoodEntry(
     val registrationMethod: String = "manual", // "photo", "voice", "manual"
     val verificationLevel: String = "user", // "manufacturer", "government", "community", "user"
     val timestamp: Long = System.currentTimeMillis()
-)
+) {
+    /**
+     * Obtiene el nombre del alimento según el idioma actual del dispositivo
+     */
+    fun getLocalizedFoodName(context: Context): String {
+        val currentLanguage = LocaleHelper.getCurrentLanguage(context)
+        return when (currentLanguage) {
+            "en" -> {
+                // Prioridad: foodNameEn -> foodNameEs -> foodName (para compatibilidad)
+                if (foodNameEn.isNotBlank()) foodNameEn
+                else if (foodNameEs.isNotBlank()) foodNameEs
+                else foodName
+            }
+            else -> {
+                // Prioridad: foodNameEs -> foodNameEn -> foodName (para compatibilidad)
+                if (foodNameEs.isNotBlank()) foodNameEs
+                else if (foodNameEn.isNotBlank()) foodNameEn
+                else foodName
+            }
+        }
+    }
+    
+    /**
+     * Obtiene el nombre del alimento según un idioma específico
+     */
+    fun getNameForLanguage(language: String): String {
+        return when (language) {
+            "en" -> {
+                if (foodNameEn.isNotBlank()) foodNameEn
+                else if (foodNameEs.isNotBlank()) foodNameEs
+                else foodName
+            }
+            else -> {
+                if (foodNameEs.isNotBlank()) foodNameEs
+                else if (foodNameEn.isNotBlank()) foodNameEn
+                else foodName
+            }
+        }
+    }
+}
 

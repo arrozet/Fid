@@ -699,7 +699,9 @@ private suspend fun saveFoodEntry(
         
         val foodEntry = FoodEntry(
             userId = user.id,
-            foodName = foodName,
+            foodName = foodName, // Fallback - asumimos español
+            foodNameEs = foodName, // Guardamos en español (idioma por defecto)
+            foodNameEn = "", // No tenemos traducción disponible desde foto
             amountGrams = amount,
             calories = calories,
             proteinG = protein,

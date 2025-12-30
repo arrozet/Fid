@@ -295,6 +295,8 @@ fun MacroProgressBar(
 
 @Composable
 fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
+    val context = LocalContext.current
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -314,7 +316,7 @@ fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = entry.foodName,
+                            text = entry.getLocalizedFoodName(context),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary

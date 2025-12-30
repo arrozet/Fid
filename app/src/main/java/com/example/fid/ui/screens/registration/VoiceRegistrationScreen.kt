@@ -416,10 +416,13 @@ private fun parseFoodFromText(text: String, userId: Long): FoodEntry {
     // Crear el FoodEntry con valores por defecto
     // En una implementación más avanzada, se podría integrar con una API 
     // de nutrición o una base de datos de alimentos
+    val foodText = text.trim()
     return FoodEntry(
         id = timestamp,
         userId = userId,
-        foodName = text.trim(),
+        foodName = foodText, // Fallback - asumimos español
+        foodNameEs = foodText, // Guardamos en español (idioma por defecto)
+        foodNameEn = "", // No tenemos traducción disponible desde voz
         amountGrams = gramos.toFloat(),
         calories = 0f, // Valores por defecto - se pueden calcular después
         proteinG = 0f,

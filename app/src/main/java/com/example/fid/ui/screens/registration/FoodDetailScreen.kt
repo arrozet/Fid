@@ -294,10 +294,13 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                     scope.launch {
                         try {
                             val user = repository.getCurrentUser()
-                            if (user != null && foodItem != null) {
+                            val currentFoodItem = foodItem // Variable local para smart cast
+                            if (user != null && currentFoodItem != null) {
                                 val foodEntry = FoodEntry(
                                     userId = user.id,
-                                    foodName = foodName,
+                                    foodName = currentFoodItem.nameEs.ifBlank { foodName }, // Fallback a español
+                                    foodNameEs = currentFoodItem.nameEs,
+                                    foodNameEn = currentFoodItem.nameEn,
                                     amountGrams = amountFloat,
                                     calories = totalCalories,
                                     proteinG = totalProtein,

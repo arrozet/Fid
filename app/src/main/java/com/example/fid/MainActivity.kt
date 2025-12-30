@@ -57,6 +57,16 @@ class MainActivity : ComponentActivity() {
         }
         */
         
+        // DESCOMENTA ESTO PARA ACTUALIZAR EL CAMPO 'name' CON EL VALOR DE 'nameEs':
+        // ⚠️ EJECUTA LA APP UNA VEZ CON ESTO DESCOMENTADO, LUEGO VUELVE A COMENTAR
+        /*
+        CoroutineScope(Dispatchers.IO).launch {
+            android.util.Log.d("MainActivity", "Actualizando campo 'name' desde 'nameEs'...")
+            repository.updateFoodItemsNameFromNameEs()
+            android.util.Log.d("MainActivity", "Campo 'name' actualizado correctamente")
+        }
+        */
+        
         if (!hasSeeded) {
             CoroutineScope(Dispatchers.IO).launch {
                 seeder.seedFoodItems()

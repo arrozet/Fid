@@ -941,6 +941,8 @@ fun WellnessCard(title: String, value: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun FoodEntryCard(entry: FoodEntry) {
+    val context = LocalContext.current
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -954,7 +956,7 @@ fun FoodEntryCard(entry: FoodEntry) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = entry.foodName,
+                    text = entry.getLocalizedFoodName(context),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary

@@ -520,6 +520,45 @@ class FirebaseRepository {
         }
     }
     
+    /**
+     * Actualiza el campo 'name' de todos los alimentos con el valor de 'nameEs'
+     * Útil para repoblar el campo deprecated 'name' con los valores en español
+     */
+    suspend fun updateFoodItemsNameFromNameEs() {
+        try {
+            android.util.Log.d("FirebaseRepository", "Iniciando actualización de campo 'name' desde 'nameEs'...")
+            
+            val snapshot = firestore.collection("food_items")
+                .get()
+                .await()
+            
+            var updatedCount = 0
+            var skippedCount = 0
+            
+            snapshot.documents.forEach { doc ->
+                val data = doc.data
+                val nameEs = data?.get("nameEs") as? String ?: ""
+                
+                if (nameEs.isNotBlank()) {
+                    firestore.collection("food_items")
+                        .document(doc.id)
+                        .update("name", nameEs)
+                        .await()
+                    updatedCount++
+                    android.util.Log.d("FirebaseRepository", "Actualizado: ${doc.id} -> name = '$nameEs'")
+                } else {
+                    skippedCount++
+                    android.util.Log.w("FirebaseRepository", "Omitido: ${doc.id} (nameEs está vacío)")
+                }
+            }
+            
+            android.util.Log.d("FirebaseRepository", "Actualización completada: $updatedCount alimentos actualizados, $skippedCount omitidos")
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error actualizando campo 'name': ${e.message}")
+            throw e
+        }
+    }
+    
     // Función para limpiar TODOS los registros de comidas (opcional)
     suspend fun cleanAllFoodEntries(userId: Long) {
         try {
