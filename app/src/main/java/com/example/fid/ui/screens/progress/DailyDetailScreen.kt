@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -204,6 +205,42 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                         goal = s.carbGoal,
                         color = CarbColor
                     )
+                    
+                    // Wellness info (sleep and water)
+                    if (s.sleepHours > 0f || s.waterIntakeMl > 0f) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        Text(
+                            text = stringResource(R.string.wellness_index),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            if (s.sleepHours > 0f) {
+                                WellnessInfoCard(
+                                    emoji = "😴",
+                                    label = stringResource(R.string.sleep),
+                                    value = String.format(Locale.getDefault(), "%.1f h", s.sleepHours),
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            if (s.waterIntakeMl > 0f) {
+                                WellnessInfoCard(
+                                    emoji = "💧",
+                                    label = stringResource(R.string.hydration),
+                                    value = String.format(Locale.getDefault(), "%.1f L", s.waterIntakeMl / 1000f),
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -396,6 +433,46 @@ fun getMealTypeNameLocalized(mealType: String): String {
         "dinner" -> stringResource(R.string.meal_dinner)
         "snack" -> stringResource(R.string.meal_snack)
         else -> stringResource(R.string.meal_food)
+    }
+}
+
+@Composable
+fun WellnessInfoCard(
+    emoji: String,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .height(100.dp)
+            .background(DarkCard, RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = emoji,
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = value,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                color = TextSecondary,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

@@ -608,6 +608,51 @@ fun DailySummaryCard(
                     modifier = Modifier.weight(1f)
                 )
             }
+            
+            // Wellness info (sleep and water)
+            if (summary.sleepHours > 0f || summary.waterIntakeMl > 0f) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (summary.sleepHours > 0f) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = "😴",
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "${summary.sleepHours.toInt()}h",
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                    if (summary.waterIntakeMl > 0f) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = "💧",
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = String.format(Locale.getDefault(), "%.1fL", summary.waterIntakeMl / 1000f),
+                                fontSize = 12.sp,
+                                color = TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
