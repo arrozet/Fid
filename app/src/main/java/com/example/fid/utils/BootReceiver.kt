@@ -14,13 +14,18 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d("BootReceiver", "Device booted, rescheduling notifications")
             
-            val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
-            val notificationsEnabled = prefs.getBoolean("enabled", true)
-            
-            if (notificationsEnabled) {
-                val scheduler = NotificationScheduler(context)
-                scheduler.scheduleAllNotifications()
-                Log.d("BootReceiver", "Notifications rescheduled successfully")
+            try {
+                val prefsName = NotificationScheduler.getPreferencesName(context)
+                val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+                val notificationsEnabled = prefs.getBoolean("enabled", true)
+                
+                if (notificationsEnabled) {
+                    val scheduler = NotificationScheduler(context)
+                    scheduler.scheduleAllNotifications()
+                    Log.d("BootReceiver", "Notifications rescheduled successfully")
+                }
+            } catch (e: Exception) {
+                Log.e("BootReceiver", "Error rescheduling notifications: ${e.message}")
             }
         }
     }

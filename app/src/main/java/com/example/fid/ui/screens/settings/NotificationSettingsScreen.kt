@@ -39,8 +39,13 @@ fun NotificationSettingsScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val notificationScheduler = remember { NotificationScheduler(context) }
     
-    // Notification preferences
-    val prefs = remember { context.getSharedPreferences("fid_notifications", android.content.Context.MODE_PRIVATE) }
+    // Notification preferences - específicas por usuario
+    val prefs = remember { 
+        context.getSharedPreferences(
+            NotificationScheduler.getPreferencesName(context), 
+            android.content.Context.MODE_PRIVATE
+        ) 
+    }
     var notificationsEnabled by remember { mutableStateOf(prefs.getBoolean("enabled", true)) }
     var mealRemindersEnabled by remember { mutableStateOf(prefs.getBoolean("meal_reminders", true)) }
     var hydrationRemindersEnabled by remember { mutableStateOf(prefs.getBoolean("hydration_reminders", true)) }

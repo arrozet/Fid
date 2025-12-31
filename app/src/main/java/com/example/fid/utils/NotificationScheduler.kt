@@ -5,6 +5,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.example.fid.data.repository.FirebaseRepository
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
 import java.util.*
 
 /**
@@ -13,7 +17,7 @@ import java.util.*
 class NotificationScheduler(private val context: Context) {
     
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences(getPreferencesName(context), Context.MODE_PRIVATE)
     
     companion object {
         private const val REQUEST_CODE_BREAKFAST = 1001
@@ -23,6 +27,30 @@ class NotificationScheduler(private val context: Context) {
         private const val REQUEST_CODE_HYDRATION_2 = 1005
         private const val REQUEST_CODE_HYDRATION_3 = 1006
         private const val REQUEST_CODE_DAILY_SUMMARY = 1007
+        
+        /**
+         * Gets the SharedPreferences name for the current user
+         * If no user is logged in, uses a default name
+         */
+        fun getPreferencesName(context: Context): String {
+            return try {
+                val currentUserEmail = Firebase.auth.currentUser?.email
+                if (currentUserEmail != null) {
+                    val repository = FirebaseRepository()
+                    val user = runBlocking { repository.getUserByEmail(currentUserEmail) }
+                    if (user != null) {
+                        "fid_notifications_${user.id}"
+                    } else {
+                        "fid_notifications"
+                    }
+                } else {
+                    "fid_notifications"
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("NotificationScheduler", "Error obteniendo ID de usuario: ${e.message}")
+                "fid_notifications"
+            }
+        }
     }
     
     fun scheduleAllNotifications() {

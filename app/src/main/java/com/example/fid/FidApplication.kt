@@ -25,12 +25,18 @@ class FidApplication : Application() {
         // Inicializar canal de notificaciones
         NotificationHelper(this)
         
-        // Programar notificaciones si están habilitadas
-        val prefs = getSharedPreferences("fid_notifications", MODE_PRIVATE)
-        val notificationsEnabled = prefs.getBoolean("enabled", true)
-        if (notificationsEnabled) {
-            val scheduler = NotificationScheduler(this)
-            scheduler.scheduleAllNotifications()
+        // Programar notificaciones si están habilitadas (solo si hay usuario logueado)
+        // Nota: En el arranque puede que aún no haya usuario, así que esto se manejará cuando el usuario inicie sesión
+        try {
+            val prefsName = NotificationScheduler.getPreferencesName(this)
+            val prefs = getSharedPreferences(prefsName, MODE_PRIVATE)
+            val notificationsEnabled = prefs.getBoolean("enabled", true)
+            if (notificationsEnabled) {
+                val scheduler = NotificationScheduler(this)
+                scheduler.scheduleAllNotifications()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FidApplication", "Error programando notificaciones al arrancar: ${e.message}")
         }
     }
 }

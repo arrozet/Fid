@@ -73,7 +73,7 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun rescheduleNotification(context: Context, notificationType: String) {
         android.util.Log.d("NotificationReceiver", "Reprogramando $notificationType para mañana...")
         
-        val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", true)) {
             android.util.Log.d("NotificationReceiver", "Notificaciones desactivadas, no reprogramar")
             return
@@ -121,7 +121,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
     
     private fun showMealNotification(context: Context, mealType: String) {
-        val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("meal_reminders", true)) {
             return
         }
@@ -147,7 +147,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
     
     private fun showHydrationNotification(context: Context) {
-        val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("hydration_reminders", true)) {
             return
         }
@@ -159,7 +159,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
     
     private fun showDailySummaryNotification(context: Context) {
-        val prefs = context.getSharedPreferences("fid_notifications", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
         if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("daily_summary", true)) {
             return
         }
