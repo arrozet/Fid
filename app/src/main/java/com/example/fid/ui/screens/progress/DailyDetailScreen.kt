@@ -24,8 +24,10 @@ import androidx.navigation.NavController
 import com.example.fid.R
 import com.example.fid.data.database.entities.DailySummary
 import com.example.fid.data.database.entities.FoodEntry
+import com.example.fid.data.database.entities.User
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.UnitConverter
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,9 +43,10 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
     var summary by remember { mutableStateOf<DailySummary?>(null) }
     var foodEntries by remember { mutableStateOf<List<FoodEntry>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var user by remember { mutableStateOf<User?>(null) }
     
     LaunchedEffect(date) {
-        val user = repository.getCurrentUser()
+        user = repository.getCurrentUser()
         user?.let { u ->
             // Calcular inicio y fin del día
             val calendar = Calendar.getInstance()
@@ -277,8 +280,9 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                         }
                     }
                 } else {
+                    val measurementUnit = user?.measurementUnit ?: "metric"
                     foodEntries.forEach { entry ->
-                        FoodEntryDetailCard(entry, timeFormatter)
+                        FoodEntryDetailCard(entry, timeFormatter, measurementUnit)
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
@@ -331,8 +335,9 @@ fun MacroProgressBar(
 }
 
 @Composable
-fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
+fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat, unit: String = "metric") {
     val context = LocalContext.current
+    val unitLabel = UnitConverter.getGramsUnitLabel(unit)
     
     Box(
         modifier = Modifier
@@ -372,9 +377,9 @@ fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat) {
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     NutrientChip("${entry.calories.toInt()} kcal", PrimaryGreen)
-                    NutrientChip("P: ${entry.proteinG.toInt()}g", ProteinColor)
-                    NutrientChip("G: ${entry.fatG.toInt()}g", FatColor)
-                    NutrientChip("C: ${entry.carbG.toInt()}g", CarbColor)
+                    NutrientChip("P: ${UnitConverter.convertGrams(entry.proteinG, unit).toInt()}$unitLabel", ProteinColor)
+                    NutrientChip("G: ${UnitConverter.convertGrams(entry.fatG, unit).toInt()}$unitLabel", FatColor)
+                    NutrientChip("C: ${UnitConverter.convertGrams(entry.carbG, unit).toInt()}$unitLabel", CarbColor)
                 }
             }
             

@@ -91,7 +91,8 @@ fun AuthScreen(navController: NavController) {
                                     proteinGoalG = 150f,
                                     fatGoalG = 65f,
                                     carbGoalG = 250f,
-                                    numberlessMode = false
+                                    numberlessMode = false,
+                                    measurementUnit = "metric"
                                 )
                                 repository.insertUser(newUser)
                                 

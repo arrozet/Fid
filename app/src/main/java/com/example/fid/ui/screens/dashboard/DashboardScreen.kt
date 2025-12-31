@@ -37,6 +37,7 @@ import com.example.fid.data.database.entities.WellnessEntry
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.UnitConverter
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -159,11 +160,14 @@ fun DashboardScreen(navController: NavController) {
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
+                val measurementUnit = user?.measurementUnit ?: "metric"
+                
                 MacroProgressBar(
                     label = stringResource(R.string.proteins),
                     current = totalProtein,
                     goal = user?.proteinGoalG ?: 150f,
-                    color = ProteinColor
+                    color = ProteinColor,
+                    unit = measurementUnit
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -172,7 +176,8 @@ fun DashboardScreen(navController: NavController) {
                     label = stringResource(R.string.fats),
                     current = totalFat,
                     goal = user?.fatGoalG ?: 65f,
-                    color = FatColor
+                    color = FatColor,
+                    unit = measurementUnit
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -181,7 +186,8 @@ fun DashboardScreen(navController: NavController) {
                     label = stringResource(R.string.carbs),
                     current = totalCarbs,
                     goal = user?.carbGoalG ?: 250f,
-                    color = CarbColor
+                    color = CarbColor,
+                    unit = measurementUnit
                 )
                 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -376,8 +382,17 @@ fun CaloriesRing(consumed: Float, goal: Float) {
 }
 
 @Composable
-fun MacroProgressBar(label: String, current: Float, goal: Float, color: androidx.compose.ui.graphics.Color) {
+fun MacroProgressBar(
+    label: String, 
+    current: Float, 
+    goal: Float, 
+    color: androidx.compose.ui.graphics.Color,
+    unit: String = "metric"
+) {
     val progress = (current / goal).coerceIn(0f, 1f)
+    val displayCurrent = UnitConverter.convertGrams(current, unit)
+    val displayGoal = UnitConverter.convertGrams(goal, unit)
+    val unitLabel = UnitConverter.getGramsUnitLabel(unit)
     
     Column {
         Row(
@@ -390,7 +405,7 @@ fun MacroProgressBar(label: String, current: Float, goal: Float, color: androidx
                 color = TextPrimary
             )
             Text(
-                text = "${current.toInt()}g / ${goal.toInt()}g",
+                text = "${displayCurrent.toInt()}$unitLabel / ${displayGoal.toInt()}$unitLabel",
                 fontSize = 14.sp,
                 color = TextSecondary
             )

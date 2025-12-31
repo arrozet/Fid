@@ -141,6 +141,17 @@ class FirebaseRepository {
                 // Buscar el usuario por email en Firestore
                 val user = getUserByEmail(currentUserEmail)
                 android.util.Log.d("FirebaseRepository", "getCurrentUser devuelve: ${user?.name} (age=${user?.age})")
+                
+                // Migración: Si el usuario no tiene measurementUnit, agregarlo
+                user?.let { u ->
+                    if (u.measurementUnit.isEmpty()) {
+                        android.util.Log.d("FirebaseRepository", "Migrando usuario: agregando measurementUnit")
+                        val migratedUser = u.copy(measurementUnit = "metric")
+                        updateUser(migratedUser)
+                        return migratedUser
+                    }
+                }
+                
                 user
             } else {
                 // NO hay usuario autenticado - devolver null para forzar login

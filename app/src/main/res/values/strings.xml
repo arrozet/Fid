@@ -246,6 +246,12 @@
     <string name="language_changed">Idioma cambiado. La aplicación se reiniciará.</string>
     <string name="select_language">Seleccionar idioma</string>
     
+    <!-- Measurement Units -->
+    <string name="select_measurement_unit">Seleccionar unidades de medida</string>
+    <string name="metric_system">Métrico (kg, cm)</string>
+    <string name="imperial_system">Imperial (lb, ft)</string>
+    <string name="measurement_unit_changed">Unidades de medida actualizadas</string>
+    
     <!-- Navigation -->
     <string name="home">Inicio</string>
     

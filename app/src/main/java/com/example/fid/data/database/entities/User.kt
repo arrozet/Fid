@@ -23,6 +23,7 @@ data class User(
     val carbGoalG: Float = 0f,
     val waterGoalMl: Float = 2500f, // Objetivo de hidratación diaria en ml (por defecto 2.5L)
     val numberlessMode: Boolean = false,
+    val measurementUnit: String = "metric", // "metric" o "imperial"
     val createdAt: Long = System.currentTimeMillis()
 )
 

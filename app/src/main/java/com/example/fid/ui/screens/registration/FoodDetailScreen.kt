@@ -27,6 +27,7 @@ import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.UnitConverter
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,11 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
     var selectedUnit by remember { mutableStateOf("grams") }
     var foodItem by remember { mutableStateOf<FoodItem?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var user by remember { mutableStateOf<com.example.fid.data.database.entities.User?>(null) }
+    
+    LaunchedEffect(Unit) {
+        user = repository.getCurrentUser()
+    }
     
     // Obtener datos del alimento desde Firestore
     LaunchedEffect(foodId) {
@@ -280,11 +286,12 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Macros
-                MacroInfoRow(stringResource(R.string.proteins), totalProtein, ProteinColor)
+                val measurementUnit = user?.measurementUnit ?: "metric"
+                MacroInfoRow(stringResource(R.string.proteins), totalProtein, ProteinColor, measurementUnit)
                 Spacer(modifier = Modifier.height(12.dp))
-                MacroInfoRow(stringResource(R.string.fats), totalFat, FatColor)
+                MacroInfoRow(stringResource(R.string.fats), totalFat, FatColor, measurementUnit)
                 Spacer(modifier = Modifier.height(12.dp))
-                MacroInfoRow(stringResource(R.string.carbs), totalCarbs, CarbColor)
+                MacroInfoRow(stringResource(R.string.carbs), totalCarbs, CarbColor, measurementUnit)
                 
                 Spacer(modifier = Modifier.height(40.dp))
                 
@@ -382,7 +389,10 @@ fun VerificationBadge(level: String) {
 }
 
 @Composable
-fun MacroInfoRow(label: String, amount: Float, color: androidx.compose.ui.graphics.Color) {
+fun MacroInfoRow(label: String, amount: Float, color: androidx.compose.ui.graphics.Color, unit: String = "metric") {
+    val displayAmount = UnitConverter.convertGrams(amount, unit)
+    val unitLabel = UnitConverter.getGramsUnitLabel(unit)
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -409,7 +419,7 @@ fun MacroInfoRow(label: String, amount: Float, color: androidx.compose.ui.graphi
             }
             
             Text(
-                text = "${amount.toInt()}g",
+                text = "${displayAmount.toInt()}$unitLabel",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = color

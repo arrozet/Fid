@@ -31,6 +31,7 @@ import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.navigation.Screen
 import com.example.fid.ui.theme.*
 import com.example.fid.utils.LocaleHelper
+import com.example.fid.utils.UnitConverter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.ktx.auth
@@ -48,6 +49,7 @@ fun SettingsScreen(navController: NavController) {
     var user by remember { mutableStateOf<User?>(null) }
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showMeasurementUnitDialog by remember { mutableStateOf(false) }
     var showPersonalDataDialog by remember { mutableStateOf(false) }
     var showFaqDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
@@ -183,9 +185,16 @@ fun SettingsScreen(navController: NavController) {
                 onClick = { showLanguageDialog = true }
             )
             
-            SettingsItem(stringResource(R.string.measurement_units)) {
-                Toast.makeText(context, context.getString(R.string.measurement_units), Toast.LENGTH_SHORT).show()
+            // Measurement units selector
+            val measurementUnitDisplay = when (user?.measurementUnit) {
+                "imperial" -> "Imperial (lb, ft)"
+                else -> "Métrico (kg, cm)"
             }
+            SettingsItemWithValue(
+                title = stringResource(R.string.measurement_units),
+                value = measurementUnitDisplay,
+                onClick = { showMeasurementUnitDialog = true }
+            )
             SettingsItem(stringResource(R.string.notifications)) {
                 navController.navigate(Screen.NotificationSettings.route)
             }
@@ -359,6 +368,74 @@ fun SettingsScreen(navController: NavController) {
                 confirmButton = {},
                 dismissButton = {
                     TextButton(onClick = { showLanguageDialog = false }) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = PrimaryGreen
+                        )
+                    }
+                },
+                containerColor = DarkCard
+            )
+        }
+        
+        // Measurement Unit selection dialog
+        if (showMeasurementUnitDialog) {
+            AlertDialog(
+                onDismissRequest = { showMeasurementUnitDialog = false },
+                title = {
+                    Text(
+                        text = stringResource(R.string.select_measurement_unit),
+                        color = TextPrimary
+                    )
+                },
+                text = {
+                    Column {
+                        listOf(
+                            "metric" to R.string.metric_system,
+                            "imperial" to R.string.imperial_system
+                        ).forEach { (unitCode, stringRes) ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        scope.launch {
+                                            user?.let { u ->
+                                                val updatedUser = u.copy(measurementUnit = unitCode)
+                                                repository.updateUser(updatedUser)
+                                                user = updatedUser
+                                                Toast.makeText(
+                                                    context,
+                                                    context.getString(R.string.measurement_unit_changed),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                        showMeasurementUnitDialog = false
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = user?.measurementUnit == unitCode,
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = PrimaryGreen,
+                                        unselectedColor = TextSecondary
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(stringRes),
+                                    fontSize = 16.sp,
+                                    color = if (user?.measurementUnit == unitCode) PrimaryGreen else TextPrimary
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showMeasurementUnitDialog = false }) {
                         Text(
                             text = stringResource(R.string.cancel),
                             color = PrimaryGreen
@@ -564,10 +641,20 @@ fun PersonalDataDialog(
     onDismiss: () -> Unit,
     onSave: (name: String, age: Int, height: Float, weight: Float) -> Unit
 ) {
+    val measurementUnit = user?.measurementUnit ?: "metric"
+    
+    // Convertir valores iniciales a la unidad de medida del usuario
+    val initialHeight = user?.heightCm?.let { 
+        UnitConverter.convertHeight(it, measurementUnit) 
+    } ?: 0f
+    val initialWeight = user?.currentWeightKg?.let { 
+        UnitConverter.convertWeight(it, measurementUnit) 
+    } ?: 0f
+    
     var name by remember { mutableStateOf(user?.name ?: "") }
     var age by remember { mutableStateOf(user?.age?.toString() ?: "") }
-    var height by remember { mutableStateOf(user?.heightCm?.toString() ?: "") }
-    var weight by remember { mutableStateOf(user?.currentWeightKg?.toString() ?: "") }
+    var height by remember { mutableStateOf(if (initialHeight > 0) initialHeight.toInt().toString() else "") }
+    var weight by remember { mutableStateOf(if (initialWeight > 0) "%.1f".format(initialWeight) else "") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -618,7 +705,10 @@ fun PersonalDataDialog(
                 OutlinedTextField(
                     value = height,
                     onValueChange = { height = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text(stringResource(R.string.height_cm)) },
+                    label = { 
+                        val heightLabel = if (measurementUnit == "imperial") "Altura (in)" else stringResource(R.string.height_cm)
+                        Text(heightLabel) 
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -634,7 +724,10 @@ fun PersonalDataDialog(
                 OutlinedTextField(
                     value = weight,
                     onValueChange = { weight = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text(stringResource(R.string.current_weight_kg)) },
+                    label = { 
+                        val weightLabel = if (measurementUnit == "imperial") "Peso (lb)" else stringResource(R.string.current_weight_kg)
+                        Text(weightLabel) 
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -652,9 +745,14 @@ fun PersonalDataDialog(
             TextButton(
                 onClick = {
                     val ageInt = age.toIntOrNull() ?: 25
-                    val heightFloat = height.toFloatOrNull() ?: 170f
-                    val weightFloat = weight.toFloatOrNull() ?: 70f
-                    onSave(name, ageInt, heightFloat, weightFloat)
+                    val heightInput = height.toFloatOrNull() ?: if (measurementUnit == "imperial") 67f else 170f
+                    val weightInput = weight.toFloatOrNull() ?: if (measurementUnit == "imperial") 154f else 70f
+                    
+                    // Convertir de vuelta a métrico para guardar en BD
+                    val heightCm = UnitConverter.convertHeightToMetric(heightInput, measurementUnit)
+                    val weightKg = UnitConverter.convertWeightToMetric(weightInput, measurementUnit)
+                    
+                    onSave(name, ageInt, heightCm, weightKg)
                 }
             ) {
                 Text(stringResource(R.string.save), color = PrimaryGreen)
