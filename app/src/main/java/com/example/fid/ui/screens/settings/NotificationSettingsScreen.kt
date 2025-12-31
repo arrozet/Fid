@@ -280,71 +280,35 @@ fun NotificationSettingsScreen(navController: NavController) {
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Test Notification Buttons
+            // Test Notification Button
             if (notificationsEnabled) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Button(
+                    onClick = {
+                        scope.launch {
+                            android.util.Log.d("NotificationSettings", "Probando notificación...")
+                            val notificationHelper = com.example.fid.utils.NotificationHelper(context)
+                            notificationHelper.showMealReminder("desayuno")
+                            android.widget.Toast.makeText(
+                                context,
+                                context.getString(R.string.test_notification_sent),
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PrimaryGreen,
+                        contentColor = DarkBackground
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                android.util.Log.d("NotificationSettings", "Probando notificación directa...")
-                                val notificationHelper = com.example.fid.utils.NotificationHelper(context)
-                                notificationHelper.showMealReminder("desayuno")
-                                android.widget.Toast.makeText(
-                                    context,
-                                    context.getString(R.string.test_notification_sent),
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PrimaryGreen,
-                            contentColor = DarkBackground
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.test_notification),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                android.util.Log.d("NotificationSettings", "Probando receiver directamente...")
-                                val intent = android.content.Intent(context, com.example.fid.utils.NotificationReceiver::class.java).apply {
-                                    putExtra("notification_type", "meal_lunch")
-                                }
-                                context.sendBroadcast(intent)
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "Receiver probado",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PrimaryGreen.copy(alpha = 0.7f),
-                            contentColor = DarkBackground
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Test Receiver",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.test_notification),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
             
