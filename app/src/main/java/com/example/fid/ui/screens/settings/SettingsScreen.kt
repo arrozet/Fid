@@ -187,7 +187,7 @@ fun SettingsScreen(navController: NavController) {
                 Toast.makeText(context, context.getString(R.string.measurement_units), Toast.LENGTH_SHORT).show()
             }
             SettingsItem(stringResource(R.string.notifications)) {
-                Toast.makeText(context, context.getString(R.string.notifications), Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.NotificationSettings.route)
             }
             
             Spacer(modifier = Modifier.height(24.dp))

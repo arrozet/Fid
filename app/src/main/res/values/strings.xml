@@ -304,6 +304,34 @@
     <string name="notification_meal_reminder_text">No olvides registrar tu %1$s</string>
     <string name="notification_progress_title">Actualización de progreso</string>
     <string name="notification_motivational_title">¡Sigue así!</string>
+    <string name="notification_hydration_title">💧 Hora de hidratarte</string>
+    <string name="notification_hydration_text">Recuerda beber agua para mantenerte saludable</string>
+    <string name="notification_summary_title">📊 Resumen del día</string>
+    <string name="notification_summary_text">Revisa tu progreso de hoy en Fid</string>
+    
+    <!-- Notification Settings -->
+    <string name="enable_notifications">Activar Notificaciones</string>
+    <string name="enable_notifications_desc">Recibe recordatorios y actualizaciones</string>
+    <string name="meal_reminders">Recordatorios de Comidas</string>
+    <string name="meal_reminders_desc">Te recordamos registrar tus comidas</string>
+    <string name="hydration_reminders">Recordatorios de Hidratación</string>
+    <string name="hydration_reminders_desc">Te recordamos beber agua regularmente</string>
+    <string name="daily_summary">Resumen Diario</string>
+    <string name="daily_summary_desc">Resumen de tu progreso diario</string>
+    <string name="motivational_messages">Mensajes Motivacionales</string>
+    <string name="motivational_messages_desc">Recibe ánimos cuando alcances tus metas</string>
+    <string name="breakfast_time">Hora del Desayuno</string>
+    <string name="lunch_time">Hora del Almuerzo</string>
+    <string name="dinner_time">Hora de la Cena</string>
+    <string name="summary_time">Hora del Resumen</string>
+    <string name="select_time">Seleccionar Hora</string>
+    <string name="breakfast">desayuno</string>
+    <string name="lunch">almuerzo</string>
+    <string name="dinner">cena</string>
+    <string name="meal">comida</string>
+    <string name="motivation">Motivación</string>
+    <string name="test_notification">Probar Notificación</string>
+    <string name="test_notification_sent">Notificación de prueba enviada</string>
     
     <!-- Success Messages -->
     <string name="success_food_added">Alimento añadido correctamente</string>

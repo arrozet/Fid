@@ -301,6 +301,34 @@
     <string name="notification_meal_reminder_text">Don\'t forget to log your %1$s</string>
     <string name="notification_progress_title">Progress update</string>
     <string name="notification_motivational_title">Keep it up!</string>
+    <string name="notification_hydration_title">💧 Time to hydrate</string>
+    <string name="notification_hydration_text">Remember to drink water to stay healthy</string>
+    <string name="notification_summary_title">📊 Daily Summary</string>
+    <string name="notification_summary_text">Review your progress today in Fid</string>
+    
+    <!-- Notification Settings -->
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="enable_notifications_desc">Receive reminders and updates</string>
+    <string name="meal_reminders">Meal Reminders</string>
+    <string name="meal_reminders_desc">We\'ll remind you to log your meals</string>
+    <string name="hydration_reminders">Hydration Reminders</string>
+    <string name="hydration_reminders_desc">We\'ll remind you to drink water regularly</string>
+    <string name="daily_summary">Daily Summary</string>
+    <string name="daily_summary_desc">Daily summary of your progress</string>
+    <string name="motivational_messages">Motivational Messages</string>
+    <string name="motivational_messages_desc">Receive encouragement when you reach your goals</string>
+    <string name="breakfast_time">Breakfast Time</string>
+    <string name="lunch_time">Lunch Time</string>
+    <string name="dinner_time">Dinner Time</string>
+    <string name="summary_time">Summary Time</string>
+    <string name="select_time">Select Time</string>
+    <string name="breakfast">breakfast</string>
+    <string name="lunch">lunch</string>
+    <string name="dinner">dinner</string>
+    <string name="meal">meal</string>
+    <string name="motivation">Motivation</string>
+    <string name="test_notification">Test Notification</string>
+    <string name="test_notification_sent">Test notification sent</string>
     
     <!-- Success Messages -->
     <string name="success_food_added">Food added successfully</string>

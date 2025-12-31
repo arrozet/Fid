@@ -22,6 +22,7 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object CustomFoods : Screen("custom_foods")
+    object NotificationSettings : Screen("notification_settings")
 }
 
 @Composable
@@ -81,6 +82,10 @@ fun NavGraph(
         
         composable(Screen.CustomFoods.route) {
             com.example.fid.ui.screens.settings.CustomFoodsScreen(navController)
+        }
+        
+        composable(Screen.NotificationSettings.route) {
+            com.example.fid.ui.screens.settings.NotificationSettingsScreen(navController)
         }
     }
 }
