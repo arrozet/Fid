@@ -21,6 +21,7 @@ sealed class Screen(val route: String) {
         fun createRoute(date: Long) = "daily_detail/$date"
     }
     object Settings : Screen("settings")
+    object CustomFoods : Screen("custom_foods")
 }
 
 @Composable
@@ -76,6 +77,10 @@ fun NavGraph(
         
         composable(Screen.Settings.route) {
             com.example.fid.ui.screens.settings.SettingsScreen(navController)
+        }
+        
+        composable(Screen.CustomFoods.route) {
+            com.example.fid.ui.screens.settings.CustomFoodsScreen(navController)
         }
     }
 }

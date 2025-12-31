@@ -18,7 +18,8 @@ data class FoodItem(
     val carbPer100g: Float = 0f,
     val verificationLevel: String = "user",
     val isFrequent: Boolean = false,
-    val lastUsed: Long? = null
+    val lastUsed: Long? = null,
+    val createdByUserId: Long? = null // null = comida global, userId = comida personalizada
 ) {
     /**
      * Obtiene el nombre del alimento según el idioma actual del dispositivo

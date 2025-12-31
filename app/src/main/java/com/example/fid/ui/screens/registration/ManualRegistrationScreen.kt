@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -35,10 +36,28 @@ fun ManualRegistrationScreen(navController: NavController) {
     val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     
+    var currentUser by remember { mutableStateOf<com.example.fid.data.database.entities.User?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
     var frequentFoods by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
     var suggestedFoods by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
+    var customFoods by remember { mutableStateOf<List<FoodItem>>(emptyList()) }
+    var showAddCustomFoodDialog by remember { mutableStateOf(false) }
+    
+    // Obtener usuario actual
+    LaunchedEffect(Unit) {
+        currentUser = repository.getCurrentUser()
+    }
+    
+    // Obtener comidas personalizadas
+    LaunchedEffect(currentUser) {
+        currentUser?.let { user ->
+            repository.getCustomFoodItems(user.id).collect { foods ->
+                android.util.Log.d("ManualRegistration", "Comidas personalizadas obtenidas: ${foods.size}")
+                customFoods = foods
+            }
+        }
+    }
     
     LaunchedEffect(Unit) {
         // Obtener alimentos frecuentes
@@ -61,11 +80,11 @@ fun ManualRegistrationScreen(navController: NavController) {
         suggestedFoods = suggestions
     }
     
-    LaunchedEffect(searchQuery) {
+    LaunchedEffect(searchQuery, currentUser) {
         if (searchQuery.isNotEmpty()) {
             val currentLanguage = LocaleHelper.getCurrentLanguage(context)
             android.util.Log.d("ManualRegistration", "Buscando alimentos con query: '$searchQuery' en idioma: $currentLanguage")
-            repository.searchFoodItems(searchQuery, currentLanguage).collect { foods ->
+            repository.searchFoodItems(searchQuery, currentLanguage, currentUser?.id).collect { foods ->
                 android.util.Log.d("ManualRegistration", "Resultados de búsqueda obtenidos: ${foods.size}")
                 foods.forEach { food ->
                     android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
@@ -138,6 +157,70 @@ fun ManualRegistrationScreen(navController: NavController) {
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp)
                 ) {
+                    // Mis Comidas (Custom Foods)
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.my_foods),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            IconButton(
+                                onClick = { showAddCustomFoodDialog = true }
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.add_custom_food),
+                                    tint = PrimaryGreen
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    
+                    item {
+                        if (customFoods.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp)
+                                    .background(DarkCard, RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.no_custom_foods),
+                                    color = TextSecondary,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        } else {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(customFoods.size) { index ->
+                                    val food = customFoods[index]
+                                    FrequentFoodCard(food) {
+                                        android.util.Log.d("ManualRegistration", "Clic en comida personalizada: ${food.getLocalizedName(context)}, ID: ${food.id}")
+                                        if (food.id > 0) {
+                                            val route = Screen.FoodDetail.createRoute(food.id)
+                                            android.util.Log.d("ManualRegistration", "Navegando a: $route")
+                                            navController.navigate(route)
+                                        } else {
+                                            android.util.Log.e("ManualRegistration", "ERROR: ID inválido para alimento: ${food.getLocalizedName(context)}")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    
                     item {
                         Text(
                             text = stringResource(R.string.frequent_recent),
@@ -255,6 +338,26 @@ fun ManualRegistrationScreen(navController: NavController) {
                     }
                 }
             }
+        }
+        
+        // Diálogo para agregar comida personalizada
+        if (showAddCustomFoodDialog) {
+            AddCustomFoodDialog(
+                onDismiss = { showAddCustomFoodDialog = false },
+                onConfirm = { foodItem ->
+                    scope.launch {
+                        currentUser?.let { user ->
+                            try {
+                                repository.insertCustomFoodItem(foodItem, user.id)
+                                android.util.Log.d("ManualRegistration", "Comida personalizada creada exitosamente")
+                            } catch (e: Exception) {
+                                android.util.Log.e("ManualRegistration", "Error creando comida personalizada: ${e.message}")
+                            }
+                        }
+                    }
+                    showAddCustomFoodDialog = false
+                }
+            )
         }
     }
 }
@@ -403,5 +506,165 @@ fun FoodSearchResultCard(food: FoodItem, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddCustomFoodDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (FoodItem) -> Unit
+) {
+    var nameEs by remember { mutableStateOf("") }
+    var nameEn by remember { mutableStateOf("") }
+    var calories by remember { mutableStateOf("") }
+    var protein by remember { mutableStateOf("") }
+    var fat by remember { mutableStateOf("") }
+    var carbs by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.add_custom_food),
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    OutlinedTextField(
+                        value = nameEs,
+                        onValueChange = { nameEs = it },
+                        label = { Text(stringResource(R.string.food_name_spanish)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = nameEn,
+                        onValueChange = { nameEn = it },
+                        label = { Text(stringResource(R.string.food_name_english)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = calories,
+                        onValueChange = { calories = it },
+                        label = { Text(stringResource(R.string.calories_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = protein,
+                        onValueChange = { protein = it },
+                        label = { Text(stringResource(R.string.protein_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = fat,
+                        onValueChange = { fat = it },
+                        label = { Text(stringResource(R.string.fat_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = carbs,
+                        onValueChange = { carbs = it },
+                        label = { Text(stringResource(R.string.carbs_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (nameEs.isNotBlank() && calories.isNotBlank()) {
+                        val foodItem = FoodItem(
+                            nameEs = nameEs,
+                            nameEn = nameEn.ifBlank { nameEs },
+                            caloriesPer100g = calories.toFloatOrNull() ?: 0f,
+                            proteinPer100g = protein.toFloatOrNull() ?: 0f,
+                            fatPer100g = fat.toFloatOrNull() ?: 0f,
+                            carbPer100g = carbs.toFloatOrNull() ?: 0f,
+                            verificationLevel = "user"
+                        )
+                        onConfirm(foodItem)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+            ) {
+                Text(stringResource(R.string.add), color = TextPrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = TextSecondary)
+            }
+        },
+        containerColor = DarkCard
+    )
 }
 

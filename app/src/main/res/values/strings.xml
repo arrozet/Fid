@@ -102,6 +102,20 @@
     <string name="no_results_found">No se encontraron resultados</string>
     <string name="suggested_for_this_time">Sugerido para esta hora</string>
     
+    <!-- Custom Foods -->
+    <string name="my_foods">Mis Comidas</string>
+    <string name="add_custom_food">Añadir Comida Personalizada</string>
+    <string name="no_custom_foods">No tienes comidas personalizadas aún. ¡Añade una!</string>
+    <string name="food_name_spanish">Nombre en español</string>
+    <string name="food_name_english">Nombre en inglés (opcional)</string>
+    <string name="calories_per_100g_input">Calorías por 100g</string>
+    <string name="protein_per_100g_input">Proteína por 100g (g)</string>
+    <string name="fat_per_100g_input">Grasa por 100g (g)</string>
+    <string name="carbs_per_100g_input">Carbohidratos por 100g (g)</string>
+    <string name="add">Añadir</string>
+    <string name="custom_food_created">Comida personalizada creada</string>
+    <string name="custom_food_deleted">Comida personalizada eliminada</string>
+    
     <!-- Voice Registration -->
     <string name="voice_recognized">✓ Reconocido: %1$s</string>
     <string name="ready_to_listen">🎤 Listo, puedes hablar</string>

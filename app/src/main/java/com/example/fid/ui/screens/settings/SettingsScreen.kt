@@ -152,6 +152,10 @@ fun SettingsScreen(navController: NavController) {
             SectionTitle(stringResource(R.string.app_preferences))
             Spacer(modifier = Modifier.height(12.dp))
             
+            SettingsItem(stringResource(R.string.my_foods)) {
+                navController.navigate(Screen.CustomFoods.route)
+            }
+            
             SettingsToggleItem(
                 title = stringResource(R.string.numberless_mode_toggle),
                 description = stringResource(R.string.numberless_mode_description),

@@ -231,7 +231,7 @@ class FirebaseRepository {
     }
     
     // Food Item operations
-    fun searchFoodItems(query: String, language: String = "es"): Flow<List<FoodItem>> = callbackFlow {
+    fun searchFoodItems(query: String, language: String = "es", userId: Long? = null): Flow<List<FoodItem>> = callbackFlow {
         // Determinar el campo de búsqueda según el idioma
         val searchField = if (language == "en") "nameEn" else "nameEs"
         
@@ -248,12 +248,21 @@ class FirebaseRepository {
                     val id = doc.id.toLongOrNull() ?: 0L
                     foodItem?.copy(id = id)
                 }.filter { foodItem ->
+                    // Filtrar por nombre
                     val nameToSearch = if (language == "en") {
                         foodItem.nameEn.lowercase()
                     } else {
                         foodItem.nameEs.lowercase()
                     }
-                    nameToSearch.contains(queryLower)
+                    val matchesName = nameToSearch.contains(queryLower)
+                    
+                    // Filtrar para incluir solo:
+                    // 1. Comidas globales (createdByUserId == null)
+                    // 2. Comidas del usuario actual (createdByUserId == userId)
+                    val isAccessible = foodItem.createdByUserId == null || 
+                                      (userId != null && foodItem.createdByUserId == userId)
+                    
+                    matchesName && isAccessible
                 }
                 android.util.Log.d("FirebaseRepository", "Búsqueda en $searchField con query '$query': ${items.size} resultados")
                 trySend(items)
@@ -264,6 +273,107 @@ class FirebaseRepository {
             }
         
         awaitClose { }
+    }
+    
+    /**
+     * Obtiene las comidas personalizadas de un usuario específico
+     */
+    fun getCustomFoodItems(userId: Long): Flow<List<FoodItem>> = callbackFlow {
+        val listener = firestore.collection("food_items")
+            .whereEqualTo("createdByUserId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    android.util.Log.e("FirebaseRepository", "Error obteniendo comidas personalizadas: ${error.message}")
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val items = snapshot?.documents?.mapNotNull { doc ->
+                    val foodItem = doc.toObject<FoodItem>()
+                    foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
+                } ?: emptyList()
+                
+                android.util.Log.d("FirebaseRepository", "Comidas personalizadas obtenidas: ${items.size}")
+                trySend(items)
+            }
+        
+        awaitClose { listener.remove() }
+    }
+    
+    /**
+     * Crea una comida personalizada para un usuario
+     */
+    suspend fun insertCustomFoodItem(foodItem: FoodItem, userId: Long): Long {
+        return try {
+            val newId = System.currentTimeMillis()
+            val customFoodItem = foodItem.copy(
+                id = newId,
+                createdByUserId = userId,
+                verificationLevel = "user" // Las comidas personalizadas tienen nivel "user"
+            )
+            
+            firestore.collection("food_items")
+                .document(newId.toString())
+                .set(customFoodItem)
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "Comida personalizada '${foodItem.nameEs}/${foodItem.nameEn}' creada con ID: $newId para usuario: $userId")
+            newId
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error creando comida personalizada: ${e.message}")
+            throw e
+        }
+    }
+    
+    /**
+     * Elimina una comida personalizada (solo si pertenece al usuario)
+     */
+    suspend fun deleteCustomFoodItem(foodItemId: Long, userId: Long): Boolean {
+        return try {
+            val foodItem = getFoodItemById(foodItemId)
+            
+            // Verificar que la comida pertenece al usuario
+            if (foodItem?.createdByUserId != userId) {
+                android.util.Log.e("FirebaseRepository", "No se puede eliminar: la comida no pertenece al usuario")
+                return false
+            }
+            
+            firestore.collection("food_items")
+                .document(foodItemId.toString())
+                .delete()
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "Comida personalizada eliminada: $foodItemId")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error eliminando comida personalizada: ${e.message}")
+            false
+        }
+    }
+    
+    /**
+     * Actualiza una comida personalizada (solo si pertenece al usuario)
+     */
+    suspend fun updateCustomFoodItem(foodItem: FoodItem, userId: Long): Boolean {
+        return try {
+            val existing = getFoodItemById(foodItem.id)
+            
+            // Verificar que la comida pertenece al usuario
+            if (existing?.createdByUserId != userId) {
+                android.util.Log.e("FirebaseRepository", "No se puede actualizar: la comida no pertenece al usuario")
+                return false
+            }
+            
+            firestore.collection("food_items")
+                .document(foodItem.id.toString())
+                .set(foodItem)
+                .await()
+            
+            android.util.Log.d("FirebaseRepository", "Comida personalizada actualizada: ${foodItem.id}")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRepository", "Error actualizando comida personalizada: ${e.message}")
+            false
+        }
     }
     
     fun getFrequentFoodItems(): Flow<List<FoodItem>> = callbackFlow {

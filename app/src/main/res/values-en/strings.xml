@@ -99,6 +99,20 @@
     <string name="no_results_found">No results found</string>
     <string name="suggested_for_this_time">Suggested for this time</string>
     
+    <!-- Custom Foods -->
+    <string name="my_foods">My Foods</string>
+    <string name="add_custom_food">Add Custom Food</string>
+    <string name="no_custom_foods">You don\'t have any custom foods yet. Add one!</string>
+    <string name="food_name_spanish">Name in Spanish</string>
+    <string name="food_name_english">Name in English (optional)</string>
+    <string name="calories_per_100g_input">Calories per 100g</string>
+    <string name="protein_per_100g_input">Protein per 100g (g)</string>
+    <string name="fat_per_100g_input">Fat per 100g (g)</string>
+    <string name="carbs_per_100g_input">Carbohydrates per 100g (g)</string>
+    <string name="add">Add</string>
+    <string name="custom_food_created">Custom food created</string>
+    <string name="custom_food_deleted">Custom food deleted</string>
+    
     <!-- Voice Registration -->
     <string name="voice_recognized">✓ Recognized: %1$s</string>
     <string name="ready_to_listen">🎤 Ready, you can speak</string>
