@@ -38,14 +38,26 @@ class NotificationHelper(private val context: Context) {
     
     /**
      * Show a meal reminder notification
+     * @param mealType should be "breakfast", "lunch", or "dinner"
      */
     fun showMealReminder(mealType: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
+        // Get localized meal name
+        val mealNameResId = when (mealType) {
+            "breakfast" -> R.string.breakfast
+            "lunch" -> R.string.lunch
+            "dinner" -> R.string.dinner
+            else -> R.string.meal
+        }
+        val mealName = LocaleHelper.getLocalizedString(context, mealNameResId)
+        val title = LocaleHelper.getLocalizedString(context, R.string.notification_meal_reminder_title)
+        val text = LocaleHelper.getLocalizedString(context, R.string.notification_meal_reminder_text, mealName)
+        
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(context.getString(R.string.notification_meal_reminder_title))
-            .setContentText(context.getString(R.string.notification_meal_reminder_text, mealType))
+            .setContentTitle(title)
+            .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()

@@ -643,17 +643,31 @@ fun PersonalDataDialog(
 ) {
     val measurementUnit = user?.measurementUnit ?: "metric"
     
-    // Convertir valores iniciales a la unidad de medida del usuario
-    val initialHeight = user?.heightCm?.let { 
-        UnitConverter.convertHeight(it, measurementUnit) 
-    } ?: 0f
+    // Convert initial values to user's measurement unit
     val initialWeight = user?.currentWeightKg?.let { 
         UnitConverter.convertWeight(it, measurementUnit) 
     } ?: 0f
     
+    // For height in imperial, calculate feet and inches separately
+    val initialHeightCm = user?.heightCm ?: 0f
+    val initialFeet: Int
+    val initialInches: Int
+    if (measurementUnit == "imperial" && initialHeightCm > 0) {
+        val totalInches = initialHeightCm * UnitConverter.CM_TO_INCHES
+        initialFeet = (totalInches / 12).toInt()
+        initialInches = (totalInches % 12).toInt()
+    } else {
+        initialFeet = 0
+        initialInches = 0
+    }
+    
     var name by remember { mutableStateOf(user?.name ?: "") }
     var age by remember { mutableStateOf(user?.age?.toString() ?: "") }
-    var height by remember { mutableStateOf(if (initialHeight > 0) initialHeight.toInt().toString() else "") }
+    // For metric: single height field in cm
+    var heightCm by remember { mutableStateOf(if (measurementUnit == "metric" && initialHeightCm > 0) initialHeightCm.toInt().toString() else "") }
+    // For imperial: feet and inches fields
+    var heightFeet by remember { mutableStateOf(if (initialFeet > 0) initialFeet.toString() else "") }
+    var heightInches by remember { mutableStateOf(if (initialFeet > 0 || initialInches > 0) initialInches.toString() else "") }
     var weight by remember { mutableStateOf(if (initialWeight > 0) "%.1f".format(initialWeight) else "") }
     
     AlertDialog(
@@ -702,30 +716,68 @@ fun PersonalDataDialog(
                     )
                 )
                 
-                OutlinedTextField(
-                    value = height,
-                    onValueChange = { height = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { 
-                        val heightLabel = if (measurementUnit == "imperial") "Altura (in)" else stringResource(R.string.height_cm)
-                        Text(heightLabel) 
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary,
-                        focusedBorderColor = PrimaryGreen,
-                        unfocusedBorderColor = TextSecondary,
-                        focusedLabelColor = PrimaryGreen,
-                        unfocusedLabelColor = TextSecondary
+                // Height input - different for metric vs imperial
+                if (measurementUnit == "imperial") {
+                    // Imperial: Two fields for feet and inches
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = heightFeet,
+                            onValueChange = { heightFeet = it.filter { c -> c.isDigit() } },
+                            label = { Text(stringResource(R.string.height_ft)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = PrimaryGreen,
+                                unfocusedBorderColor = TextSecondary,
+                                focusedLabelColor = PrimaryGreen,
+                                unfocusedLabelColor = TextSecondary
+                            )
+                        )
+                        OutlinedTextField(
+                            value = heightInches,
+                            onValueChange = { heightInches = it.filter { c -> c.isDigit() } },
+                            label = { Text(stringResource(R.string.height_in)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = PrimaryGreen,
+                                unfocusedBorderColor = TextSecondary,
+                                focusedLabelColor = PrimaryGreen,
+                                unfocusedLabelColor = TextSecondary
+                            )
+                        )
+                    }
+                } else {
+                    // Metric: Single field for cm
+                    OutlinedTextField(
+                        value = heightCm,
+                        onValueChange = { heightCm = it.filter { c -> c.isDigit() } },
+                        label = { Text(stringResource(R.string.height_cm)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = TextSecondary,
+                            focusedLabelColor = PrimaryGreen,
+                            unfocusedLabelColor = TextSecondary
+                        )
                     )
-                )
+                }
                 
                 OutlinedTextField(
                     value = weight,
                     onValueChange = { weight = it.filter { c -> c.isDigit() || c == '.' } },
                     label = { 
-                        val weightLabel = if (measurementUnit == "imperial") "Peso (lb)" else stringResource(R.string.current_weight_kg)
+                        val weightLabel = if (measurementUnit == "imperial") stringResource(R.string.weight_lb) else stringResource(R.string.current_weight_kg)
                         Text(weightLabel) 
                     },
                     singleLine = true,
@@ -745,14 +797,23 @@ fun PersonalDataDialog(
             TextButton(
                 onClick = {
                     val ageInt = age.toIntOrNull() ?: 25
-                    val heightInput = height.toFloatOrNull() ?: if (measurementUnit == "imperial") 67f else 170f
                     val weightInput = weight.toFloatOrNull() ?: if (measurementUnit == "imperial") 154f else 70f
                     
-                    // Convertir de vuelta a métrico para guardar en BD
-                    val heightCm = UnitConverter.convertHeightToMetric(heightInput, measurementUnit)
+                    // Calculate height in cm
+                    val finalHeightCm = if (measurementUnit == "imperial") {
+                        // Convert feet + inches to cm
+                        val feet = heightFeet.toIntOrNull() ?: 5
+                        val inches = heightInches.toIntOrNull() ?: 7
+                        val totalInches = (feet * 12) + inches
+                        totalInches / UnitConverter.CM_TO_INCHES
+                    } else {
+                        heightCm.toFloatOrNull() ?: 170f
+                    }
+                    
+                    // Convert weight back to metric for saving
                     val weightKg = UnitConverter.convertWeightToMetric(weightInput, measurementUnit)
                     
-                    onSave(name, ageInt, heightCm, weightKg)
+                    onSave(name, ageInt, finalHeightCm, weightKg)
                 }
             ) {
                 Text(stringResource(R.string.save), color = PrimaryGreen)

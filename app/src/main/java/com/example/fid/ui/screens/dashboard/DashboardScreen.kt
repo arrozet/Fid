@@ -94,6 +94,9 @@ fun DashboardScreen(navController: NavController) {
     val totalFat = foodEntries.sumOf { it.fatG.toDouble() }.toFloat()
     val totalCarbs = foodEntries.sumOf { it.carbG.toDouble() }.toFloat()
     
+    // Check if numberless mode is enabled
+    val isNumberlessMode = user?.numberlessMode ?: false
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -145,7 +148,8 @@ fun DashboardScreen(navController: NavController) {
                 // Calories Ring
                 CaloriesRing(
                     consumed = totalCalories,
-                    goal = user?.tdee ?: 2000f
+                    goal = user?.tdee ?: 2000f,
+                    isNumberlessMode = isNumberlessMode
                 )
                 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -167,7 +171,8 @@ fun DashboardScreen(navController: NavController) {
                     current = totalProtein,
                     goal = user?.proteinGoalG ?: 150f,
                     color = ProteinColor,
-                    unit = measurementUnit
+                    unit = measurementUnit,
+                    isNumberlessMode = isNumberlessMode
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -177,7 +182,8 @@ fun DashboardScreen(navController: NavController) {
                     current = totalFat,
                     goal = user?.fatGoalG ?: 65f,
                     color = FatColor,
-                    unit = measurementUnit
+                    unit = measurementUnit,
+                    isNumberlessMode = isNumberlessMode
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -187,7 +193,8 @@ fun DashboardScreen(navController: NavController) {
                     current = totalCarbs,
                     goal = user?.carbGoalG ?: 250f,
                     color = CarbColor,
-                    unit = measurementUnit
+                    unit = measurementUnit,
+                    isNumberlessMode = isNumberlessMode
                 )
                 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -326,7 +333,7 @@ fun DashboardScreen(navController: NavController) {
 }
 
 @Composable
-fun CaloriesRing(consumed: Float, goal: Float) {
+fun CaloriesRing(consumed: Float, goal: Float, isNumberlessMode: Boolean = false) {
     val progress = (consumed / goal).coerceIn(0f, 1f)
     
     Box(
@@ -353,29 +360,55 @@ fun CaloriesRing(consumed: Float, goal: Float) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "${consumed.toInt()}",
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryGreen
-                )
-                Text(
-                    text = "/ ${goal.toInt()} ${stringResource(R.string.calories)}",
-                    fontSize = 14.sp,
-                    color = TextSecondary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.calories_remaining),
-                    fontSize = 12.sp,
-                    color = TextSecondary
-                )
-                Text(
-                    text = "${(goal - consumed).coerceAtLeast(0f).toInt()} kcal",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
+                if (isNumberlessMode) {
+                    // Show qualitative feedback instead of numbers
+                    val feedbackEmoji = when {
+                        progress < 0.25f -> "🌱"
+                        progress < 0.5f -> "🌿"
+                        progress < 0.75f -> "🌳"
+                        progress < 1f -> "✨"
+                        else -> "🌟"
+                    }
+                    Text(
+                        text = feedbackEmoji,
+                        fontSize = 50.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = when {
+                            progress < 0.5f -> stringResource(R.string.keep_going)
+                            progress < 0.9f -> stringResource(R.string.almost_there)
+                            else -> stringResource(R.string.goal_reached)
+                        },
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen
+                    )
+                } else {
+                    Text(
+                        text = "${consumed.toInt()}",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen
+                    )
+                    Text(
+                        text = "/ ${goal.toInt()} ${stringResource(R.string.calories)}",
+                        fontSize = 14.sp,
+                        color = TextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.calories_remaining),
+                        fontSize = 12.sp,
+                        color = TextSecondary
+                    )
+                    Text(
+                        text = "${(goal - consumed).coerceAtLeast(0f).toInt()} kcal",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary
+                    )
+                }
             }
         }
     }
@@ -387,7 +420,8 @@ fun MacroProgressBar(
     current: Float, 
     goal: Float, 
     color: androidx.compose.ui.graphics.Color,
-    unit: String = "metric"
+    unit: String = "metric",
+    isNumberlessMode: Boolean = false
 ) {
     val progress = (current / goal).coerceIn(0f, 1f)
     val displayCurrent = UnitConverter.convertGrams(current, unit)
@@ -404,11 +438,13 @@ fun MacroProgressBar(
                 fontSize = 14.sp,
                 color = TextPrimary
             )
-            Text(
-                text = "${displayCurrent.toInt()}$unitLabel / ${displayGoal.toInt()}$unitLabel",
-                fontSize = 14.sp,
-                color = TextSecondary
-            )
+            if (!isNumberlessMode) {
+                Text(
+                    text = "${displayCurrent.toInt()}$unitLabel / ${displayGoal.toInt()}$unitLabel",
+                    fontSize = 14.sp,
+                    color = TextSecondary
+                )
+            }
         }
         
         Spacer(modifier = Modifier.height(8.dp))

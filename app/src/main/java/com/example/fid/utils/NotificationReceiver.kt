@@ -28,78 +28,43 @@ class NotificationReceiver : BroadcastReceiver() {
     }
     
     override fun onReceive(context: Context, intent: Intent) {
-        android.util.Log.d("NotificationReceiver", "=== RECEIVER ACTIVADO ===")
-        android.util.Log.d("NotificationReceiver", "Intent recibido: ${intent.action}")
-        android.util.Log.d("NotificationReceiver", "Extras: ${intent.extras?.keySet()}")
+        val notificationType = intent.getStringExtra("notification_type") ?: return
+        val appContext = context.applicationContext
         
-        val notificationType = intent.getStringExtra("notification_type")
-        android.util.Log.d("NotificationReceiver", "Tipo de notificación: $notificationType")
-        
-        if (notificationType == null) {
-            android.util.Log.e("NotificationReceiver", "ERROR: notification_type es null!")
-            return
-        }
-        
-        android.util.Log.d("NotificationReceiver", "Procesando notificación tipo: $notificationType")
-        
-        createNotificationChannel(context)
+        createNotificationChannel(appContext)
         
         when {
             notificationType.startsWith("meal_") -> {
                 val mealType = notificationType.removePrefix("meal_")
-                android.util.Log.d("NotificationReceiver", "Mostrando notificación de comida: $mealType")
-                showMealNotification(context, mealType)
-                // Reprogramar para mañana
+                showMealNotification(appContext, mealType)
                 rescheduleNotification(context, notificationType)
             }
             notificationType == "hydration" -> {
-                android.util.Log.d("NotificationReceiver", "Mostrando notificación de hidratación")
-                showHydrationNotification(context)
-                // Reprogramar para mañana
+                showHydrationNotification(appContext)
                 rescheduleNotification(context, notificationType)
             }
             notificationType == "daily_summary" -> {
-                android.util.Log.d("NotificationReceiver", "Mostrando notificación de resumen diario")
-                showDailySummaryNotification(context)
-                // Reprogramar para mañana
+                showDailySummaryNotification(appContext)
                 rescheduleNotification(context, notificationType)
             }
         }
     }
     
-    /**
-     * Reschedules the notification for the next day
-     */
     private fun rescheduleNotification(context: Context, notificationType: String) {
-        android.util.Log.d("NotificationReceiver", "Reprogramando $notificationType para mañana...")
-        
         val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("enabled", true)) {
-            android.util.Log.d("NotificationReceiver", "Notificaciones desactivadas, no reprogramar")
-            return
-        }
+        if (!prefs.getBoolean("enabled", true)) return
         
-        // Use NotificationScheduler to reschedule
         val scheduler = NotificationScheduler(context)
         
         when {
-            notificationType.startsWith("meal_") -> {
-                if (prefs.getBoolean("meal_reminders", true)) {
-                    scheduler.scheduleMealReminders()
-                    android.util.Log.d("NotificationReceiver", "Comidas reprogramadas")
-                }
+            notificationType.startsWith("meal_") && prefs.getBoolean("meal_reminders", true) -> {
+                scheduler.scheduleMealReminders()
             }
-            notificationType == "hydration" -> {
-                if (prefs.getBoolean("hydration_reminders", true)) {
-                    scheduler.scheduleHydrationReminders()
-                    android.util.Log.d("NotificationReceiver", "Hidratación reprogramada")
-                }
+            notificationType == "hydration" && prefs.getBoolean("hydration_reminders", true) -> {
+                scheduler.scheduleHydrationReminders()
             }
-            notificationType == "daily_summary" -> {
-                if (prefs.getBoolean("daily_summary", true)) {
-                    scheduler.scheduleDailySummary()
-                    android.util.Log.d("NotificationReceiver", "Resumen diario reprogramado")
-                }
+            notificationType == "daily_summary" && prefs.getBoolean("daily_summary", true) -> {
+                scheduler.scheduleDailySummary()
             }
         }
     }
@@ -122,15 +87,13 @@ class NotificationReceiver : BroadcastReceiver() {
     
     private fun showMealNotification(context: Context, mealType: String) {
         val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("meal_reminders", true)) {
-            return
-        }
+        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("meal_reminders", true)) return
         
         val mealName = when (mealType) {
-            "breakfast" -> context.getString(R.string.breakfast)
-            "lunch" -> context.getString(R.string.lunch)
-            "dinner" -> context.getString(R.string.dinner)
-            else -> context.getString(R.string.meal)
+            "breakfast" -> LocaleHelper.getLocalizedString(context, R.string.breakfast)
+            "lunch" -> LocaleHelper.getLocalizedString(context, R.string.lunch)
+            "dinner" -> LocaleHelper.getLocalizedString(context, R.string.dinner)
+            else -> LocaleHelper.getLocalizedString(context, R.string.meal)
         }
         
         val notificationId = when (mealType) {
@@ -140,39 +103,33 @@ class NotificationReceiver : BroadcastReceiver() {
             else -> NOTIFICATION_ID_BREAKFAST
         }
         
-        val title = context.getString(R.string.notification_meal_reminder_title)
-        val text = context.getString(R.string.notification_meal_reminder_text, mealName)
+        val title = LocaleHelper.getLocalizedString(context, R.string.notification_meal_reminder_title)
+        val text = LocaleHelper.getLocalizedString(context, R.string.notification_meal_reminder_text, mealName)
         
         showNotification(context, notificationId, title, text)
     }
     
     private fun showHydrationNotification(context: Context) {
         val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("hydration_reminders", true)) {
-            return
-        }
+        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("hydration_reminders", true)) return
         
-        val title = context.getString(R.string.notification_hydration_title)
-        val text = context.getString(R.string.notification_hydration_text)
+        val title = LocaleHelper.getLocalizedString(context, R.string.notification_hydration_title)
+        val text = LocaleHelper.getLocalizedString(context, R.string.notification_hydration_text)
         
         showNotification(context, NOTIFICATION_ID_HYDRATION, title, text)
     }
     
     private fun showDailySummaryNotification(context: Context) {
         val prefs = context.getSharedPreferences(NotificationScheduler.getPreferencesName(context), Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("daily_summary", true)) {
-            return
-        }
+        if (!prefs.getBoolean("enabled", true) || !prefs.getBoolean("daily_summary", true)) return
         
-        val title = context.getString(R.string.notification_summary_title)
-        val text = context.getString(R.string.notification_summary_text)
+        val title = LocaleHelper.getLocalizedString(context, R.string.notification_summary_title)
+        val text = LocaleHelper.getLocalizedString(context, R.string.notification_summary_text)
         
         showNotification(context, NOTIFICATION_ID_SUMMARY, title, text)
     }
     
     private fun showNotification(context: Context, notificationId: Int, title: String, text: String) {
-        android.util.Log.d("NotificationReceiver", "Mostrando notificación - ID: $notificationId, Título: $title, Texto: $text")
-        
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -194,12 +151,7 @@ class NotificationReceiver : BroadcastReceiver() {
             .build()
         
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        try {
-            notificationManager.notify(notificationId, notification)
-            android.util.Log.d("NotificationReceiver", "✅ Notificación mostrada exitosamente - ID: $notificationId")
-        } catch (e: Exception) {
-            android.util.Log.e("NotificationReceiver", "❌ Error al mostrar notificación: ${e.message}", e)
-        }
+        notificationManager.notify(notificationId, notification)
     }
 }
 

@@ -91,4 +91,24 @@ object LocaleHelper {
             LANGUAGE_ENGLISH to "English"
         )
     }
+    
+    /**
+     * Get a localized string resource using the app's saved language.
+     * This is more reliable than createConfigurationContext for BroadcastReceivers.
+     */
+    fun getLocalizedString(context: Context, resId: Int, vararg formatArgs: Any): String {
+        val language = getLanguage(context)
+        val locale = Locale(language)
+        
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        
+        val localizedContext = context.createConfigurationContext(config)
+        
+        return if (formatArgs.isEmpty()) {
+            localizedContext.resources.getString(resId)
+        } else {
+            localizedContext.resources.getString(resId, *formatArgs)
+        }
+    }
 }

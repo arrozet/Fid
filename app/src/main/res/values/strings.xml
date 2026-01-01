@@ -36,7 +36,10 @@
     <string name="age">Edad</string>
     <string name="gender">Género</string>
     <string name="height_cm">Altura (cm)</string>
+    <string name="height_ft">Altura (ft)</string>
+    <string name="height_in">Altura (in)</string>
     <string name="current_weight_kg">Peso Actual (kg)</string>
+    <string name="weight_lb">Peso (lb)</string>
     <string name="activity_level">Nivel de Actividad</string>
     <string name="sedentary">Sedentario</string>
     <string name="light">Ligero</string>
@@ -153,6 +156,9 @@
     <!-- Progress -->
     <string name="progress">Progreso</string>
     <string name="numberless_mode">Modo sin Números</string>
+    <string name="keep_going">¡Sigue así!</string>
+    <string name="almost_there">¡Casi lo logras!</string>
+    <string name="goal_reached">¡Objetivo cumplido!</string>
     <string name="high_energy">Hoy has tenido una Energía Alta</string>
     <string name="balanced_diet">Tu dieta de hoy fue Equilibrada</string>
     <string name="need_more_veggies">Parece que necesitas más Verduras Frescas</string>

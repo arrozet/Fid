@@ -292,7 +292,7 @@ fun NotificationSettingsScreen(navController: NavController) {
                         scope.launch {
                             android.util.Log.d("NotificationSettings", "Probando notificación...")
                             val notificationHelper = com.example.fid.utils.NotificationHelper(context)
-                            notificationHelper.showMealReminder("desayuno")
+                            notificationHelper.showMealReminder("breakfast")
                             android.widget.Toast.makeText(
                                 context,
                                 context.getString(R.string.test_notification_sent),
