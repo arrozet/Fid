@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +39,8 @@ fun CustomFoodsScreen(navController: NavController) {
     var showAddDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var foodToDelete by remember { mutableStateOf<FoodItem?>(null) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var foodToEdit by remember { mutableStateOf<FoodItem?>(null) }
     
     // Obtener usuario actual
     LaunchedEffect(Unit) {
@@ -106,6 +109,10 @@ fun CustomFoodsScreen(navController: NavController) {
                 items(customFoods) { food ->
                     CustomFoodCard(
                         food = food,
+                        onEdit = {
+                            foodToEdit = food
+                            showEditDialog = true
+                        },
                         onDelete = {
                             foodToDelete = food
                             showDeleteDialog = true
@@ -180,10 +187,35 @@ fun CustomFoodsScreen(navController: NavController) {
             containerColor = DarkCard
         )
     }
+    
+    // Diálogo para editar comida personalizada
+    if (showEditDialog && foodToEdit != null) {
+        EditCustomFoodDialog(
+            food = foodToEdit!!,
+            onDismiss = {
+                showEditDialog = false
+                foodToEdit = null
+            },
+            onConfirm = { updatedFoodItem ->
+                scope.launch {
+                    currentUser?.let { user ->
+                        try {
+                            repository.updateCustomFoodItem(updatedFoodItem, user.id)
+                            android.util.Log.d("CustomFoods", "Comida personalizada actualizada exitosamente")
+                        } catch (e: Exception) {
+                            android.util.Log.e("CustomFoods", "Error actualizando comida personalizada: ${e.message}")
+                        }
+                    }
+                }
+                showEditDialog = false
+                foodToEdit = null
+            }
+        )
+    }
 }
 
 @Composable
-fun CustomFoodCard(food: FoodItem, onDelete: () -> Unit) {
+fun CustomFoodCard(food: FoodItem, onEdit: () -> Unit, onDelete: () -> Unit) {
     val context = LocalContext.current
     val localizedName = food.getLocalizedName(context)
     
@@ -213,15 +245,183 @@ fun CustomFoodCard(food: FoodItem, onDelete: () -> Unit) {
                 )
             }
             
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.error
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.edit),
+                        tint = PrimaryGreen
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditCustomFoodDialog(
+    food: FoodItem,
+    onDismiss: () -> Unit,
+    onConfirm: (FoodItem) -> Unit
+) {
+    var nameEs by remember { mutableStateOf(food.nameEs) }
+    var nameEn by remember { mutableStateOf(food.nameEn) }
+    var calories by remember { mutableStateOf(food.caloriesPer100g.toString()) }
+    var protein by remember { mutableStateOf(food.proteinPer100g.toString()) }
+    var fat by remember { mutableStateOf(food.fatPer100g.toString()) }
+    var carbs by remember { mutableStateOf(food.carbPer100g.toString()) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.edit_custom_food),
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+        },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    OutlinedTextField(
+                        value = nameEs,
+                        onValueChange = { nameEs = it },
+                        label = { Text(stringResource(R.string.food_name_spanish)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = nameEn,
+                        onValueChange = { nameEn = it },
+                        label = { Text(stringResource(R.string.food_name_english)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = calories,
+                        onValueChange = { calories = it },
+                        label = { Text(stringResource(R.string.calories_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = protein,
+                        onValueChange = { protein = it },
+                        label = { Text(stringResource(R.string.protein_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = fat,
+                        onValueChange = { fat = it },
+                        label = { Text(stringResource(R.string.fat_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+                
+                item {
+                    OutlinedTextField(
+                        value = carbs,
+                        onValueChange = { carbs = it },
+                        label = { Text(stringResource(R.string.carbs_per_100g_input)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = DarkCard,
+                            focusedLabelColor = PrimaryGreen,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryGreen
+                        )
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (nameEs.isNotBlank() && calories.isNotBlank()) {
+                        val updatedFoodItem = food.copy(
+                            nameEs = nameEs,
+                            nameEn = nameEn.ifBlank { nameEs },
+                            caloriesPer100g = calories.toFloatOrNull() ?: 0f,
+                            proteinPer100g = protein.toFloatOrNull() ?: 0f,
+                            fatPer100g = fat.toFloatOrNull() ?: 0f,
+                            carbPer100g = carbs.toFloatOrNull() ?: 0f
+                        )
+                        onConfirm(updatedFoodItem)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+            ) {
+                Text(stringResource(R.string.save), color = TextPrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel), color = TextSecondary)
+            }
+        },
+        containerColor = DarkCard
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

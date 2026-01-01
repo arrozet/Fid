@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -56,6 +57,8 @@ fun DashboardScreen(navController: NavController) {
     var showAddMenu by remember { mutableStateOf(false) }
     var showWaterDialog by remember { mutableStateOf(false) }
     var showSleepDialog by remember { mutableStateOf(false) }
+    var showDeleteFoodDialog by remember { mutableStateOf(false) }
+    var foodEntryToDelete by remember { mutableStateOf<FoodEntry?>(null) }
     
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -245,7 +248,14 @@ fun DashboardScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     foodEntries.forEach { entry ->
-                        FoodEntryCard(entry, measurementUnit)
+                        FoodEntryCard(
+                            entry = entry, 
+                            measurementUnit = measurementUnit,
+                            onDeleteClick = {
+                                foodEntryToDelete = entry
+                                showDeleteFoodDialog = true
+                            }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -326,6 +336,55 @@ fun DashboardScreen(navController: NavController) {
                         }
                         showSleepDialog = false
                     }
+                )
+            }
+            
+            // Dialog de eliminación de comida
+            if (showDeleteFoodDialog && foodEntryToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { 
+                        showDeleteFoodDialog = false
+                        foodEntryToDelete = null
+                    },
+                    title = {
+                        Text(
+                            text = stringResource(R.string.delete_food_title),
+                            color = TextPrimary
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.delete_food_confirmation, foodEntryToDelete?.getLocalizedFoodName(context) ?: ""),
+                            color = TextSecondary
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                foodEntryToDelete?.let { entry ->
+                                    scope.launch {
+                                        repository.deleteFoodEntry(entry)
+                                        Toast.makeText(context, context.getString(R.string.food_deleted), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                showDeleteFoodDialog = false
+                                foodEntryToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(R.string.delete), color = ErrorRed)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showDeleteFoodDialog = false
+                                foodEntryToDelete = null
+                            }
+                        ) {
+                            Text(stringResource(R.string.cancel), color = TextSecondary)
+                        }
+                    },
+                    containerColor = DarkCard
                 )
             }
         }
@@ -991,7 +1050,11 @@ fun WellnessCard(title: String, value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun FoodEntryCard(entry: FoodEntry, measurementUnit: String = "metric") {
+fun FoodEntryCard(
+    entry: FoodEntry, 
+    measurementUnit: String = "metric",
+    onDeleteClick: () -> Unit = {}
+) {
     val context = LocalContext.current
     val unitLabel = UnitConverter.getGramsUnitLabel(measurementUnit)
     val displayAmount = UnitConverter.convertGrams(entry.amountGrams, measurementUnit)
@@ -1000,7 +1063,7 @@ fun FoodEntryCard(entry: FoodEntry, measurementUnit: String = "metric") {
         modifier = Modifier
             .fillMaxWidth()
             .background(DarkCard, RoundedCornerShape(12.dp))
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -1021,11 +1084,28 @@ fun FoodEntryCard(entry: FoodEntry, measurementUnit: String = "metric") {
                 )
             }
             
-            Text(
-                text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entry.timestamp)),
-                fontSize = 12.sp,
-                color = TextSecondary
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entry.timestamp)),
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+                
+                IconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete),
+                        tint = TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
     }
 }

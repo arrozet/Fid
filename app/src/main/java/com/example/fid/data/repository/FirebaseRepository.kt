@@ -464,7 +464,8 @@ class FirebaseRepository {
                 carbPer100g = (data?.get("carbPer100g") as? Number)?.toFloat() ?: 0f,
                 verificationLevel = data?.get("verificationLevel") as? String ?: "user",
                 isFrequent = (data?.get("isFrequent") as? Boolean) ?: (data?.get("frequent") as? Boolean) ?: false,
-                lastUsed = (data?.get("lastUsed") as? Long)
+                lastUsed = (data?.get("lastUsed") as? Long),
+                createdByUserId = (data?.get("createdByUserId") as? Number)?.toLong()
             )
             
             android.util.Log.d("FirebaseRepository", "FoodItem mapeado manualmente:")

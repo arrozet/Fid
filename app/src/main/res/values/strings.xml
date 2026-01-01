@@ -108,6 +108,7 @@
     <!-- Custom Foods -->
     <string name="my_foods">Mis Comidas</string>
     <string name="add_custom_food">Añadir Comida Personalizada</string>
+    <string name="edit_custom_food">Editar Comida</string>
     <string name="no_custom_foods">No tienes comidas personalizadas aún. ¡Añade una!</string>
     <string name="food_name_spanish">Nombre en español</string>
     <string name="food_name_english">Nombre en inglés (opcional)</string>
@@ -369,6 +370,9 @@
     <string name="success_food_added">Alimento añadido correctamente</string>
     <string name="success_profile_updated">Perfil actualizado</string>
     <string name="success_goals_set">Objetivos establecidos</string>
+    <string name="food_deleted">Comida eliminada</string>
+    <string name="delete_food_title">Eliminar comida</string>
+    <string name="delete_food_confirmation">¿Estás seguro de que quieres eliminar \"%1$s\" de tus comidas de hoy?</string>
     
     <!-- Camera/Permissions -->
     <string name="camera_permission_granted">Permiso de cámara concedido</string>
