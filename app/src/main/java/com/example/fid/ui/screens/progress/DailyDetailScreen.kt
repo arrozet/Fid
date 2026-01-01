@@ -184,11 +184,14 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
+                    val measurementUnit = user?.measurementUnit ?: "metric"
+                    
                     MacroProgressBar(
                         label = stringResource(R.string.proteins),
                         current = s.totalProteinG,
                         goal = s.proteinGoal,
-                        color = ProteinColor
+                        color = ProteinColor,
+                        measurementUnit = measurementUnit
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -197,7 +200,8 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                         label = stringResource(R.string.fats),
                         current = s.totalFatG,
                         goal = s.fatGoal,
-                        color = FatColor
+                        color = FatColor,
+                        measurementUnit = measurementUnit
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -206,7 +210,8 @@ fun DailyDetailScreen(navController: NavController, date: Long) {
                         label = stringResource(R.string.carbs),
                         current = s.totalCarbG,
                         goal = s.carbGoal,
-                        color = CarbColor
+                        color = CarbColor,
+                        measurementUnit = measurementUnit
                     )
                     
                     // Wellness info (sleep and water)
@@ -298,9 +303,13 @@ fun MacroProgressBar(
     label: String,
     current: Float,
     goal: Float,
-    color: androidx.compose.ui.graphics.Color
+    color: androidx.compose.ui.graphics.Color,
+    measurementUnit: String = "metric"
 ) {
     val progress = if (goal > 0) (current / goal).coerceIn(0f, 1f) else 0f
+    val displayCurrent = UnitConverter.convertGrams(current, measurementUnit)
+    val displayGoal = UnitConverter.convertGrams(goal, measurementUnit)
+    val unitLabel = UnitConverter.getGramsUnitLabel(measurementUnit)
     
     Column {
         Row(
@@ -313,7 +322,7 @@ fun MacroProgressBar(
                 color = TextPrimary
             )
             Text(
-                text = "${current.toInt()}g / ${goal.toInt()}g",
+                text = "${displayCurrent.toInt()}$unitLabel / ${displayGoal.toInt()}$unitLabel",
                 fontSize = 14.sp,
                 color = TextSecondary
             )
@@ -394,7 +403,7 @@ fun FoodEntryDetailCard(entry: FoodEntry, timeFormatter: SimpleDateFormat, unit:
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${entry.amountGrams.toInt()}g",
+                    text = "${UnitConverter.convertGrams(entry.amountGrams, unit).toInt()}$unitLabel",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary

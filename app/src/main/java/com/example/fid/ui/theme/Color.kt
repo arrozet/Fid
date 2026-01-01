@@ -21,6 +21,7 @@ val TextTertiary = Color(0xFF808080)
 val ProteinColor = Color(0xFF00D9FF)
 val FatColor = Color(0xFFFFB800)
 val CarbColor = Color(0xFFFF6B00)
+val WaterColor = Color(0xFF00B4D8)
 
 // Status colors
 val SuccessGreen = Color(0xFF00FF87)

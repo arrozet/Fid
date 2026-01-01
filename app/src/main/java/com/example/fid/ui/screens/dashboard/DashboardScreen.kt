@@ -245,7 +245,7 @@ fun DashboardScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     foodEntries.forEach { entry ->
-                        FoodEntryCard(entry)
+                        FoodEntryCard(entry, measurementUnit)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -991,8 +991,10 @@ fun WellnessCard(title: String, value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun FoodEntryCard(entry: FoodEntry) {
+fun FoodEntryCard(entry: FoodEntry, measurementUnit: String = "metric") {
     val context = LocalContext.current
+    val unitLabel = UnitConverter.getGramsUnitLabel(measurementUnit)
+    val displayAmount = UnitConverter.convertGrams(entry.amountGrams, measurementUnit)
     
     Box(
         modifier = Modifier
@@ -1013,7 +1015,7 @@ fun FoodEntryCard(entry: FoodEntry) {
                     color = TextPrimary
                 )
                 Text(
-                    text = "${entry.amountGrams.toInt()}g • ${entry.calories.toInt()} kcal",
+                    text = "${displayAmount.toInt()}$unitLabel • ${entry.calories.toInt()} kcal",
                     fontSize = 12.sp,
                     color = TextSecondary
                 )
