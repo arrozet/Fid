@@ -135,6 +135,7 @@
     <string name="food_detail">Food Detail</string>
     <string name="amount">Amount</string>
     <string name="grams">grams</string>
+    <string name="ounces">ounces</string>
     <string name="unit">unit</string>
     <string name="calories">Calories</string>
     <string name="verified_manufacturer">Verified by Manufacturer/Restaurant</string>

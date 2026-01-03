@@ -138,6 +138,7 @@
     <string name="food_detail">Detalle de Alimento</string>
     <string name="amount">Cantidad</string>
     <string name="grams">gramos</string>
+    <string name="ounces">onzas</string>
     <string name="unit">unidad</string>
     <string name="calories">Calorías</string>
     <string name="verified_manufacturer">Verificado por Fabricante/Restaurante</string>

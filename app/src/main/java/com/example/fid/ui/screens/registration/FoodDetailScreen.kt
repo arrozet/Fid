@@ -38,14 +38,29 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
-    var amount by remember { mutableStateOf("100") }
-    var selectedUnit by remember { mutableStateOf("grams") }
     var foodItem by remember { mutableStateOf<FoodItem?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var user by remember { mutableStateOf<com.example.fid.data.database.entities.User?>(null) }
     
+    // Obtener la preferencia de unidad del usuario
+    val measurementUnit = user?.measurementUnit ?: "metric"
+    
+    // Inicializar unidad y cantidad según el sistema del usuario
+    var selectedUnit by remember { mutableStateOf("grams") }
+    var amount by remember { mutableStateOf("100") }
+    
+    // Cargar usuario y ajustar unidad/cantidad inicial
     LaunchedEffect(Unit) {
         user = repository.getCurrentUser()
+        val unit = user?.measurementUnit ?: "metric"
+        if (unit == "imperial") {
+            selectedUnit = "ounces"
+            // Convertir 100g a onzas (100g ≈ 3.5 oz)
+            amount = "%.1f".format(100f * UnitConverter.G_TO_OZ)
+        } else {
+            selectedUnit = "grams"
+            amount = "100"
+        }
     }
     
     // Obtener datos del alimento desde Firestore
@@ -89,11 +104,15 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
     val verificationLevel = foodItem?.verificationLevel ?: "user"
     
     val amountFloat = amount.toFloatOrNull() ?: 100f
-    val multiplier = when (selectedUnit) {
-        "grams" -> amountFloat / 100f
-        "unit" -> 1f
-        else -> amountFloat / 100f
+    
+    // Convertir la cantidad ingresada a gramos para los cálculos
+    val amountInGrams = when (selectedUnit) {
+        "ounces" -> UnitConverter.convertGramsToMetric(amountFloat, "imperial")
+        "grams" -> amountFloat
+        else -> amountFloat
     }
+    
+    val multiplier = amountInGrams / 100f
     
     val totalCalories = caloriesPer100g * multiplier
     val totalProtein = proteinPer100g * multiplier
@@ -199,7 +218,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                     
-                    // Unit selector
+                    // Unit selector - muestra gramos u onzas según el sistema del usuario
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -217,7 +236,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                         ) {
                             Text(
                                 text = if (selectedUnit == "grams") stringResource(R.string.grams) 
-                                       else stringResource(R.string.unit),
+                                       else stringResource(R.string.ounces),
                                 color = TextPrimary
                             )
                         }
@@ -227,17 +246,30 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                             onDismissRequest = { expanded = false },
                             modifier = Modifier.background(DarkCard)
                         ) {
+                            // Siempre permitir cambiar entre gramos y onzas
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.grams)) },
                                 onClick = {
+                                    // Si estaba en onzas, convertir el valor a gramos
+                                    if (selectedUnit == "ounces") {
+                                        val currentValue = amount.toFloatOrNull() ?: 0f
+                                        val gramsValue = UnitConverter.convertGramsToMetric(currentValue, "imperial")
+                                        amount = "%.1f".format(gramsValue)
+                                    }
                                     selectedUnit = "grams"
                                     expanded = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.unit)) },
+                                text = { Text(stringResource(R.string.ounces)) },
                                 onClick = {
-                                    selectedUnit = "unit"
+                                    // Si estaba en gramos, convertir el valor a onzas
+                                    if (selectedUnit == "grams") {
+                                        val currentValue = amount.toFloatOrNull() ?: 0f
+                                        val ouncesValue = UnitConverter.convertGrams(currentValue, "imperial")
+                                        amount = "%.1f".format(ouncesValue)
+                                    }
+                                    selectedUnit = "ounces"
                                     expanded = false
                                 }
                             )
@@ -303,12 +335,19 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                             val user = repository.getCurrentUser()
                             val currentFoodItem = foodItem // Variable local para smart cast
                             if (user != null && currentFoodItem != null) {
+                                // Convertir la cantidad a gramos antes de guardar
+                                val finalAmountGrams = when (selectedUnit) {
+                                    "ounces" -> UnitConverter.convertGramsToMetric(amountFloat, "imperial")
+                                    "grams" -> amountFloat
+                                    else -> amountFloat
+                                }
+                                
                                 val foodEntry = FoodEntry(
                                     userId = user.id,
                                     foodName = currentFoodItem.nameEs.ifBlank { foodName }, // Fallback a español
                                     foodNameEs = currentFoodItem.nameEs,
                                     foodNameEn = currentFoodItem.nameEn,
-                                    amountGrams = amountFloat,
+                                    amountGrams = finalAmountGrams,
                                     calories = totalCalories,
                                     proteinG = totalProtein,
                                     fatG = totalFat,
