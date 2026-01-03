@@ -15,15 +15,7 @@
     <string name="dont_have_account">¿No tienes una cuenta?</string>
     
     <!-- Auth -->
-    <string name="sign_in">Iniciar sesión</string>
-    <string name="create_account">Crear cuenta</string>
-    <string name="email">Correo electrónico</string>
-    <string name="password">Contraseña</string>
-    <string name="remember_me">Recordarme</string>
-    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
-    <string name="or_continue_with">O continuar con</string>
     <string name="continue_with_google">Continuar con Google</string>
-    <string name="continue_with_apple">Continuar con Apple</string>
     <string name="error_google_signin">Error en Google Sign-In: %1$s</string>
     
     <!-- Goal Setup -->
@@ -222,7 +214,6 @@
     <string name="my_account">Mi cuenta</string>
     <string name="personal_data">Datos personales</string>
     <string name="my_goals">Mis objetivos</string>
-    <string name="change_password">Cambiar contraseña</string>
     <string name="app_preferences">Preferencias de la app</string>
     <string name="numberless_mode_toggle">Modo sin números</string>
     <string name="numberless_mode_description">Oculta los números de calorías</string>
@@ -265,7 +256,7 @@
     <string name="contact_subject">Contacto desde Fid App</string>
     
     <string name="privacy_policy_title">Política de privacidad</string>
-    <string name="privacy_policy_content">Fid respeta tu privacidad. Recopilamos únicamente la información necesaria para proporcionarte nuestros servicios:\n\n• Datos de cuenta (email, nombre)\n• Información física (edad, peso, altura) para calcular objetivos\n• Registro de comidas y bienestar\n\nNunca vendemos ni compartimos tu información personal con terceros. Tus datos se almacenan de forma segura en Firebase.\n\nPuedes solicitar la eliminación de tus datos en cualquier momento contactándonos.</string>
+    <string name="privacy_policy_content">Fid respeta tu privacidad. Recopilamos únicamente la información necesaria para proporcionarte nuestros servicios:\n\n• Datos de cuenta a través de Google Sign-In (email, nombre)\n• Información física (edad, peso, altura) para calcular objetivos\n• Registro de comidas y bienestar\n\nUsamos Google OAuth para autenticación segura. Nunca vendemos ni compartimos tu información personal con terceros. Tus datos se almacenan de forma segura en Firebase.\n\nPuedes solicitar la eliminación de tus datos en cualquier momento contactándonos.</string>
     
     <string name="terms_of_service_title">Términos de servicio</string>
     <string name="terms_of_service_content">Al usar Fid, aceptas estos términos:\n\n1. Uso personal: Fid es para uso personal y no comercial.\n\n2. Información nutricional: La información proporcionada es orientativa y no sustituye el consejo médico profesional.\n\n3. Cuenta: Eres responsable de mantener la seguridad de tu cuenta.\n\n4. Contenido: No subas contenido inapropiado o ilegal.\n\n5. Modificaciones: Nos reservamos el derecho de modificar estos términos.\n\nÚltima actualización: Diciembre 2025</string>
@@ -308,16 +299,9 @@
     <string name="camera_permission_explanation">Para tomar fotos de tus comidas, necesitamos acceso a la cámara</string>
     
     <!-- Errors -->
-    <string name="error_empty_field">Este campo no puede estar vacío</string>
-    <string name="error_invalid_email">Correo electrónico inválido</string>
-    <string name="error_invalid_password">La contraseña debe tener al menos 6 caracteres</string>
-    <string name="error_login_failed">Error al iniciar sesión</string>
-    <string name="error_registration_failed">Error al crear cuenta</string>
     <string name="error_user_not_authenticated">Usuario no autenticado</string>
     <string name="error_user_not_found">No se encontró el usuario</string>
-    <string name="error_user_already_exists">El usuario ya existe</string>
     <string name="error_google_signin_failed">Google Sign-In falló: %1$s</string>
-    <string name="already_have_account_question">¿Ya tienes una cuenta?</string>
     <string name="error_food_info">Error: No se pudo obtener la información del alimento</string>
     <string name="error_saving">Error al guardar: %1$s</string>
     

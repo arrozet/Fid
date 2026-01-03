@@ -12,15 +12,7 @@
     <string name="dont_have_account">Don\'t have an account?</string>
     
     <!-- Auth -->
-    <string name="sign_in">Sign In</string>
-    <string name="create_account">Create Account</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="remember_me">Remember me</string>
-    <string name="forgot_password">Forgot your password?</string>
-    <string name="or_continue_with">Or continue with</string>
     <string name="continue_with_google">Continue with Google</string>
-    <string name="continue_with_apple">Continue with Apple</string>
     <string name="error_google_signin">Google Sign-In failed: %1$s</string>
     
     <!-- Goal Setup -->
@@ -219,7 +211,6 @@
     <string name="my_account">My Account</string>
     <string name="personal_data">Personal Data</string>
     <string name="my_goals">My Goals</string>
-    <string name="change_password">Change Password</string>
     <string name="app_preferences">App Preferences</string>
     <string name="numberless_mode_toggle">Numberless Mode</string>
     <string name="numberless_mode_description">Hide calorie numbers</string>
@@ -262,7 +253,7 @@
     <string name="contact_subject">Contact from Fid App</string>
     
     <string name="privacy_policy_title">Privacy Policy</string>
-    <string name="privacy_policy_content">Fid respects your privacy. We only collect the information necessary to provide our services:\n\n• Account data (email, name)\n• Physical information (age, weight, height) to calculate goals\n• Food and wellness logs\n\nWe never sell or share your personal information with third parties. Your data is securely stored in Firebase.\n\nYou can request deletion of your data at any time by contacting us.</string>
+    <string name="privacy_policy_content">Fid respects your privacy. We only collect the information necessary to provide our services:\n\n• Account data via Google Sign-In (email, name)\n• Physical information (age, weight, height) to calculate goals\n• Food and wellness logs\n\nWe use Google OAuth for secure authentication. We never sell or share your personal information with third parties. Your data is securely stored in Firebase.\n\nYou can request deletion of your data at any time by contacting us.</string>
     
     <string name="terms_of_service_title">Terms of Service</string>
     <string name="terms_of_service_content">By using Fid, you agree to these terms:\n\n1. Personal Use: Fid is for personal, non-commercial use.\n\n2. Nutritional Information: Information provided is for guidance only and does not replace professional medical advice.\n\n3. Account: You are responsible for maintaining the security of your account.\n\n4. Content: Do not upload inappropriate or illegal content.\n\n5. Modifications: We reserve the right to modify these terms.\n\nLast updated: December 2025</string>
@@ -305,16 +296,9 @@
     <string name="camera_permission_explanation">To take photos of your meals, we need access to the camera</string>
     
     <!-- Errors -->
-    <string name="error_empty_field">This field cannot be empty</string>
-    <string name="error_invalid_email">Invalid email</string>
-    <string name="error_invalid_password">Password must be at least 6 characters</string>
-    <string name="error_login_failed">Login failed</string>
-    <string name="error_registration_failed">Account creation failed</string>
     <string name="error_user_not_authenticated">User not authenticated</string>
     <string name="error_user_not_found">User not found</string>
-    <string name="error_user_already_exists">User already exists</string>
     <string name="error_google_signin_failed">Google Sign-In failed: %1$s</string>
-    <string name="already_have_account_question">Already have an account?</string>
     <string name="error_food_info">Error: Could not get food information</string>
     <string name="error_saving">Error saving: %1$s</string>
     
