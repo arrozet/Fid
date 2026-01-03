@@ -46,6 +46,10 @@ fun GoalSetupScreen(navController: NavController) {
     var selectedActivityLevel by remember { mutableStateOf("moderate") }
     var targetWeight by remember { mutableStateOf("") }
     
+    // Obtener la preferencia de unidades del usuario
+    val prefs = context.getSharedPreferences("fid_prefs", android.content.Context.MODE_PRIVATE)
+    val measurementUnit = prefs.getString("measurement_unit", "metric") ?: "metric"
+    
     // Obtener usuario actual si existe
     LaunchedEffect(Unit) {
         try {
@@ -112,9 +116,10 @@ fun GoalSetupScreen(navController: NavController) {
                     selectedGender, { selectedGender = it },
                     height, { height = it },
                     weight, { weight = it },
-                    selectedActivityLevel, { selectedActivityLevel = it }
+                    selectedActivityLevel, { selectedActivityLevel = it },
+                    measurementUnit
                 )
-                3 -> TargetWeightStep(targetWeight) { targetWeight = it }
+                3 -> TargetWeightStep(targetWeight, { targetWeight = it }, measurementUnit)
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -157,11 +162,34 @@ fun GoalSetupScreen(navController: NavController) {
                             scope.launch {
                                 try {
                                     val ageInt = age.toIntOrNull() ?: 25
-                                    val heightFloat = height.toFloatOrNull() ?: 170f
-                                    val weightFloat = weight.toFloatOrNull() ?: 70f
-                                    val targetWeightFloat = targetWeight.toFloatOrNull()
+                                    
+                                    // Convertir los valores a métrico si el usuario usa sistema imperial
+                                    val heightFloat = if (measurementUnit == "imperial") {
+                                        // Convertir pulgadas a cm
+                                        val inches = height.toFloatOrNull() ?: 67f  // 67 in ≈ 170 cm
+                                        com.example.fid.utils.UnitConverter.convertHeightToMetric(inches, "imperial")
+                                    } else {
+                                        height.toFloatOrNull() ?: 170f
+                                    }
+                                    
+                                    val weightFloat = if (measurementUnit == "imperial") {
+                                        // Convertir lb a kg
+                                        val pounds = weight.toFloatOrNull() ?: 154f  // 154 lb ≈ 70 kg
+                                        com.example.fid.utils.UnitConverter.convertWeightToMetric(pounds, "imperial")
+                                    } else {
+                                        weight.toFloatOrNull() ?: 70f
+                                    }
+                                    
+                                    val targetWeightFloat = targetWeight.toFloatOrNull()?.let { target ->
+                                        if (measurementUnit == "imperial") {
+                                            com.example.fid.utils.UnitConverter.convertWeightToMetric(target, "imperial")
+                                        } else {
+                                            target
+                                        }
+                                    }
                                     
                                     android.util.Log.d("GoalSetupScreen", "=== INICIO GUARDADO ===")
+                                    android.util.Log.d("GoalSetupScreen", "Measurement unit: $measurementUnit")
                                     android.util.Log.d("GoalSetupScreen", "Age input: '$age' -> parsed: $ageInt")
                                     android.util.Log.d("GoalSetupScreen", "Height: $heightFloat, Weight: $weightFloat, Target: $targetWeightFloat")
                                     
@@ -201,7 +229,8 @@ fun GoalSetupScreen(navController: NavController) {
                                             tdee = tdee,
                                             proteinGoalG = protein,
                                             fatGoalG = fat,
-                                            carbGoalG = carb
+                                            carbGoalG = carb,
+                                            measurementUnit = measurementUnit
                                         )
                                     } else {
                                         // NO debería llegar aquí si viene de Google Sign-In
@@ -222,7 +251,8 @@ fun GoalSetupScreen(navController: NavController) {
                                                 tdee = tdee,
                                                 proteinGoalG = protein,
                                                 fatGoalG = fat,
-                                                carbGoalG = carb
+                                                carbGoalG = carb,
+                                                measurementUnit = measurementUnit
                                             )
                                         } else {
                                             android.util.Log.e("GoalSetupScreen", "❌ No se encontró usuario existente, creando nuevo")
@@ -241,7 +271,8 @@ fun GoalSetupScreen(navController: NavController) {
                                                 proteinGoalG = protein,
                                                 fatGoalG = fat,
                                                 carbGoalG = carb,
-                                                numberlessMode = false
+                                                numberlessMode = false,
+                                                measurementUnit = measurementUnit
                                             )
                                         }
                                     }
@@ -337,7 +368,8 @@ fun PersonalInfoStep(
     selectedGender: String, onGenderChange: (String) -> Unit,
     height: String, onHeightChange: (String) -> Unit,
     weight: String, onWeightChange: (String) -> Unit,
-    selectedActivityLevel: String, onActivityLevelChange: (String) -> Unit
+    selectedActivityLevel: String, onActivityLevelChange: (String) -> Unit,
+    measurementUnit: String = "metric"
 ) {
     Column {
         Text(
@@ -384,10 +416,18 @@ fun PersonalInfoStep(
         
         Spacer(modifier = Modifier.height(16.dp))
         
+        // Altura: mostrar según el sistema de unidades
         OutlinedTextField(
             value = height,
             onValueChange = onHeightChange,
-            label = { Text(stringResource(R.string.height_cm)) },
+            label = { 
+                Text(
+                    if (measurementUnit == "imperial") 
+                        stringResource(R.string.height_in) 
+                    else 
+                        stringResource(R.string.height_cm)
+                ) 
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryGreen,
@@ -400,10 +440,18 @@ fun PersonalInfoStep(
         
         Spacer(modifier = Modifier.height(16.dp))
         
+        // Peso: mostrar según el sistema de unidades
         OutlinedTextField(
             value = weight,
             onValueChange = onWeightChange,
-            label = { Text(stringResource(R.string.current_weight_kg)) },
+            label = { 
+                Text(
+                    if (measurementUnit == "imperial") 
+                        stringResource(R.string.weight_lb) 
+                    else 
+                        stringResource(R.string.current_weight_kg)
+                ) 
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryGreen,
@@ -495,10 +543,17 @@ fun ActivityLevelButton(
 }
 
 @Composable
-fun TargetWeightStep(targetWeight: String, onTargetWeightChange: (String) -> Unit) {
+fun TargetWeightStep(
+    targetWeight: String, 
+    onTargetWeightChange: (String) -> Unit,
+    measurementUnit: String = "metric"
+) {
     Column {
         Text(
-            text = stringResource(R.string.target_weight_kg),
+            text = if (measurementUnit == "imperial") 
+                stringResource(R.string.target_weight_lb)
+            else 
+                stringResource(R.string.target_weight_kg),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary
@@ -517,7 +572,14 @@ fun TargetWeightStep(targetWeight: String, onTargetWeightChange: (String) -> Uni
         OutlinedTextField(
             value = targetWeight,
             onValueChange = onTargetWeightChange,
-            label = { Text(stringResource(R.string.target_weight_kg)) },
+            label = { 
+                Text(
+                    if (measurementUnit == "imperial") 
+                        stringResource(R.string.target_weight_lb)
+                    else 
+                        stringResource(R.string.target_weight_kg)
+                ) 
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryGreen,

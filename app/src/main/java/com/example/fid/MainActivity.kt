@@ -80,13 +80,25 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 var startDestination by remember { mutableStateOf<String?>(null) }
                 
-                // Check if user exists to determine start destination
+                // Check if user exists first, then check if initial setup is needed
                 LaunchedEffect(Unit) {
                     val user = repository.getCurrentUser()
-                    startDestination = if (user != null) {
-                        Screen.Dashboard.route
+                    
+                    startDestination = if (user == null) {
+                        // No hay usuario: siempre mostrar setup inicial para que configure idioma y unidades
+                        Screen.InitialSetup.route
                     } else {
-                        Screen.Onboarding.route
+                        // Hay usuario: verificar si tiene preferencias guardadas
+                        val initialSetupDone = prefs.getBoolean("initial_setup_done", false)
+                        val measurementUnit = prefs.getString("measurement_unit", null)
+                        
+                        if (!initialSetupDone || measurementUnit == null) {
+                            // Usuario existe pero no tiene preferencias guardadas: mostrar setup
+                            Screen.InitialSetup.route
+                        } else {
+                            // Usuario existe y tiene preferencias: ir al dashboard
+                            Screen.Dashboard.route
+                        }
                     }
                 }
                 

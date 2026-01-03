@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 sealed class Screen(val route: String) {
+    object InitialSetup : Screen("initial_setup")
     object Onboarding : Screen("onboarding")
     object Auth : Screen("auth")
     object GoalSetup : Screen("goal_setup")
@@ -34,6 +35,10 @@ fun NavGraph(
         navController = navController,
         startDestination = startDestination
     ) {
+        composable(Screen.InitialSetup.route) {
+            com.example.fid.ui.screens.setup.InitialSetupScreen(navController)
+        }
+        
         composable(Screen.Onboarding.route) {
             com.example.fid.ui.screens.onboarding.OnboardingScreen(navController)
         }

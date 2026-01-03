@@ -40,6 +40,7 @@
     <string name="height_in">Altura (in)</string>
     <string name="current_weight_kg">Peso Actual (kg)</string>
     <string name="weight_lb">Peso (lb)</string>
+    <string name="target_weight_lb">Peso Objetivo (lb)</string>
     <string name="activity_level">Nivel de Actividad</string>
     <string name="sedentary">Sedentario</string>
     <string name="light">Ligero</string>

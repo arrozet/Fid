@@ -275,8 +275,15 @@ fun SettingsScreen(navController: NavController) {
                                     val googleSignInClient = GoogleSignIn.getClient(context, gso)
                                     googleSignInClient.signOut()
                                     
-                                    // Navegar a onboarding
-                                    navController.navigate(Screen.Onboarding.route) {
+                                    // Resetear la flag de setup inicial para que se muestre de nuevo
+                                    val prefs = context.getSharedPreferences("fid_prefs", android.content.Context.MODE_PRIVATE)
+                                    prefs.edit()
+                                        .putBoolean("initial_setup_done", false)
+                                        .remove("measurement_unit")
+                                        .apply()
+                                    
+                                    // Navegar a InitialSetup para que configure de nuevo
+                                    navController.navigate(Screen.InitialSetup.route) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 } catch (e: Exception) {

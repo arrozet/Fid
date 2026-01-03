@@ -37,6 +37,7 @@
     <string name="height_in">Height (in)</string>
     <string name="current_weight_kg">Current Weight (kg)</string>
     <string name="weight_lb">Weight (lb)</string>
+    <string name="target_weight_lb">Target Weight (lb)</string>
     <string name="activity_level">Activity Level</string>
     <string name="sedentary">Sedentary</string>
     <string name="light">Light</string>
