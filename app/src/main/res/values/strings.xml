@@ -209,6 +209,15 @@
     <string name="meals_registered">comidas registradas</string>
     <string name="of_goal">del objetivo</string>
     
+    <!-- Calendar View -->
+    <string name="last_7_days">Últimos 7 días</string>
+    <string name="goal_reached_legend">Objetivo</string>
+    <string name="no_data_legend">Sin datos</string>
+    <string name="previous_month">Mes anterior</string>
+    <string name="next_month">Mes siguiente</string>
+    <string name="previous_year">Año anterior</string>
+    <string name="next_year">Año siguiente</string>
+    
     <!-- Settings -->
     <string name="settings">Ajustes</string>
     <string name="my_account">Mi cuenta</string>
