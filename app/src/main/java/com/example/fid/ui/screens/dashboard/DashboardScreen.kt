@@ -1239,7 +1239,7 @@ fun BottomNavigationBar(navController: NavController) {
                     modifier = Modifier.size(24.dp)
                 )
             },
-            label = { Text("Chef IA", fontSize = 10.sp) },
+            label = { Text(stringResource(R.string.chef_ia_title), fontSize = 10.sp) },
             selected = currentRoute == Screen.RecipeGenerator.route,
             onClick = { 
                 if (currentRoute != Screen.RecipeGenerator.route) {

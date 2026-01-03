@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.fid.data.ai.RecipeGeneratorService
 import com.example.fid.data.ai.RecipeIngredient
 import com.example.fid.data.ai.RecipeStreamState
+import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.google.firebase.auth.ktx.auth
@@ -49,19 +50,27 @@ class RecipeViewModel : ViewModel() {
     private val _saveSuccess = MutableStateFlow(false)
     val saveSuccess: StateFlow<Boolean> = _saveSuccess.asStateFlow()
     
+    // Estado para añadir a registro de hoy
+    private val _isAddingToLog = MutableStateFlow(false)
+    val isAddingToLog: StateFlow<Boolean> = _isAddingToLog.asStateFlow()
+    
+    private val _addToLogSuccess = MutableStateFlow(false)
+    val addToLogSuccess: StateFlow<Boolean> = _addToLogSuccess.asStateFlow()
+    
     // Información nutricional extraída de la receta
     private val _nutritionInfo = MutableStateFlow<RecipeNutritionInfo?>(null)
     val nutritionInfo: StateFlow<RecipeNutritionInfo?> = _nutritionInfo.asStateFlow()
     
     /**
      * Añade un nuevo ingrediente a la lista
+     * @param defaultQuantity El texto por defecto para cantidad (ej: "al gusto")
      */
-    fun addIngredient(name: String, quantity: String) {
+    fun addIngredient(name: String, quantity: String, defaultQuantity: String = "al gusto") {
         if (name.isBlank()) return
         
         val ingredient = RecipeIngredient(
             name = name.trim(),
-            quantity = quantity.trim().ifBlank { "al gusto" }
+            quantity = quantity.trim().ifBlank { defaultQuantity }
         )
         
         _ingredients.value = _ingredients.value + ingredient
@@ -96,10 +105,19 @@ class RecipeViewModel : ViewModel() {
     
     /**
      * Genera una receta basada en los ingredientes actuales usando streaming
+     * @param errorNoIngredients Mensaje de error cuando no hay ingredientes
+     * @param defaultRecipeName Nombre por defecto para la receta
+     * @param systemPrompt Prompt del sistema para la IA
+     * @param userMessageTemplate Template del mensaje del usuario
      */
-    fun generateRecipe() {
+    fun generateRecipe(
+        errorNoIngredients: String, 
+        defaultRecipeName: String,
+        systemPrompt: String,
+        userMessageTemplate: String
+    ) {
         if (_ingredients.value.isEmpty()) {
-            _errorMessage.value = "Añade al menos un ingrediente"
+            _errorMessage.value = errorNoIngredients
             return
         }
         
@@ -111,7 +129,11 @@ class RecipeViewModel : ViewModel() {
             _nutritionInfo.value = null
             _saveSuccess.value = false
             
-            recipeService.generateRecipeStream(_ingredients.value).collect { state ->
+            recipeService.generateRecipeStream(
+                _ingredients.value,
+                systemPrompt,
+                userMessageTemplate
+            ).collect { state ->
                 when (state) {
                     is RecipeStreamState.Loading -> {
                         _isGenerating.value = true
@@ -123,7 +145,7 @@ class RecipeViewModel : ViewModel() {
                         _recipeContent.value = state.content
                         _isGenerating.value = false
                         // Extraer información nutricional
-                        extractNutritionInfo(state.content)
+                        extractNutritionInfo(state.content, defaultRecipeName)
                     }
                     is RecipeStreamState.Error -> {
                         _errorMessage.value = state.message
@@ -136,38 +158,41 @@ class RecipeViewModel : ViewModel() {
     
     /**
      * Extrae la información nutricional del texto de la receta
+     * @param defaultRecipeName Nombre por defecto si no se puede extraer
      */
-    private fun extractNutritionInfo(recipeText: String) {
+    private fun extractNutritionInfo(recipeText: String, defaultRecipeName: String = "Recipe") {
         try {
             // Extraer nombre de la receta (primera línea con emoji de plato)
             val nameRegex = """🍽️\s*\**([^*\n]+)\**""".toRegex()
             val nameMatch = nameRegex.find(recipeText)
-            val recipeName = nameMatch?.groupValues?.get(1)?.trim() ?: "Receta del Chef IA"
+            val recipeName = nameMatch?.groupValues?.get(1)?.trim() ?: defaultRecipeName
             
-            // Extraer porciones
-            val portionsRegex = """👥\s*\**Porciones:\**\s*(\d+)""".toRegex(RegexOption.IGNORE_CASE)
+            // Extraer porciones (español e inglés)
+            val portionsRegex = """👥\s*\**(Porciones|Servings):\**\s*(\d+)""".toRegex(RegexOption.IGNORE_CASE)
             val portionsMatch = portionsRegex.find(recipeText)
-            val portions = portionsMatch?.groupValues?.get(1)?.toFloatOrNull() ?: 1f
+            val portions = portionsMatch?.groupValues?.get(2)?.toFloatOrNull() ?: 1f
             
-            // Extraer calorías
-            val caloriesRegex = """Calorías[:\s]*(\d+)\s*kcal""".toRegex(RegexOption.IGNORE_CASE)
+            // Extraer calorías (español e inglés)
+            val caloriesRegex = """(Calorías|Calories)[:\s]*(\d+)\s*kcal""".toRegex(RegexOption.IGNORE_CASE)
             val caloriesMatch = caloriesRegex.find(recipeText)
-            val totalCalories = caloriesMatch?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+            val totalCalories = caloriesMatch?.groupValues?.get(2)?.toFloatOrNull() ?: 0f
             
-            // Extraer proteínas
-            val proteinRegex = """Proteínas[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
+            // Extraer proteínas (español e inglés)
+            val proteinRegex = """(Proteínas|Protein)[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
             val proteinMatch = proteinRegex.find(recipeText)
-            val totalProtein = proteinMatch?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+            val totalProtein = proteinMatch?.groupValues?.get(2)?.toFloatOrNull() ?: 0f
             
-            // Extraer carbohidratos
-            val carbsRegex = """Carbohidratos[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
+            // Extraer carbohidratos (español e inglés)
+            val carbsRegex = """(Carbohidratos|Carbohydrates)[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
             val carbsMatch = carbsRegex.find(recipeText)
-            val totalCarbs = carbsMatch?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+            val totalCarbs = carbsMatch?.groupValues?.get(2)?.toFloatOrNull() ?: 0f
             
-            // Extraer grasas
-            val fatRegex = """Grasas[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
+            // Extraer grasas (español e inglés)
+            val fatRegex = """(Grasas|Fat)[:\s]*(\d+(?:\.\d+)?)\s*g""".toRegex(RegexOption.IGNORE_CASE)
             val fatMatch = fatRegex.find(recipeText)
-            val totalFat = fatMatch?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+            val totalFat = fatMatch?.groupValues?.get(2)?.toFloatOrNull() ?: 0f
+            
+            Log.d(TAG, "Nutrition extraction - Calories: $totalCalories, Protein: $totalProtein, Carbs: $totalCarbs, Fat: $totalFat")
             
             _nutritionInfo.value = RecipeNutritionInfo(
                 name = recipeName,
@@ -186,11 +211,20 @@ class RecipeViewModel : ViewModel() {
     
     /**
      * Guarda la receta como comida personalizada
+     * @param errorNoNutrition Error cuando no hay información nutricional
+     * @param errorNotLoggedIn Error cuando no hay sesión
+     * @param errorUserNotFound Error cuando no se encuentra el usuario
+     * @param errorSaving Patrón de error al guardar (debe contener %s para el mensaje)
      */
-    fun saveAsCustomFood() {
+    fun saveAsCustomFood(
+        errorNoNutrition: String,
+        errorNotLoggedIn: String,
+        errorUserNotFound: String,
+        errorSaving: String
+    ) {
         val nutrition = _nutritionInfo.value
         if (nutrition == null) {
-            _errorMessage.value = "No se pudo extraer la información nutricional"
+            _errorMessage.value = errorNoNutrition
             return
         }
         
@@ -199,14 +233,14 @@ class RecipeViewModel : ViewModel() {
             try {
                 val currentUser = Firebase.auth.currentUser
                 if (currentUser == null) {
-                    _errorMessage.value = "Debes iniciar sesión para guardar"
+                    _errorMessage.value = errorNotLoggedIn
                     _isSaving.value = false
                     return@launch
                 }
                 
                 val user = repository.getUserByEmail(currentUser.email ?: "")
                 if (user == null) {
-                    _errorMessage.value = "No se encontró el usuario"
+                    _errorMessage.value = errorUserNotFound
                     _isSaving.value = false
                     return@launch
                 }
@@ -235,7 +269,7 @@ class RecipeViewModel : ViewModel() {
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving recipe as custom food", e)
-                _errorMessage.value = "Error al guardar: ${e.message}"
+                _errorMessage.value = errorSaving.replace("%1\$s", e.message ?: "Unknown error")
             } finally {
                 _isSaving.value = false
             }
@@ -250,6 +284,89 @@ class RecipeViewModel : ViewModel() {
     }
     
     /**
+     * Añade la receta al registro de comidas de hoy
+     * @param errorNoNutrition Error cuando no hay información nutricional
+     * @param errorNotLoggedIn Error cuando no hay sesión
+     * @param errorUserNotFound Error cuando no se encuentra el usuario
+     * @param errorSaving Patrón de error al guardar (debe contener %s para el mensaje)
+     */
+    fun addToTodayLog(
+        errorNoNutrition: String,
+        errorNotLoggedIn: String,
+        errorUserNotFound: String,
+        errorSaving: String
+    ) {
+        val nutrition = _nutritionInfo.value
+        if (nutrition == null) {
+            _errorMessage.value = errorNoNutrition
+            return
+        }
+        
+        viewModelScope.launch {
+            _isAddingToLog.value = true
+            try {
+                val currentUser = Firebase.auth.currentUser
+                if (currentUser == null) {
+                    _errorMessage.value = errorNotLoggedIn
+                    _isAddingToLog.value = false
+                    return@launch
+                }
+                
+                val user = repository.getUserByEmail(currentUser.email ?: "")
+                if (user == null) {
+                    _errorMessage.value = errorUserNotFound
+                    _isAddingToLog.value = false
+                    return@launch
+                }
+                
+                // Crear FoodEntry con los datos de la receta
+                // Asumimos 1 porción = 300g aproximadamente
+                val portionGrams = 300f
+                
+                val foodEntry = FoodEntry(
+                    id = 0,
+                    userId = user.id,
+                    foodName = nutrition.name,
+                    foodNameEs = nutrition.name,
+                    foodNameEn = nutrition.name,
+                    amountGrams = portionGrams,
+                    calories = nutrition.caloriesPerPortion,
+                    proteinG = nutrition.proteinPerPortion,
+                    fatG = nutrition.fatPerPortion,
+                    carbG = nutrition.carbsPerPortion,
+                    mealType = getCurrentMealType(),
+                    registrationMethod = "manual",
+                    verificationLevel = "ai_generated",
+                    timestamp = System.currentTimeMillis()
+                )
+                
+                repository.insertFoodEntry(foodEntry)
+                _addToLogSuccess.value = true
+                Log.d(TAG, "Recipe added to today's log: ${nutrition.name}")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adding recipe to today's log", e)
+                _errorMessage.value = errorSaving.replace("%1\$s", e.message ?: "Unknown error")
+            } finally {
+                _isAddingToLog.value = false
+            }
+        }
+    }
+    
+    /**
+     * Determina el tipo de comida según la hora del día
+     */
+    private fun getCurrentMealType(): String {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 5..10 -> "breakfast"
+            in 11..15 -> "lunch"
+            in 16..20 -> "dinner"
+            else -> "snack"
+        }
+    }
+    
+    /**
      * Reinicia el estado para generar una nueva receta
      */
     fun resetRecipe() {
@@ -257,6 +374,7 @@ class RecipeViewModel : ViewModel() {
         _errorMessage.value = null
         _nutritionInfo.value = null
         _saveSuccess.value = false
+        _addToLogSuccess.value = false
     }
     
     /**

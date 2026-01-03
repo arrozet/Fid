@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.fid.R
 import com.example.fid.ui.components.SimpleMarkdownText
 import com.example.fid.ui.theme.*
 
@@ -69,7 +71,28 @@ fun RecipeScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val isSaving by viewModel.isSaving.collectAsState()
     val saveSuccess by viewModel.saveSuccess.collectAsState()
+    val isAddingToLog by viewModel.isAddingToLog.collectAsState()
+    val addToLogSuccess by viewModel.addToLogSuccess.collectAsState()
     val nutritionInfo by viewModel.nutritionInfo.collectAsState()
+    
+    // Mensajes localizados para el ViewModel
+    val recipeSavedMessage = stringResource(R.string.recipe_saved)
+    val recipeAddedMessage = stringResource(R.string.recipe_added_to_log)
+    val atTasteText = stringResource(R.string.at_taste)
+    val addAtLeastOneText = stringResource(R.string.add_at_least_one)
+    val defaultRecipeNameText = stringResource(R.string.recipe_default_name)
+    val couldNotExtractNutritionText = stringResource(R.string.could_not_extract_nutrition)
+    val mustLoginToSaveText = stringResource(R.string.must_login_to_save)
+    val userNotFoundText = stringResource(R.string.error_user_not_found)
+    val errorSavingPattern = stringResource(R.string.error_saving)
+    
+    // Prompts de IA localizados
+    val aiSystemPrompt = stringResource(R.string.ai_system_prompt)
+    val aiUserMessageTemplate = stringResource(R.string.ai_user_message_template)
+    
+    // Placeholders localizados
+    val ingredientExample = stringResource(R.string.ingredient_example)
+    val quantityExample = stringResource(R.string.quantity_example)
     
     // Mostrar errores como Toast
     LaunchedEffect(errorMessage) {
@@ -82,7 +105,14 @@ fun RecipeScreen(
     // Mostrar éxito al guardar
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
-            Toast.makeText(context, "¡Receta guardada en tus comidas!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, recipeSavedMessage, Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // Mostrar éxito al añadir al registro
+    LaunchedEffect(addToLogSuccess) {
+        if (addToLogSuccess) {
+            Toast.makeText(context, recipeAddedMessage, Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -99,7 +129,7 @@ fun RecipeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Chef IA",
+                        text = stringResource(R.string.chef_ia),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -107,7 +137,7 @@ fun RecipeScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.back),
                             tint = TextPrimary
                         )
                     }
@@ -121,7 +151,7 @@ fun RecipeScreen(
                         ) {
                             Icon(
                                 Icons.Default.RestartAlt,
-                                contentDescription = "Nueva receta",
+                                contentDescription = stringResource(R.string.new_recipe),
                                 tint = PrimaryGreen
                             )
                         }
@@ -150,7 +180,7 @@ fun RecipeScreen(
                 Column {
                     // Header de ingredientes
                     Text(
-                        text = "¿Qué tienes en la nevera?",
+                        text = stringResource(R.string.what_do_you_have),
                         color = TextPrimary,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -158,7 +188,7 @@ fun RecipeScreen(
                     )
                     
                     Text(
-                        text = "Añade los ingredientes que tienes disponibles y te sugeriré una receta rápida y saludable",
+                        text = stringResource(R.string.add_ingredients_description),
                         color = TextSecondary,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -168,10 +198,16 @@ fun RecipeScreen(
                     IngredientInputSection(
                         ingredientName = uiState.ingredientName,
                         ingredientQuantity = uiState.ingredientQuantity,
+                        ingredientExample = ingredientExample,
+                        quantityExample = quantityExample,
                         onNameChange = viewModel::updateIngredientName,
                         onQuantityChange = viewModel::updateIngredientQuantity,
                         onAddIngredient = {
-                            viewModel.addIngredient(uiState.ingredientName, uiState.ingredientQuantity)
+                            viewModel.addIngredient(
+                                uiState.ingredientName, 
+                                uiState.ingredientQuantity,
+                                atTasteText
+                            )
                             focusManager.clearFocus()
                         }
                     )
@@ -181,7 +217,7 @@ fun RecipeScreen(
                     // Lista de ingredientes añadidos
                     if (ingredients.isNotEmpty()) {
                         Text(
-                            text = "Ingredientes añadidos (${ingredients.size})",
+                            text = stringResource(R.string.ingredients_added, ingredients.size),
                             color = TextSecondary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
@@ -226,11 +262,18 @@ fun RecipeScreen(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Limpiar")
+                                Text(stringResource(R.string.clear))
                             }
                             
                             Button(
-                                onClick = { viewModel.generateRecipe() },
+                                onClick = { 
+                                    viewModel.generateRecipe(
+                                        errorNoIngredients = addAtLeastOneText,
+                                        defaultRecipeName = defaultRecipeNameText,
+                                        systemPrompt = aiSystemPrompt,
+                                        userMessageTemplate = aiUserMessageTemplate
+                                    ) 
+                                },
                                 modifier = Modifier.weight(2f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = PrimaryGreen,
@@ -245,7 +288,7 @@ fun RecipeScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    "Generar Receta",
+                                    stringResource(R.string.generate_recipe),
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -308,15 +351,32 @@ fun RecipeScreen(
                             }
                         }
                         
-                        // Botón para guardar como comida personalizada
+                        // Botones de acción para la receta
                         if (!isGenerating && nutritionInfo != null) {
                             Spacer(modifier = Modifier.height(16.dp))
                             
-                            SaveRecipeButton(
+                            RecipeActionButtons(
                                 nutritionInfo = nutritionInfo!!,
                                 isSaving = isSaving,
                                 saveSuccess = saveSuccess,
-                                onSave = { viewModel.saveAsCustomFood() }
+                                isAddingToLog = isAddingToLog,
+                                addToLogSuccess = addToLogSuccess,
+                                onSave = { 
+                                    viewModel.saveAsCustomFood(
+                                        errorNoNutrition = couldNotExtractNutritionText,
+                                        errorNotLoggedIn = mustLoginToSaveText,
+                                        errorUserNotFound = userNotFoundText,
+                                        errorSaving = errorSavingPattern
+                                    ) 
+                                },
+                                onAddToLog = {
+                                    viewModel.addToTodayLog(
+                                        errorNoNutrition = couldNotExtractNutritionText,
+                                        errorNotLoggedIn = mustLoginToSaveText,
+                                        errorUserNotFound = userNotFoundText,
+                                        errorSaving = errorSavingPattern
+                                    )
+                                }
                             )
                         }
                     }
@@ -332,6 +392,8 @@ fun RecipeScreen(
 private fun IngredientInputSection(
     ingredientName: String,
     ingredientQuantity: String,
+    ingredientExample: String,
+    quantityExample: String,
     onNameChange: (String) -> Unit,
     onQuantityChange: (String) -> Unit,
     onAddIngredient: () -> Unit
@@ -356,8 +418,8 @@ private fun IngredientInputSection(
                 OutlinedTextField(
                     value = ingredientName,
                     onValueChange = onNameChange,
-                    label = { Text("Ingrediente") },
-                    placeholder = { Text("Ej: Pollo") },
+                    label = { Text(stringResource(R.string.ingredient)) },
+                    placeholder = { Text(ingredientExample) },
                     modifier = Modifier.weight(2f),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryGreen,
@@ -381,8 +443,8 @@ private fun IngredientInputSection(
                 OutlinedTextField(
                     value = ingredientQuantity,
                     onValueChange = onQuantityChange,
-                    label = { Text("Cantidad") },
-                    placeholder = { Text("Ej: 500g") },
+                    label = { Text(stringResource(R.string.quantity)) },
+                    placeholder = { Text(quantityExample) },
                     modifier = Modifier.weight(1f),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryGreen,
@@ -423,7 +485,7 @@ private fun IngredientInputSection(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Añadir ingrediente")
+                Text(stringResource(R.string.add_ingredient))
             }
         }
     }
@@ -527,14 +589,14 @@ private fun EmptyIngredientsState() {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Sin ingredientes",
+            text = stringResource(R.string.no_ingredients),
             color = TextSecondary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )
         
         Text(
-            text = "Añade ingredientes para generar una receta",
+            text = stringResource(R.string.add_ingredients_hint),
             color = TextTertiary,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
@@ -575,7 +637,7 @@ private fun StreamingIndicator() {
         Spacer(modifier = Modifier.width(8.dp))
         
         Text(
-            text = "Generando receta...",
+            text = stringResource(R.string.generating_recipe),
             color = PrimaryGreen,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
@@ -608,6 +670,197 @@ private fun BlinkingCursor() {
 }
 
 @Composable
+private fun RecipeActionButtons(
+    nutritionInfo: RecipeNutritionInfo,
+    isSaving: Boolean,
+    saveSuccess: Boolean,
+    isAddingToLog: Boolean,
+    addToLogSuccess: Boolean,
+    onSave: () -> Unit,
+    onAddToLog: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = DarkCard
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Resumen nutricional
+            Text(
+                text = stringResource(R.string.nutrition_summary),
+                color = TextPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                NutritionChip(
+                    label = stringResource(R.string.calories_label),
+                    value = "${nutritionInfo.caloriesPerPortion.toInt()}",
+                    unit = "kcal",
+                    color = PrimaryGreen
+                )
+                NutritionChip(
+                    label = stringResource(R.string.protein_label),
+                    value = "${nutritionInfo.proteinPerPortion.toInt()}",
+                    unit = "g",
+                    color = ProteinColor
+                )
+                NutritionChip(
+                    label = stringResource(R.string.carbs_label),
+                    value = "${nutritionInfo.carbsPerPortion.toInt()}",
+                    unit = "g",
+                    color = CarbColor
+                )
+                NutritionChip(
+                    label = stringResource(R.string.fat_label),
+                    value = "${nutritionInfo.fatPerPortion.toInt()}",
+                    unit = "g",
+                    color = FatColor
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Botón de añadir a mi registro de hoy
+            Button(
+                onClick = onAddToLog,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (addToLogSuccess) SuccessGreen else WarningYellow,
+                    contentColor = DarkBackground,
+                    disabledContainerColor = WarningYellow.copy(alpha = 0.5f)
+                ),
+                enabled = !isAddingToLog && !addToLogSuccess,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isAddingToLog) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = DarkBackground,
+                        strokeWidth = 2.dp
+                    )
+                } else if (addToLogSuccess) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.added_to_today),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Restaurant,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.add_to_today),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+            
+            if (!addToLogSuccess) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.will_add_to_log, nutritionInfo.name),
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Botón de guardar en mis comidas
+            OutlinedButton(
+                onClick = onSave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = if (saveSuccess) SuccessGreen.copy(alpha = 0.1f) else DarkCard,
+                    contentColor = if (saveSuccess) SuccessGreen else PrimaryGreen,
+                    disabledContentColor = PrimaryGreen.copy(alpha = 0.5f)
+                ),
+                enabled = !isSaving && !saveSuccess,
+                shape = RoundedCornerShape(12.dp),
+                border = ButtonDefaults.outlinedButtonBorder.copy(
+                    brush = Brush.horizontalGradient(
+                        listOf(
+                            if (saveSuccess) SuccessGreen else PrimaryGreen,
+                            if (saveSuccess) SuccessGreen else PrimaryGreen
+                        )
+                    )
+                )
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = PrimaryGreen,
+                        strokeWidth = 2.dp
+                    )
+                } else if (saveSuccess) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.saved),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.BookmarkAdd,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.save_to_my_foods),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+            
+            if (!saveSuccess) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.will_be_saved_as, nutritionInfo.name),
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SaveRecipeButton(
     nutritionInfo: RecipeNutritionInfo,
     isSaving: Boolean,
@@ -626,7 +879,7 @@ private fun SaveRecipeButton(
         ) {
             // Resumen nutricional
             Text(
-                text = "📊 Resumen nutricional por porción",
+                text = stringResource(R.string.nutrition_summary),
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -639,25 +892,25 @@ private fun SaveRecipeButton(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 NutritionChip(
-                    label = "Calorías",
+                    label = stringResource(R.string.calories_label),
                     value = "${nutritionInfo.caloriesPerPortion.toInt()}",
                     unit = "kcal",
                     color = PrimaryGreen
                 )
                 NutritionChip(
-                    label = "Proteínas",
+                    label = stringResource(R.string.protein_label),
                     value = "${nutritionInfo.proteinPerPortion.toInt()}",
                     unit = "g",
                     color = ProteinColor
                 )
                 NutritionChip(
-                    label = "Carbs",
+                    label = stringResource(R.string.carbs_label),
                     value = "${nutritionInfo.carbsPerPortion.toInt()}",
                     unit = "g",
                     color = CarbColor
                 )
                 NutritionChip(
-                    label = "Grasas",
+                    label = stringResource(R.string.fat_label),
                     value = "${nutritionInfo.fatPerPortion.toInt()}",
                     unit = "g",
                     color = FatColor
@@ -694,7 +947,7 @@ private fun SaveRecipeButton(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "¡Guardado!",
+                        stringResource(R.string.saved),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
@@ -706,7 +959,7 @@ private fun SaveRecipeButton(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Guardar en mis comidas",
+                        stringResource(R.string.save_to_my_foods),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
@@ -716,7 +969,7 @@ private fun SaveRecipeButton(
             if (!saveSuccess) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Se guardará como \"${nutritionInfo.name}\" en tus comidas personalizadas",
+                    text = stringResource(R.string.will_be_saved_as, nutritionInfo.name),
                     color = TextSecondary,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,

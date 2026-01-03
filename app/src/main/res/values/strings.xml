@@ -434,4 +434,44 @@
     <string name="view_ingredients">Ver ingredientes</string>
     <string name="ingredients_detected">Ingredientes detectados</string>
     <string name="review_ai_details">Revisa los datos detectados por IA:</string>
+    
+    <!-- Chef IA / Recipe Generator -->
+    <string name="chef_ia">Chef IA</string>
+    <string name="chef_ia_title">Chef IA</string>
+    <string name="recipe_default_name">Receta del Chef IA</string>
+    <string name="what_do_you_have">¿Qué tienes en la nevera?</string>
+    <string name="add_ingredients_description">Añade los ingredientes que tienes disponibles y te sugeriré una receta rápida y saludable</string>
+    <string name="ingredient">Ingrediente</string>
+    <string name="quantity">Cantidad</string>
+    <string name="add_ingredient">Añadir ingrediente</string>
+    <string name="ingredients_added">Ingredientes añadidos (%1$d)</string>
+    <string name="no_ingredients">Sin ingredientes</string>
+    <string name="add_ingredients_hint">Añade ingredientes para generar una receta</string>
+    <string name="clear">Limpiar</string>
+    <string name="generate_recipe">Generar Receta</string>
+    <string name="generating_recipe">Generando receta...</string>
+    <string name="nutrition_summary">📊 Resumen nutricional por porción</string>
+    <string name="calories_label">Calorías</string>
+    <string name="protein_label">Proteínas</string>
+    <string name="carbs_label">Carbs</string>
+    <string name="fat_label">Grasas</string>
+    <string name="save_to_my_foods">Guardar en mis comidas</string>
+    <string name="saved">¡Guardado!</string>
+    <string name="will_be_saved_as">Se guardará como "%1$s" en tus comidas personalizadas</string>
+    <string name="recipe_saved">¡Receta guardada en tus comidas!</string>
+    <string name="add_to_today">Añadir a mi registro de hoy</string>
+    <string name="added_to_today">¡Añadido!</string>
+    <string name="will_add_to_log">Se añadirá "%1$s" a tu registro del día</string>
+    <string name="recipe_added_to_log">¡Receta añadida a tu registro!</string>
+    <string name="at_taste">al gusto</string>
+    <string name="add_at_least_one">Añade al menos un ingrediente</string>
+    <string name="could_not_extract_nutrition">No se pudo extraer la información nutricional</string>
+    <string name="must_login_to_save">Debes iniciar sesión para guardar</string>
+    <string name="new_recipe">Nueva receta</string>
+    
+    <!-- AI Recipe Prompt -->
+    <string name="ai_system_prompt">Eres un chef profesional y nutricionista experto. Tu tarea es crear recetas saludables, rápidas y deliciosas usando los ingredientes que el usuario tiene disponibles.\n\nINSTRUCCIONES:\n1. Analiza los ingredientes disponibles\n2. Crea UNA receta que sea:\n   - Rápida de preparar (menos de 30 minutos)\n   - Saludable y nutritiva\n   - Sencilla de seguir\n   - Que aproveche al máximo los ingredientes disponibles\n\nFORMATO DE RESPUESTA:\nUsa el siguiente formato con emojis para hacerlo más visual:\n\n🍽️ **[NOMBRE DE LA RECETA]**\n\n⏱️ **Tiempo de preparación:** X minutos\n👥 **Porciones:** X personas\n🔥 **Dificultad:** Fácil/Media\n\n📝 **INGREDIENTES NECESARIOS:**\n(Lista los ingredientes con las cantidades exactas)\n\n👨‍🍳 **PASOS A SEGUIR:**\n1. [Paso detallado]\n2. [Paso detallado]\n...\n\n💡 **CONSEJOS:**\n- [Consejo útil para mejorar el plato]\n\n🥗 **INFORMACIÓN NUTRICIONAL APROXIMADA (por porción):**\n- Calorías: X kcal\n- Proteínas: X g\n- Carbohidratos: X g\n- Grasas: X g\n\nSé creativo pero práctico. El usuario quiere cocinar algo rico y saludable con lo que tiene.</string>
+    <string name="ai_user_message_template">Tengo estos ingredientes disponibles:\n\n%1$s\n\nPor favor, sugiere una receta rápida, sencilla y saludable que pueda preparar con estos ingredientes. Si falta algún ingrediente básico común (sal, aceite, especias), puedes asumirlo.</string>
+    <string name="ingredient_example">Ej: Pollo</string>
+    <string name="quantity_example">Ej: 500g</string>
 </resources>

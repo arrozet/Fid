@@ -54,9 +54,15 @@ class RecipeGeneratorService {
     /**
      * Genera una receta basada en los ingredientes proporcionados usando streaming
      * @param ingredients Lista de ingredientes con sus cantidades
+     * @param systemPrompt Prompt del sistema en el idioma del usuario
+     * @param userMessageTemplate Template del mensaje del usuario con %1$s para los ingredientes
      * @return Flow que emite el texto de la receta progresivamente
      */
-    fun generateRecipeStream(ingredients: List<RecipeIngredient>): Flow<RecipeStreamState> = flow {
+    fun generateRecipeStream(
+        ingredients: List<RecipeIngredient>,
+        systemPrompt: String,
+        userMessageTemplate: String
+    ): Flow<RecipeStreamState> = flow {
         try {
             val apiKey = BuildConfig.GROK_API_KEY
             val model = BuildConfig.GROK_MODEL
@@ -74,7 +80,7 @@ class RecipeGeneratorService {
             
             emit(RecipeStreamState.Loading)
             
-            val requestBody = buildRecipeRequest(model, ingredients)
+            val requestBody = buildRecipeRequest(model, ingredients, systemPrompt, userMessageTemplate)
             
             val request = Request.Builder()
                 .url(API_URL)
@@ -139,58 +145,17 @@ class RecipeGeneratorService {
         }
     }.flowOn(Dispatchers.IO)
     
-    private fun buildRecipeRequest(model: String, ingredients: List<RecipeIngredient>): String {
+    private fun buildRecipeRequest(
+        model: String, 
+        ingredients: List<RecipeIngredient>,
+        systemPrompt: String,
+        userMessageTemplate: String
+    ): String {
         val ingredientsList = ingredients.joinToString("\n") { ingredient ->
             "- ${ingredient.name}: ${ingredient.quantity}"
         }
         
-        val systemPrompt = """
-Eres un chef profesional y nutricionista experto. Tu tarea es crear recetas saludables, rápidas y deliciosas usando los ingredientes que el usuario tiene disponibles.
-
-INSTRUCCIONES:
-1. Analiza los ingredientes disponibles
-2. Crea UNA receta que sea:
-   - Rápida de preparar (menos de 30 minutos)
-   - Saludable y nutritiva
-   - Sencilla de seguir
-   - Que aproveche al máximo los ingredientes disponibles
-
-FORMATO DE RESPUESTA:
-Usa el siguiente formato con emojis para hacerlo más visual:
-
-🍽️ **[NOMBRE DE LA RECETA]**
-
-⏱️ **Tiempo de preparación:** X minutos
-👥 **Porciones:** X personas
-🔥 **Dificultad:** Fácil/Media
-
-📝 **INGREDIENTES NECESARIOS:**
-(Lista los ingredientes con las cantidades exactas)
-
-👨‍🍳 **PASOS A SEGUIR:**
-1. [Paso detallado]
-2. [Paso detallado]
-...
-
-💡 **CONSEJOS:**
-- [Consejo útil para mejorar el plato]
-
-🥗 **INFORMACIÓN NUTRICIONAL APROXIMADA (por porción):**
-- Calorías: X kcal
-- Proteínas: X g
-- Carbohidratos: X g
-- Grasas: X g
-
-Sé creativo pero práctico. El usuario quiere cocinar algo rico y saludable con lo que tiene.
-""".trimIndent()
-        
-        val userMessage = """
-Tengo estos ingredientes disponibles:
-
-$ingredientsList
-
-Por favor, sugiere una receta rápida, sencilla y saludable que pueda preparar con estos ingredientes. Si falta algún ingrediente básico común (sal, aceite, especias), puedes asumirlo.
-""".trimIndent()
+        val userMessage = userMessageTemplate.replace("%1\$s", ingredientsList)
         
         val messages = listOf(
             mapOf("role" to "system", "content" to systemPrompt),
