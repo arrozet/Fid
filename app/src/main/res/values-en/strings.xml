@@ -416,4 +416,14 @@
     <string name="water_goal_title">Daily goal</string>
     <string name="enter_water_goal">Enter goal (ml)</string>
     <string name="goal_updated">Goal updated</string>
+    
+    <!-- AI Food Analysis -->
+    <string name="analyzing_food_ai">Analyzing with AI...</string>
+    <string name="analyzing_food_description">Our AI is identifying ingredients and calculating nutritional values of your food</string>
+    <string name="ai_analysis_complete">AI analysis complete</string>
+    <string name="ai_analysis_failed">AI analysis failed</string>
+    <string name="ai_confidence">Confidence: %1$s</string>
+    <string name="view_ingredients">View ingredients</string>
+    <string name="ingredients_detected">Ingredients detected</string>
+    <string name="review_ai_details">Review AI-detected data:</string>
 </resources>
