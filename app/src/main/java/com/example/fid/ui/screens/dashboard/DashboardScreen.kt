@@ -22,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -98,13 +99,15 @@ fun DashboardScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddMenu = true },
-                containerColor = PrimaryGreen,
-                contentColor = DarkBackground,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Food")
+            if (!showAddMenu) {
+                FloatingActionButton(
+                    onClick = { showAddMenu = true },
+                    containerColor = PrimaryGreen,
+                    contentColor = DarkBackground,
+                    shape = CircleShape
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Food")
+                }
             }
         },
         bottomBar = {
@@ -244,10 +247,6 @@ fun DashboardScreen(
                     onPhotoClick = {
                         showAddMenu = false
                         navController.navigate(Screen.PhotoRegistration.route)
-                    },
-                    onVoiceClick = {
-                        showAddMenu = false
-                        navController.navigate(Screen.VoiceRegistration.route)
                     },
                     onManualClick = {
                         showAddMenu = false
@@ -1074,24 +1073,22 @@ fun FoodEntryCard(
 fun AddFoodMenu(
     onDismiss: () -> Unit,
     onPhotoClick: () -> Unit,
-    onVoiceClick: () -> Unit,
     onManualClick: () -> Unit
 ) {
     // InteractionSources para detectar el estado pressed de cada botón
     val photoInteractionSource = remember { MutableInteractionSource() }
-    val voiceInteractionSource = remember { MutableInteractionSource() }
     val manualInteractionSource = remember { MutableInteractionSource() }
     
     val isPhotoPressed by photoInteractionSource.collectIsPressedAsState()
-    val isVoicePressed by voiceInteractionSource.collectIsPressedAsState()
     val isManualPressed by manualInteractionSource.collectIsPressedAsState()
     
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .zIndex(10f) // Asegurar que esté por encima del FAB
             .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.7f))
             .clickable(onClick = onDismiss)
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 100.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Column(
@@ -1133,32 +1130,7 @@ fun AddFoodMenu(
                 )
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            OutlinedButton(
-                onClick = onVoiceClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .graphicsLayer {
-                        scaleX = if (isVoicePressed) 0.96f else 1f
-                        scaleY = if (isVoicePressed) 0.96f else 1f
-                    },
-                interactionSource = voiceInteractionSource,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = if (isVoicePressed) PrimaryGreenLight else PrimaryGreen,
-                    containerColor = if (isVoicePressed) PrimaryGreen.copy(alpha = 0.1f) else androidx.compose.ui.graphics.Color.Transparent
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.voice_registration),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
             OutlinedButton(
                 onClick = onManualClick,
