@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.fid.R
 import com.example.fid.data.database.entities.FoodEntry
@@ -45,57 +46,30 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(navController: NavController) {
+fun DashboardScreen(
+    navController: NavController,
+    viewModel: DashboardViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val repository = remember { FirebaseRepository() }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     
-    var user by remember { mutableStateOf<User?>(null) }
-    var foodEntries by remember { mutableStateOf<List<FoodEntry>>(emptyList()) }
-    var wellnessEntry by remember { mutableStateOf<WellnessEntry?>(null) }
+    // Collect state from ViewModel
+    val user by viewModel.user.collectAsState()
+    val foodEntries by viewModel.foodEntries.collectAsState()
+    val wellnessEntry by viewModel.wellnessEntry.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    
     var showAddMenu by remember { mutableStateOf(false) }
     var showWaterDialog by remember { mutableStateOf(false) }
     var showSleepDialog by remember { mutableStateOf(false) }
     var showDeleteFoodDialog by remember { mutableStateOf(false) }
     var foodEntryToDelete by remember { mutableStateOf<FoodEntry?>(null) }
     
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-    calendar.set(Calendar.MILLISECOND, 0)
-    val startOfDay = calendar.timeInMillis
-    val endOfDay = startOfDay + 24 * 60 * 60 * 1000
-    
-    // Función para recargar wellness
-    fun refreshWellness(userId: Long) {
-        scope.launch {
-            wellnessEntry = repository.getTodayWellnessEntry(userId)
-        }
-    }
-    
-    LaunchedEffect(Unit) {
-        user = repository.getCurrentUser()
-        user?.let { u ->
-            // Calcular y guardar resumen diario actual
-            scope.launch {
-                repository.calculateAndSaveDailySummary(u.id, System.currentTimeMillis())
-            }
-            
-            // Cargar wellness entry del día
-            wellnessEntry = repository.getTodayWellnessEntry(u.id)
-            
-            repository.getFoodEntriesByDateRange(u.id, startOfDay, endOfDay).collect { entries ->
-                foodEntries = entries
-            }
-        }
-    }
-    
-    val totalCalories = foodEntries.sumOf { it.calories.toDouble() }.toFloat()
-    val totalProtein = foodEntries.sumOf { it.proteinG.toDouble() }.toFloat()
-    val totalFat = foodEntries.sumOf { it.fatG.toDouble() }.toFloat()
-    val totalCarbs = foodEntries.sumOf { it.carbG.toDouble() }.toFloat()
+    val totalCalories = uiState.totalCalories
+    val totalProtein = uiState.totalProtein
+    val totalFat = uiState.totalFat
+    val totalCarbs = uiState.totalCarbs
     
     // Check if numberless mode is enabled
     val isNumberlessMode = user?.numberlessMode ?: false
@@ -289,31 +263,24 @@ fun DashboardScreen(navController: NavController) {
                     goalMl = user?.waterGoalMl ?: 2500f,
                     onDismiss = { showWaterDialog = false },
                     onAddWater = { amountMl ->
-                        user?.let { u ->
-                            scope.launch {
-                                repository.addWaterIntake(u.id, amountMl)
-                                refreshWellness(u.id)
-                                Toast.makeText(context, context.getString(R.string.water_added), Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        viewModel.addWaterIntake(amountMl)
+                        Toast.makeText(context, context.getString(R.string.water_added), Toast.LENGTH_SHORT).show()
                         showWaterDialog = false
                     },
                     onReset = {
-                        user?.let { u ->
-                            scope.launch {
-                                repository.resetWaterIntake(u.id)
-                                refreshWellness(u.id)
-                                Toast.makeText(context, context.getString(R.string.water_reset), Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        viewModel.resetWaterIntake()
+                        Toast.makeText(context, context.getString(R.string.water_reset), Toast.LENGTH_SHORT).show()
                         showWaterDialog = false
                     },
                     onChangeGoal = { newGoalMl ->
+                        // Note: For now, keep using repository directly for user update
+                        // This could be moved to ViewModel in a future refactor
                         user?.let { u ->
                             scope.launch {
+                                val repository = FirebaseRepository()
                                 val updatedUser = u.copy(waterGoalMl = newGoalMl)
                                 repository.updateUser(updatedUser)
-                                user = updatedUser
+                                viewModel.loadDashboardData()
                                 Toast.makeText(context, context.getString(R.string.goal_updated), Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -327,13 +294,8 @@ fun DashboardScreen(navController: NavController) {
                     currentHours = wellnessEntry?.sleepHours ?: 0f,
                     onDismiss = { showSleepDialog = false },
                     onSaveSleep = { hours ->
-                        user?.let { u ->
-                            scope.launch {
-                                repository.setSleepHours(u.id, hours)
-                                refreshWellness(u.id)
-                                Toast.makeText(context, context.getString(R.string.sleep_logged), Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        viewModel.setSleepHours(hours)
+                        Toast.makeText(context, context.getString(R.string.sleep_logged), Toast.LENGTH_SHORT).show()
                         showSleepDialog = false
                     }
                 )
@@ -362,10 +324,8 @@ fun DashboardScreen(navController: NavController) {
                         TextButton(
                             onClick = {
                                 foodEntryToDelete?.let { entry ->
-                                    scope.launch {
-                                        repository.deleteFoodEntry(entry)
-                                        Toast.makeText(context, context.getString(R.string.food_deleted), Toast.LENGTH_SHORT).show()
-                                    }
+                                    viewModel.deleteFoodEntry(entry)
+                                    Toast.makeText(context, context.getString(R.string.food_deleted), Toast.LENGTH_SHORT).show()
                                 }
                                 showDeleteFoodDialog = false
                                 foodEntryToDelete = null
