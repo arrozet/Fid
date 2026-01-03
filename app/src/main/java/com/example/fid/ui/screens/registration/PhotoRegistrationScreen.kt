@@ -50,6 +50,7 @@ import com.example.fid.data.database.entities.FoodEntry
 import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
+import com.example.fid.utils.UnitConverter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -162,6 +163,7 @@ fun PhotoRegistrationScreen(navController: NavController) {
                 FoodConfirmationScreen(
                     image = confirmationState.image,
                     analysisResult = confirmationState.analysisResult,
+                    repository = repository,
                     onConfirm = { foodName, foodNameEs, foodNameEn, amount, calories, protein, fat, carbs, mealType ->
                         // Save to database and navigate back
                         scope.launch {
@@ -429,19 +431,58 @@ fun AIAnalyzingScreen(
 fun FoodConfirmationScreen(
     image: Bitmap,
     analysisResult: FoodAnalysisResult?,
+    repository: FirebaseRepository,
     onConfirm: (String, String, String, Float, Float, Float, Float, Float, String) -> Unit,
     onRetake: () -> Unit,
     onCancel: () -> Unit
 ) {
-    // Pre-fill with AI analysis if available
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    
+    // Get user preferences
+    var userMeasurementUnit by remember { mutableStateOf("metric") }
+    
+    // Pre-fill with AI analysis if available - will be converted after user prefs loaded
     var foodName by remember { mutableStateOf(analysisResult?.foodName ?: "") }
     var foodNameEs by remember { mutableStateOf(analysisResult?.foodNameEs ?: "") }
     var foodNameEn by remember { mutableStateOf(analysisResult?.foodNameEn ?: "") }
-    var amount by remember { mutableStateOf(analysisResult?.totalEstimatedGrams?.takeIf { it > 0 }?.toString() ?: "") }
+    var amount by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf(analysisResult?.totalCalories?.takeIf { it > 0 }?.toString() ?: "") }
-    var protein by remember { mutableStateOf(analysisResult?.totalProteinG?.takeIf { it > 0 }?.toString() ?: "") }
-    var fat by remember { mutableStateOf(analysisResult?.totalFatG?.takeIf { it > 0 }?.toString() ?: "") }
-    var carbs by remember { mutableStateOf(analysisResult?.totalCarbsG?.takeIf { it > 0 }?.toString() ?: "") }
+    var protein by remember { mutableStateOf("") }
+    var fat by remember { mutableStateOf("") }
+    var carbs by remember { mutableStateOf("") }
+    
+    // Helper function to convert grams to display unit
+    fun convertToDisplayUnit(grams: Float?): String {
+        if (grams == null || grams <= 0) return ""
+        val value = if (userMeasurementUnit == "imperial") {
+            UnitConverter.convertGrams(grams, "imperial")
+        } else {
+            grams
+        }
+        // Format to 1 decimal place with dot (not comma) for consistency
+        return "%.1f".format(java.util.Locale.US, value)
+    }
+    
+    LaunchedEffect(Unit) {
+        scope.launch {
+            try {
+                val currentUser = Firebase.auth.currentUser
+                val user = currentUser?.email?.let { repository.getUserByEmail(it) }
+                userMeasurementUnit = user?.measurementUnit ?: "metric"
+                
+                // Now convert AI values to display units
+                if (analysisResult != null) {
+                    amount = convertToDisplayUnit(analysisResult.totalEstimatedGrams)
+                    protein = convertToDisplayUnit(analysisResult.totalProteinG)
+                    fat = convertToDisplayUnit(analysisResult.totalFatG)
+                    carbs = convertToDisplayUnit(analysisResult.totalCarbsG)
+                }
+            } catch (e: Exception) {
+                // Default to metric if error
+            }
+        }
+    }
     var selectedMealType by remember { mutableStateOf(analysisResult?.suggestedMealType ?: "snack") }
     var showMealTypeMenu by remember { mutableStateOf(false) }
     var showIngredientsDialog by remember { mutableStateOf(false) }
@@ -648,11 +689,17 @@ fun FoodConfirmationScreen(
         
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Amount
+        // Amount with unit label
+        val amountLabel = if (userMeasurementUnit == "imperial") {
+            stringResource(R.string.amount_ounces_label)
+        } else {
+            stringResource(R.string.amount_grams_label)
+        }
+        
         OutlinedTextField(
             value = amount,
             onValueChange = { amount = it },
-            label = { Text(stringResource(R.string.amount_grams_label)) },
+            label = { Text(amountLabel) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -700,10 +747,15 @@ fun FoodConfirmationScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Protein
+            val proteinLabel = if (userMeasurementUnit == "imperial") {
+                stringResource(R.string.protein_oz_label)
+            } else {
+                stringResource(R.string.protein_g_label)
+            }
             OutlinedTextField(
                 value = protein,
                 onValueChange = { protein = it },
-                label = { Text(stringResource(R.string.protein_g_label)) },
+                label = { Text(proteinLabel) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -717,10 +769,15 @@ fun FoodConfirmationScreen(
             )
             
             // Fat
+            val fatLabel = if (userMeasurementUnit == "imperial") {
+                stringResource(R.string.fat_oz_label)
+            } else {
+                stringResource(R.string.fat_g_label)
+            }
             OutlinedTextField(
                 value = fat,
                 onValueChange = { fat = it },
-                label = { Text(stringResource(R.string.fat_g_label)) },
+                label = { Text(fatLabel) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -737,10 +794,15 @@ fun FoodConfirmationScreen(
         Spacer(modifier = Modifier.height(12.dp))
         
         // Carbs
+        val carbsLabel = if (userMeasurementUnit == "imperial") {
+            stringResource(R.string.carbs_oz_label)
+        } else {
+            stringResource(R.string.carbs_g_label)
+        }
         OutlinedTextField(
             value = carbs,
             onValueChange = { carbs = it },
-            label = { Text(stringResource(R.string.carbs_g_label)) },
+            label = { Text(carbsLabel) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -772,22 +834,31 @@ fun FoodConfirmationScreen(
             
             Button(
                 onClick = {
-                    val amountFloat = amount.toFloatOrNull() ?: 0f
+                    var amountFloat = amount.toFloatOrNull() ?: 0f
+                    var proteinFloat = protein.toFloatOrNull() ?: 0f
+                    var fatFloat = fat.toFloatOrNull() ?: 0f
+                    var carbsFloat = carbs.toFloatOrNull() ?: 0f
+                    
+                    // Convert from ounces to grams if user is in imperial
+                    if (userMeasurementUnit == "imperial") {
+                        if (amountFloat > 0) amountFloat = amountFloat / UnitConverter.G_TO_OZ
+                        if (proteinFloat > 0) proteinFloat = proteinFloat / UnitConverter.G_TO_OZ
+                        if (fatFloat > 0) fatFloat = fatFloat / UnitConverter.G_TO_OZ
+                        if (carbsFloat > 0) carbsFloat = carbsFloat / UnitConverter.G_TO_OZ
+                    }
+                    
                     val caloriesFloat = calories.toFloatOrNull() ?: 0f
-                    val proteinFloat = protein.toFloatOrNull() ?: 0f
-                    val fatFloat = fat.toFloatOrNull() ?: 0f
-                    val carbsFloat = carbs.toFloatOrNull() ?: 0f
                     
                     if (foodName.isNotEmpty() && amountFloat > 0) {
                         onConfirm(
                             foodName,
                             foodNameEs.ifBlank { foodName },
                             foodNameEn.ifBlank { foodName },
-                            amountFloat,
+                            amountFloat, // Always save in grams
                             caloriesFloat,
-                            proteinFloat,
-                            fatFloat,
-                            carbsFloat,
+                            proteinFloat, // Always save in grams
+                            fatFloat, // Always save in grams
+                            carbsFloat, // Always save in grams
                             selectedMealType
                         )
                     }

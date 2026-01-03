@@ -96,11 +96,15 @@
     <string name="food_name_label">Nombre de la comida</string>
     <string name="meal_type_label">Tipo de comida</string>
     <string name="amount_grams_label">Cantidad (gramos)</string>
+    <string name="amount_ounces_label">Cantidad (onzas)</string>
     <string name="macronutrients_label">Macronutrientes:</string>
     <string name="calories_kcal_label">Calorías (kcal)</string>
     <string name="protein_g_label">Proteína (g)</string>
     <string name="fat_g_label">Grasa (g)</string>
     <string name="carbs_g_label">Carbohidratos (g)</string>
+    <string name="protein_oz_label">Proteína (oz)</string>
+    <string name="fat_oz_label">Grasa (oz)</string>
+    <string name="carbs_oz_label">Carbohidratos (oz)</string>
     <string name="food_registered_success">Comida registrada exitosamente</string>
     <string name="no_frequent_foods">No hay alimentos frecuentes aún</string>
     <string name="no_results_found">No se encontraron resultados</string>
