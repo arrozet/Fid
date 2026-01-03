@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
@@ -1224,6 +1225,32 @@ fun BottomNavigationBar(navController: NavController) {
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = PrimaryGreenLight,
                 selectedTextColor = PrimaryGreenLight,
+                indicatorColor = DarkCard,
+                unselectedIconColor = TextTertiary,
+                unselectedTextColor = TextTertiary
+            )
+        )
+        
+        NavigationBarItem(
+            icon = { 
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            label = { Text("Chef IA", fontSize = 10.sp) },
+            selected = currentRoute == Screen.RecipeGenerator.route,
+            onClick = { 
+                if (currentRoute != Screen.RecipeGenerator.route) {
+                    navController.navigate(Screen.RecipeGenerator.route) {
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = WarningYellow,
+                selectedTextColor = WarningYellow,
                 indicatorColor = DarkCard,
                 unselectedIconColor = TextTertiary,
                 unselectedTextColor = TextTertiary
