@@ -488,7 +488,7 @@ fun SettingsScreen(navController: NavController) {
                 onDismiss = { showContactDialog = false },
                 onSendEmail = {
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:soporte@fid-app.com")
+                        data = Uri.parse("mailto:jorgers4+fid@uma.es")
                         putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.contact_subject))
                     }
                     try {

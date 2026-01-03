@@ -260,6 +260,7 @@
     
     <string name="contact_title">Contacto</string>
     <string name="contact_email">Email: jorgers4+fid@uma.es</string>
+    <string name="contact_email_address">jorgers4+fid@uma.es</string>
     <string name="contact_description">¿Tienes preguntas, sugerencias o encontraste un problema? Escríbenos y te responderemos lo antes posible.</string>
     <string name="send_email">Enviar email</string>
     <string name="contact_subject">Contacto desde Fid App</string>
