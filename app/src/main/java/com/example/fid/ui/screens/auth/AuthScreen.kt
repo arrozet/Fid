@@ -5,13 +5,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -38,6 +46,7 @@ fun AuthScreen(navController: NavController) {
     val auth = Firebase.auth
     
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
     
     // Google Sign-In launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -50,6 +59,7 @@ fun AuthScreen(navController: NavController) {
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 
                 scope.launch {
+                    isLoading = true
                     try {
                         val authResult = auth.signInWithCredential(credential).await()
                         val firebaseUser = authResult.user
@@ -89,20 +99,22 @@ fun AuthScreen(navController: NavController) {
                                 
                                 // Ir a configuración de objetivos para personalizar
                                 navController.navigate(Screen.GoalSetup.route) {
-                                    popUpTo(Screen.Onboarding.route) { inclusive = true }
+                                    popUpTo(Screen.Auth.route) { inclusive = true }
                                 }
                             } else {
                                 android.util.Log.d("AuthScreen", "Usuario encontrado: ${existingUser.name}, navegando a Dashboard")
                                 
                                 // Usuario existente con objetivos configurados, ir al dashboard
                                 navController.navigate(Screen.Dashboard.route) {
-                                    popUpTo(Screen.Onboarding.route) { inclusive = true }
+                                    popUpTo(Screen.Auth.route) { inclusive = true }
                                 }
                             }
                         }
                     } catch (e: Exception) {
                         android.util.Log.e("AuthScreen", "Error en Google Sign-In: ${e.message}", e)
                         errorMessage = "Error con Google Sign-In: ${e.message}"
+                    } finally {
+                        isLoading = false
                     }
                 }
             } catch (e: ApiException) {
@@ -119,68 +131,162 @@ fun AuthScreen(navController: NavController) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.Center),
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Fid",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryGreen
-            )
+            Spacer(modifier = Modifier.height(48.dp))
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = stringResource(R.string.welcome_to_fid),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = stringResource(R.string.discover_new_way),
-                fontSize = 16.sp,
-                color = TextSecondary,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-            
-            if (errorMessage != null) {
-                Spacer(modifier = Modifier.height(16.dp))
+            // Header con logo y título
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = errorMessage!!,
-                    color = ErrorRed,
-                    fontSize = 12.sp
+                    text = "Fid",
+                    fontSize = 72.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryGreen
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = stringResource(R.string.discover_new_way),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextPrimary,
+                    textAlign = TextAlign.Center
                 )
             }
             
-            Spacer(modifier = Modifier.height(48.dp))
-            
-            // Google Sign-In button
-            OutlinedButton(
-                onClick = {
-                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(context.getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build()
-                    
-                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                    googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = TextPrimary
-                ),
-                shape = RoundedCornerShape(24.dp)
+            // Features section
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(stringResource(R.string.continue_with_google), fontSize = 14.sp)
+                FeatureCard(
+                    icon = Icons.Default.CameraAlt,
+                    text = stringResource(R.string.effortless_ai_registration)
+                )
+                FeatureCard(
+                    icon = Icons.Default.Psychology,
+                    text = stringResource(R.string.dynamic_personalized_goals)
+                )
+                FeatureCard(
+                    icon = Icons.Default.Favorite,
+                    text = stringResource(R.string.healthy_conscious_relationship)
+                )
             }
+            
+            // Bottom section con botón y error
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (errorMessage != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = ErrorRed.copy(alpha = 0.1f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = errorMessage!!,
+                            color = ErrorRed,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(12.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
+                // Google Sign-In button mejorado
+                Button(
+                    onClick = {
+                        errorMessage = null
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(context.getString(R.string.default_web_client_id))
+                            .requestEmail()
+                            .build()
+                        
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PrimaryGreen,
+                        contentColor = DarkBackground
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = DarkBackground,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.continue_with_google),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeatureCard(
+    icon: ImageVector,
+    text: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = DarkCard
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(PrimaryGreen.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = PrimaryGreen,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Text(
+                text = text,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary
+            )
         }
     }
 }

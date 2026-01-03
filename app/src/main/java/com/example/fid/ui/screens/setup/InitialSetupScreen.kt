@@ -157,8 +157,8 @@ fun InitialSetupScreen(navController: NavController) {
                     // Guardar idioma
                     LocaleHelper.setLanguage(context, selectedLanguage)
                     
-                    // Navegar a Onboarding y eliminar InitialSetup del stack
-                    navController.navigate(Screen.Onboarding.route) {
+                    // Navegar directamente a Auth y eliminar InitialSetup del stack
+                    navController.navigate(Screen.Auth.route) {
                         popUpTo(Screen.InitialSetup.route) { inclusive = true }
                     }
                     
