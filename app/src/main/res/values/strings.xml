@@ -146,10 +146,10 @@
     <string name="ounces">onzas</string>
     <string name="unit">unidad</string>
     <string name="calories">Calorías</string>
-    <string name="verified_manufacturer">Verificado por Fabricante/Restaurante</string>
-    <string name="verified_government">Verificado por Gobierno/USDA</string>
-    <string name="verified_community">Verificado por la Comunidad (Alta Confianza)</string>
-    <string name="user_submitted">Enviado por el Usuario (Sin verificar)</string>
+    <string name="verified_manufacturer">Verificado por fabricante/restaurante</string>
+    <string name="verified_government">Verificado por gobierno/USDA</string>
+    <string name="verified_community">Verificado por la comunidad (alta confianza)</string>
+    <string name="user_submitted">Enviado por el usuario (sin verificar)</string>
     <string name="add_to_log">Añadir a mi registro</string>
     <string name="nutritional_information">Información nutricional</string>
     <string name="food_not_found">No se encontró el alimento</string>
@@ -268,7 +268,7 @@
     <string name="privacy_policy_content">Fid respeta tu privacidad. Recopilamos únicamente la información necesaria para proporcionarte nuestros servicios:\n\n• Datos de cuenta (email, nombre)\n• Información física (edad, peso, altura) para calcular objetivos\n• Registro de comidas y bienestar\n\nNunca vendemos ni compartimos tu información personal con terceros. Tus datos se almacenan de forma segura en Firebase.\n\nPuedes solicitar la eliminación de tus datos en cualquier momento contactándonos.</string>
     
     <string name="terms_of_service_title">Términos de servicio</string>
-    <string name="terms_of_service_content">Al usar Fid, aceptas estos términos:\n\n1. Uso Personal: Fid es para uso personal y no comercial.\n\n2. Información Nutricional: La información proporcionada es orientativa y no sustituye el consejo médico profesional.\n\n3. Cuenta: Eres responsable de mantener la seguridad de tu cuenta.\n\n4. Contenido: No subas contenido inapropiado o ilegal.\n\n5. Modificaciones: Nos reservamos el derecho de modificar estos términos.\n\nÚltima actualización: Diciembre 2025</string>
+    <string name="terms_of_service_content">Al usar Fid, aceptas estos términos:\n\n1. Uso personal: Fid es para uso personal y no comercial.\n\n2. Información nutricional: La información proporcionada es orientativa y no sustituye el consejo médico profesional.\n\n3. Cuenta: Eres responsable de mantener la seguridad de tu cuenta.\n\n4. Contenido: No subas contenido inapropiado o ilegal.\n\n5. Modificaciones: Nos reservamos el derecho de modificar estos términos.\n\nÚltima actualización: Diciembre 2025</string>
     
     <string name="close">Cerrar</string>
     
