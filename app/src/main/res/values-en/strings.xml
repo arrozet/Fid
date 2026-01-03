@@ -247,7 +247,7 @@
     <string name="faq_a4">Yes, we use Firebase with Google authentication. Your data is securely stored in the cloud.</string>
     
     <string name="contact_title">Contact</string>
-    <string name="contact_email">Email: support@fid-app.com</string>
+    <string name="contact_email">Email: jorgers4+fid@uma.es</string>
     <string name="contact_description">Have questions, suggestions, or found a bug? Write to us and we\'ll get back to you as soon as possible.</string>
     <string name="send_email">Send Email</string>
     <string name="contact_subject">Contact from Fid App</string>
