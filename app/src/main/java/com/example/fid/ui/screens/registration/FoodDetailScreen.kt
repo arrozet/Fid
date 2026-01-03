@@ -28,6 +28,7 @@ import com.example.fid.data.database.entities.FoodItem
 import com.example.fid.data.repository.FirebaseRepository
 import com.example.fid.ui.theme.*
 import com.example.fid.utils.UnitConverter
+import java.util.Calendar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -352,7 +353,7 @@ fun FoodDetailScreen(navController: NavController, foodId: Long) {
                                     proteinG = totalProtein,
                                     fatG = totalFat,
                                     carbG = totalCarbs,
-                                    mealType = "snack",
+                                    mealType = getCurrentMealType(),
                                     registrationMethod = "manual",
                                     verificationLevel = verificationLevel
                                 )
@@ -467,3 +468,15 @@ fun MacroInfoRow(label: String, amount: Float, color: androidx.compose.ui.graphi
     }
 }
 
+/**
+ * Determina el tipo de comida según la hora del día
+ */
+private fun getCurrentMealType(): String {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    return when (hour) {
+        in 6..10 -> "breakfast"
+        in 12..15 -> "lunch"
+        in 17..22 -> "dinner"
+        else -> "snack"
+    }
+}

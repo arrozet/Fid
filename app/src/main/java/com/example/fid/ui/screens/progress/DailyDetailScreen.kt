@@ -431,11 +431,11 @@ fun NutrientChip(text: String, color: androidx.compose.ui.graphics.Color) {
 
 fun getMealEmoji(mealType: String): String {
     return when (mealType) {
-        "breakfast" -> "🌅"
-        "lunch" -> "☀️"
-        "dinner" -> "🌙"
-        "snack" -> "🍎"
-        else -> "🍽️"
+        "breakfast" -> "🥐"
+        "lunch" -> "🍝"
+        "dinner" -> "🍽️"
+        "snack" -> "🍪"
+        else -> "🥗"
     }
 }
 

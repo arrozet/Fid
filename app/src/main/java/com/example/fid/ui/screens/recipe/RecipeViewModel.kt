@@ -359,9 +359,9 @@ class RecipeViewModel : ViewModel() {
     private fun getCurrentMealType(): String {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         return when (hour) {
-            in 5..10 -> "breakfast"
-            in 11..15 -> "lunch"
-            in 16..20 -> "dinner"
+            in 6..10 -> "breakfast"
+            in 12..15 -> "lunch"
+            in 17..22 -> "dinner"
             else -> "snack"
         }
     }
