@@ -93,11 +93,15 @@
     <string name="food_name_label">Food name</string>
     <string name="meal_type_label">Meal type</string>
     <string name="amount_grams_label">Amount (grams)</string>
+    <string name="amount_ounces_label">Amount (ounces)</string>
     <string name="macronutrients_label">Macronutrients:</string>
     <string name="calories_kcal_label">Calories (kcal)</string>
     <string name="protein_g_label">Protein (g)</string>
     <string name="fat_g_label">Fat (g)</string>
     <string name="carbs_g_label">Carbohydrates (g)</string>
+    <string name="protein_oz_label">Protein (oz)</string>
+    <string name="fat_oz_label">Fat (oz)</string>
+    <string name="carbs_oz_label">Carbohydrates (oz)</string>
     <string name="food_registered_success">Food registered successfully</string>
     <string name="no_frequent_foods">No frequent foods yet</string>
     <string name="no_results_found">No results found</string>

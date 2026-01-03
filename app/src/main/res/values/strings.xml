@@ -6,18 +6,18 @@
     
     <!-- Onboarding -->
     <string name="welcome_to_fid">Bienvenido a Fid</string>
-    <string name="discover_new_way">Descubre una Nueva Forma de Nutrirte</string>
+    <string name="discover_new_way">Descubre una nueva forma de nutrirte</string>
     <string name="effortless_ai_registration">Registro sin esfuerzo con IA (fotos y voz)</string>
     <string name="dynamic_personalized_goals">Objetivos dinámicos y personalizados</string>
     <string name="healthy_conscious_relationship">Una relación saludable y consciente con la comida</string>
-    <string name="start_journey">Empezar Mi Viaje</string>
+    <string name="start_journey">Empezar mi viaje</string>
     <string name="already_have_account">Ya tengo una cuenta</string>
     <string name="dont_have_account">¿No tienes una cuenta?</string>
     
     <!-- Auth -->
-    <string name="sign_in">Iniciar Sesión</string>
-    <string name="create_account">Crear Cuenta</string>
-    <string name="email">Correo Electrónico</string>
+    <string name="sign_in">Iniciar sesión</string>
+    <string name="create_account">Crear cuenta</string>
+    <string name="email">Correo electrónico</string>
     <string name="password">Contraseña</string>
     <string name="remember_me">Recordarme</string>
     <string name="forgot_password">¿Olvidaste tu contraseña?</string>
@@ -27,7 +27,7 @@
     <string name="error_google_signin">Error en Google Sign-In: %1$s</string>
     
     <!-- Goal Setup -->
-    <string name="setup_goals">Establecimiento de Objetivos</string>
+    <string name="setup_goals">Establecimiento de objetivos</string>
     <string name="whats_your_goal">¿Cuál es tu objetivo?</string>
     <string name="lose_weight">Perder peso</string>
     <string name="maintain_weight">Mantener peso</string>
@@ -38,36 +38,36 @@
     <string name="height_cm">Altura (cm)</string>
     <string name="height_ft">Altura (ft)</string>
     <string name="height_in">Altura (in)</string>
-    <string name="current_weight_kg">Peso Actual (kg)</string>
+    <string name="current_weight_kg">Peso actual (kg)</string>
     <string name="weight_lb">Peso (lb)</string>
-    <string name="target_weight_lb">Peso Objetivo (lb)</string>
-    <string name="activity_level">Nivel de Actividad</string>
+    <string name="target_weight_lb">Peso objetivo (lb)</string>
+    <string name="activity_level">Nivel de actividad</string>
     <string name="sedentary">Sedentario</string>
     <string name="light">Ligero</string>
     <string name="moderate">Moderado</string>
-    <string name="very_active">Muy Activo</string>
+    <string name="very_active">Muy activo</string>
     <string name="athlete">Atleta</string>
-    <string name="target_weight_kg">Peso Objetivo (kg)</string>
+    <string name="target_weight_kg">Peso objetivo (kg)</string>
     <string name="target_weight_description">Opcional: Establece un peso objetivo para ayudarnos a personalizar mejor tu plan.</string>
-    <string name="confirm_goals">Confirmar Objetivos</string>
+    <string name="confirm_goals">Confirmar objetivos</string>
     <string name="next">Siguiente</string>
     <string name="back">Atrás</string>
     <string name="step_of_total">Paso %1$d de %2$d</string>
     
     <!-- Dashboard -->
     <string name="hello">Hola, %1$s</string>
-    <string name="calories_consumed">Calorías Consumidas</string>
-    <string name="calories_remaining">Calorías Restantes</string>
-    <string name="daily_goal">Objetivo Diario</string>
+    <string name="calories_consumed">Calorías consumidas</string>
+    <string name="calories_remaining">Calorías restantes</string>
+    <string name="daily_goal">Objetivo diario</string>
     <string name="proteins">Proteínas</string>
     <string name="fats">Grasas</string>
     <string name="carbs">Carbohidratos</string>
     <string name="hydration">Hidratación</string>
     <string name="sleep">Sueño</string>
-    <string name="register_food">Registrar Alimento</string>
+    <string name="register_food">Registrar alimento</string>
     <string name="macronutrients">Macronutrientes</string>
-    <string name="wellness_index">Índice de Bienestar</string>
-    <string name="todays_meals">Comidas de Hoy</string>
+    <string name="wellness_index">Índice de bienestar</string>
+    <string name="todays_meals">Comidas de hoy</string>
     <string name="default_user_name">Usuario</string>
     
     <!-- Meal Types -->
@@ -81,14 +81,14 @@
     <string name="snap_it">¡Fotografía!</string>
     <string name="focus_your_food">Enfoca tu comida</string>
     <string name="analyzing_food">Analizando tu comida…</string>
-    <string name="voice_registration">Registro por Voz</string>
+    <string name="voice_registration">Registro por voz</string>
     <string name="say_what_you_ate">Di lo que comiste (ej: \'Comí 100 gramos de pollo y una ensalada\')</string>
-    <string name="manual_registration">Registro Manual</string>
+    <string name="manual_registration">Registro manual</string>
     <string name="search_food">Buscar alimento</string>
-    <string name="frequent_recent">Alimentos Frecuentes y Recientes</string>
-    <string name="smart_suggestions">Sugerencias Inteligentes</string>
-    <string name="add_custom">Añadir Personalizado</string>
-    <string name="confirm_register">Confirmar y Registrar</string>
+    <string name="frequent_recent">Alimentos frecuentes y recientes</string>
+    <string name="smart_suggestions">Sugerencias inteligentes</string>
+    <string name="add_custom">Añadir personalizado</string>
+    <string name="confirm_register">Confirmar y registrar</string>
     <string name="take_photo">Tomar foto</string>
     <string name="captured_photo">Foto capturada</string>
     <string name="retake_photo">Tomar otra foto</string>
@@ -96,20 +96,24 @@
     <string name="food_name_label">Nombre de la comida</string>
     <string name="meal_type_label">Tipo de comida</string>
     <string name="amount_grams_label">Cantidad (gramos)</string>
+    <string name="amount_ounces_label">Cantidad (onzas)</string>
     <string name="macronutrients_label">Macronutrientes:</string>
     <string name="calories_kcal_label">Calorías (kcal)</string>
     <string name="protein_g_label">Proteína (g)</string>
     <string name="fat_g_label">Grasa (g)</string>
     <string name="carbs_g_label">Carbohidratos (g)</string>
+    <string name="protein_oz_label">Proteína (oz)</string>
+    <string name="fat_oz_label">Grasa (oz)</string>
+    <string name="carbs_oz_label">Carbohidratos (oz)</string>
     <string name="food_registered_success">Comida registrada exitosamente</string>
     <string name="no_frequent_foods">No hay alimentos frecuentes aún</string>
     <string name="no_results_found">No se encontraron resultados</string>
     <string name="suggested_for_this_time">Sugerido para esta hora</string>
     
     <!-- Custom Foods -->
-    <string name="my_foods">Mis Comidas</string>
-    <string name="add_custom_food">Añadir Comida Personalizada</string>
-    <string name="edit_custom_food">Editar Comida</string>
+    <string name="my_foods">Mis comidas</string>
+    <string name="add_custom_food">Añadir comida personalizada</string>
+    <string name="edit_custom_food">Editar comida</string>
     <string name="no_custom_foods">No tienes comidas personalizadas aún. ¡Añade una!</string>
     <string name="food_name_spanish">Nombre en español</string>
     <string name="food_name_english">Nombre en inglés (opcional)</string>
@@ -136,7 +140,7 @@
     <string name="voice_tips">💡 Consejos:\n• Verifica tu conexión a internet\n• Habla claro y cerca del micrófono\n• Evita ruido de fondo</string>
     
     <!-- Food Detail -->
-    <string name="food_detail">Detalle de Alimento</string>
+    <string name="food_detail">Detalle de alimento</string>
     <string name="amount">Cantidad</string>
     <string name="grams">gramos</string>
     <string name="ounces">onzas</string>
@@ -147,18 +151,18 @@
     <string name="verified_community">Verificado por la Comunidad (Alta Confianza)</string>
     <string name="user_submitted">Enviado por el Usuario (Sin verificar)</string>
     <string name="add_to_log">Añadir a mi registro</string>
-    <string name="nutritional_information">Información Nutricional</string>
+    <string name="nutritional_information">Información nutricional</string>
     <string name="food_not_found">No se encontró el alimento</string>
     
     <!-- Day Detail -->
-    <string name="day_detail">Detalle del Día</string>
+    <string name="day_detail">Detalle del día</string>
     <string name="go_back">Volver</string>
     <string name="meals_count">Comidas (%1$d)</string>
     <string name="no_meals_registered">No hay comidas registradas</string>
     
     <!-- Progress -->
     <string name="progress">Progreso</string>
-    <string name="numberless_mode">Modo sin Números</string>
+    <string name="numberless_mode">Modo sin números</string>
     <string name="keep_going">¡Sigue así!</string>
     <string name="almost_there">¡Casi lo logras!</string>
     <string name="goal_reached">¡Objetivo cumplido!</string>
@@ -170,13 +174,13 @@
     <string name="high_carbs_today">Hoy has consumido bastantes carbohidratos</string>
     <string name="high_fats_today">Hoy has consumido bastantes grasas</string>
     <string name="need_more_protein">Necesitas más proteínas</string>
-    <string name="high_energy">Hoy has tenido una Energía Alta</string>
-    <string name="moderate_energy">Energía Moderada</string>
-    <string name="building_energy">Construyendo Energía</string>
+    <string name="high_energy">Hoy has tenido una energía alta</string>
+    <string name="moderate_energy">Energía moderada</string>
+    <string name="building_energy">Construyendo energía</string>
     <string name="no_energy_data">Sin datos de energía</string>
-    <string name="balanced_diet">Tu dieta de hoy fue Equilibrada</string>
-    <string name="need_more_veggies">Parece que necesitas más Verduras Frescas</string>
-    <string name="prioritized_protein">Hoy priorizaste las Proteínas</string>
+    <string name="balanced_diet">Tu dieta de hoy fue equilibrada</string>
+    <string name="need_more_veggies">Parece que necesitas más verduras frescas</string>
+    <string name="prioritized_protein">Hoy priorizaste las proteínas</string>
     <string name="feeling_radiant">¡Te sientes radiante!</string>
     <string name="today_status">Estado de hoy</string>
     <string name="energy">Energía</string>
@@ -191,10 +195,10 @@
     <string name="tip_calorie_surplus">Has superado ligeramente tu objetivo de calorías</string>
     <string name="tip_keep_going">¡Sigue así, lo estás haciendo genial!</string>
     <string name="sugar_tip_message">Hoy has consumido bastante azúcar natural de la fruta. Prueba equilibrar con más proteínas mañana.</string>
-    <string name="wellness_trends">Tendencias de Bienestar</string>
+    <string name="wellness_trends">Tendencias de bienestar</string>
     <string name="hydration_trend">Hidratación</string>
     <string name="improving">Mejorando ↗</string>
-    <string name="dietary_diversity">Diversidad Dietética</string>
+    <string name="dietary_diversity">Diversidad dietética</string>
     <string name="stable">Estable →</string>
     <string name="consistency">Consistencia</string>
     <string name="excellent">Excelente ✓</string>
@@ -206,45 +210,45 @@
     <string name="daily_average">Promedio diario</string>
     <string name="days_on_target">Días en objetivo</string>
     <string name="average_protein">Proteína promedio</string>
-    <string name="macro_distribution_period">Distribución de Macros (%1$s)</string>
+    <string name="macro_distribution_period">Distribución de macros (%1$s)</string>
     <string name="carbs_short">Carbos</string>
-    <string name="daily_history">Historial Diario</string>
+    <string name="daily_history">Historial diario</string>
     <string name="no_data_for_period">No hay datos para este período</string>
     <string name="meals_registered">comidas registradas</string>
     <string name="of_goal">del objetivo</string>
     
     <!-- Settings -->
     <string name="settings">Ajustes</string>
-    <string name="my_account">Mi Cuenta</string>
-    <string name="personal_data">Datos Personales</string>
-    <string name="my_goals">Mis Objetivos</string>
-    <string name="change_password">Cambiar Contraseña</string>
-    <string name="app_preferences">Preferencias de la App</string>
-    <string name="numberless_mode_toggle">Modo sin Números</string>
+    <string name="my_account">Mi cuenta</string>
+    <string name="personal_data">Datos personales</string>
+    <string name="my_goals">Mis objetivos</string>
+    <string name="change_password">Cambiar contraseña</string>
+    <string name="app_preferences">Preferencias de la app</string>
+    <string name="numberless_mode_toggle">Modo sin números</string>
     <string name="numberless_mode_description">Oculta los números de calorías</string>
     <string name="numberless_mode_enabled">Modo sin números activado</string>
     <string name="numberless_mode_disabled">Modo sin números desactivado</string>
-    <string name="measurement_units">Unidades de Medida</string>
+    <string name="measurement_units">Unidades de medida</string>
     <string name="notifications">Notificaciones</string>
     <string name="connectivity">Conectividad</string>
     <string name="integrate_apple_health">Integrar con Apple Health</string>
     <string name="integrate_google_fit">Integrar con Google Fit</string>
-    <string name="support_legal">Soporte y Legal</string>
-    <string name="faq">Preguntas Frecuentes</string>
+    <string name="support_legal">Soporte y legal</string>
+    <string name="faq">Preguntas frecuentes</string>
     <string name="contact">Contacto</string>
-    <string name="privacy_policy">Política de Privacidad</string>
-    <string name="terms_of_service">Términos de Servicio</string>
-    <string name="sign_out">Cerrar Sesión</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="terms_of_service">Términos de servicio</string>
+    <string name="sign_out">Cerrar sesión</string>
     <string name="sign_out_confirmation">¿Estás seguro de que quieres cerrar sesión?</string>
     <string name="error_sign_out">Error al cerrar sesión: %1$s</string>
     
     <!-- Personal Data -->
-    <string name="edit_personal_data">Editar Datos Personales</string>
+    <string name="edit_personal_data">Editar datos personales</string>
     <string name="name">Nombre</string>
     <string name="personal_data_saved">Datos personales guardados</string>
     
     <!-- Support &amp; Legal Content -->
-    <string name="faq_title">Preguntas Frecuentes</string>
+    <string name="faq_title">Preguntas frecuentes</string>
     <string name="faq_q1">¿Cómo registro mis comidas?</string>
     <string name="faq_a1">Puedes registrar comidas usando la cámara para tomar fotos, por voz describiendo lo que comiste, o manualmente buscando alimentos en nuestra base de datos.</string>
     <string name="faq_q2">¿Cómo se calculan mis objetivos nutricionales?</string>
@@ -257,13 +261,13 @@
     <string name="contact_title">Contacto</string>
     <string name="contact_email">Email: soporte@fid-app.com</string>
     <string name="contact_description">¿Tienes preguntas, sugerencias o encontraste un problema? Escríbenos y te responderemos lo antes posible.</string>
-    <string name="send_email">Enviar Email</string>
+    <string name="send_email">Enviar email</string>
     <string name="contact_subject">Contacto desde Fid App</string>
     
-    <string name="privacy_policy_title">Política de Privacidad</string>
+    <string name="privacy_policy_title">Política de privacidad</string>
     <string name="privacy_policy_content">Fid respeta tu privacidad. Recopilamos únicamente la información necesaria para proporcionarte nuestros servicios:\n\n• Datos de cuenta (email, nombre)\n• Información física (edad, peso, altura) para calcular objetivos\n• Registro de comidas y bienestar\n\nNunca vendemos ni compartimos tu información personal con terceros. Tus datos se almacenan de forma segura en Firebase.\n\nPuedes solicitar la eliminación de tus datos en cualquier momento contactándonos.</string>
     
-    <string name="terms_of_service_title">Términos de Servicio</string>
+    <string name="terms_of_service_title">Términos de servicio</string>
     <string name="terms_of_service_content">Al usar Fid, aceptas estos términos:\n\n1. Uso Personal: Fid es para uso personal y no comercial.\n\n2. Información Nutricional: La información proporcionada es orientativa y no sustituye el consejo médico profesional.\n\n3. Cuenta: Eres responsable de mantener la seguridad de tu cuenta.\n\n4. Contenido: No subas contenido inapropiado o ilegal.\n\n5. Modificaciones: Nos reservamos el derecho de modificar estos términos.\n\nÚltima actualización: Diciembre 2025</string>
     
     <string name="close">Cerrar</string>
@@ -345,27 +349,27 @@
     <string name="notification_summary_text">Revisa tu progreso de hoy en Fid</string>
     
     <!-- Notification Settings -->
-    <string name="enable_notifications">Activar Notificaciones</string>
+    <string name="enable_notifications">Activar notificaciones</string>
     <string name="enable_notifications_desc">Recibe recordatorios y actualizaciones</string>
-    <string name="meal_reminders">Recordatorios de Comidas</string>
+    <string name="meal_reminders">Recordatorios de comidas</string>
     <string name="meal_reminders_desc">Te recordamos registrar tus comidas</string>
-    <string name="hydration_reminders">Recordatorios de Hidratación</string>
+    <string name="hydration_reminders">Recordatorios de hidratación</string>
     <string name="hydration_reminders_desc">Te recordamos beber agua regularmente</string>
-    <string name="daily_summary">Resumen Diario</string>
+    <string name="daily_summary">Resumen diario</string>
     <string name="daily_summary_desc">Resumen de tu progreso diario</string>
-    <string name="motivational_messages">Mensajes Motivacionales</string>
+    <string name="motivational_messages">Mensajes motivacionales</string>
     <string name="motivational_messages_desc">Recibe ánimos cuando alcances tus metas</string>
-    <string name="breakfast_time">Hora del Desayuno</string>
-    <string name="lunch_time">Hora del Almuerzo</string>
-    <string name="dinner_time">Hora de la Cena</string>
-    <string name="summary_time">Hora del Resumen</string>
-    <string name="select_time">Seleccionar Hora</string>
+    <string name="breakfast_time">Hora del desayuno</string>
+    <string name="lunch_time">Hora del almuerzo</string>
+    <string name="dinner_time">Hora de la cena</string>
+    <string name="summary_time">Hora del resumen</string>
+    <string name="select_time">Seleccionar hora</string>
     <string name="breakfast">desayuno</string>
     <string name="lunch">almuerzo</string>
     <string name="dinner">cena</string>
     <string name="meal">comida</string>
     <string name="motivation">Motivación</string>
-    <string name="test_notification">Probar Notificación</string>
+    <string name="test_notification">Probar notificación</string>
     <string name="test_notification_sent">Notificación de prueba enviada</string>
     
     <!-- Success Messages -->
@@ -392,7 +396,7 @@
     <string name="percentage_of_goal">%1$d%% del objetivo</string>
 
     <!-- Wellness Index -->
-    <string name="add_water">Añadir Agua</string>
+    <string name="add_water">Añadir agua</string>
     <string name="water_intake_today">Agua consumida hoy</string>
     <string name="add_glass">+ 1 vaso (250ml)</string>
     <string name="add_bottle">+ 1 botella (500ml)</string>
@@ -400,7 +404,7 @@
     <string name="water_goal">Objetivo: %1$.1f L</string>
     <string name="liters_format">%1$.1f L</string>
     <string name="milliliters_format">%1$d ml</string>
-    <string name="log_sleep">Registrar Sueño</string>
+    <string name="log_sleep">Registrar sueño</string>
     <string name="hours_slept">Horas dormidas</string>
     <string name="sleep_last_night">¿Cuántas horas dormiste anoche?</string>
     <string name="hours_format">%1$.1f h</string>
