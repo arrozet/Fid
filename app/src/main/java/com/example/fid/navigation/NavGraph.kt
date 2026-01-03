@@ -12,7 +12,6 @@ sealed class Screen(val route: String) {
     object GoalSetup : Screen("goal_setup")
     object Dashboard : Screen("dashboard")
     object PhotoRegistration : Screen("photo_registration")
-    object VoiceRegistration : Screen("voice_registration")
     object ManualRegistration : Screen("manual_registration")
     object FoodDetail : Screen("food_detail/{foodId}") {
         fun createRoute(foodId: Long) = "food_detail/$foodId"
@@ -57,10 +56,6 @@ fun NavGraph(
         
         composable(Screen.PhotoRegistration.route) {
             com.example.fid.ui.screens.registration.PhotoRegistrationScreen(navController)
-        }
-        
-        composable(Screen.VoiceRegistration.route) {
-            com.example.fid.ui.screens.registration.VoiceRegistrationScreen(navController)
         }
         
         composable(Screen.ManualRegistration.route) {
