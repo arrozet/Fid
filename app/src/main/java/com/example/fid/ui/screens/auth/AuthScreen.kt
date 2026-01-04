@@ -1,8 +1,11 @@
 package com.example.fid.ui.screens.auth
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -15,8 +18,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +52,35 @@ fun AuthScreen(navController: NavController) {
     
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    
+    // Animación del logo
+    var animationStarted by remember { mutableStateOf(false) }
+    val titleOffset by animateFloatAsState(
+        targetValue = if (animationStarted) -12f else 0f,
+        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        label = "titleOffset"
+    )
+    val logoAlpha by animateFloatAsState(
+        targetValue = if (animationStarted) 1f else 0f,
+        animationSpec = tween(durationMillis = 550, delayMillis = 300, easing = FastOutSlowInEasing),
+        label = "logoAlpha"
+    )
+    val logoOffset by animateFloatAsState(
+        targetValue = if (animationStarted) 0f else 20f,
+        animationSpec = tween(durationMillis = 550, delayMillis = 300, easing = FastOutSlowInEasing),
+        label = "logoOffset"
+    )
+    
+    LaunchedEffect(Unit) {
+        animationStarted = true
+    }
+    
+    // Manejar botón atrás para volver a InitialSetup
+    BackHandler {
+        navController.navigate(Screen.InitialSetup.route) {
+            popUpTo(Screen.Auth.route) { inclusive = true }
+        }
+    }
     
     // Google Sign-In launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -137,16 +171,33 @@ fun AuthScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Header con logo y título
+            // Header con logo y título animados
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Fid",
-                    fontSize = 72.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryGreen
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Fid",
+                        fontSize = 72.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen,
+                        modifier = Modifier.offset(x = titleOffset.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.width(4.dp))
+                    
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_fid),
+                        contentDescription = "Fid Logo",
+                        modifier = Modifier
+                            .size(64.dp)
+                            .offset(x = logoOffset.dp)
+                            .alpha(logoAlpha)
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 

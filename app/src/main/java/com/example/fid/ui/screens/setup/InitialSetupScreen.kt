@@ -1,6 +1,8 @@
 package com.example.fid.ui.screens.setup
 
 import android.app.Activity
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +36,28 @@ fun InitialSetupScreen(navController: NavController) {
     var selectedLanguage by remember { mutableStateOf(LocaleHelper.LANGUAGE_SPANISH) }
     var selectedUnit by remember { mutableStateOf("metric") }
     
+    // Animación del logo
+    var animationStarted by remember { mutableStateOf(false) }
+    val titleOffset by animateFloatAsState(
+        targetValue = if (animationStarted) -10f else 0f,
+        animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing),
+        label = "titleOffset"
+    )
+    val logoAlpha by animateFloatAsState(
+        targetValue = if (animationStarted) 1f else 0f,
+        animationSpec = tween(durationMillis = 550, delayMillis = 300, easing = FastOutSlowInEasing),
+        label = "logoAlpha"
+    )
+    val logoOffset by animateFloatAsState(
+        targetValue = if (animationStarted) 0f else 20f,
+        animationSpec = tween(durationMillis = 550, delayMillis = 300, easing = FastOutSlowInEasing),
+        label = "logoOffset"
+    )
+    
+    LaunchedEffect(Unit) {
+        animationStarted = true
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,16 +73,33 @@ fun InitialSetupScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(40.dp))
             
-            // Header
+            // Header con animación del logo
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Fid",
-                    fontSize = 56.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryGreen
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Fid",
+                        fontSize = 56.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryGreen,
+                        modifier = Modifier.offset(x = titleOffset.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.width(4.dp))
+                    
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_fid),
+                        contentDescription = "Fid Logo",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .offset(x = logoOffset.dp)
+                            .alpha(logoAlpha)
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
