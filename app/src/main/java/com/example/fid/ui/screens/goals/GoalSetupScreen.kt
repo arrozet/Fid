@@ -289,7 +289,7 @@ fun GoalSetupScreen(navController: NavController) {
                                     ).show()
                                     
                                     navController.navigate(Screen.Dashboard.route) {
-                                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                                        popUpTo(Screen.Auth.route) { inclusive = true }
                                     }
                                 } catch (e: Exception) {
                                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()

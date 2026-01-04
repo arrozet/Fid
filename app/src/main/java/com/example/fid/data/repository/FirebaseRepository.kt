@@ -775,7 +775,7 @@ class FirebaseRepository {
      */
     suspend fun getTodayWellnessEntry(userId: Long): WellnessEntry? {
         return try {
-            val calendar = java.util.Calendar.getInstance()
+            val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
             calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
             calendar.set(java.util.Calendar.MINUTE, 0)
             calendar.set(java.util.Calendar.SECOND, 0)
@@ -806,7 +806,7 @@ class FirebaseRepository {
             return existing
         }
         
-        val calendar = java.util.Calendar.getInstance()
+        val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
         calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
         calendar.set(java.util.Calendar.MINUTE, 0)
         calendar.set(java.util.Calendar.SECOND, 0)
