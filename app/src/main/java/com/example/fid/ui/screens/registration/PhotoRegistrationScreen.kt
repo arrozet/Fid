@@ -1007,23 +1007,76 @@ private fun captureImage(
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                var bitmap: Bitmap? = null
                 try {
-                    // Read EXIF data before rotating
-                    val exif = ExifInterface(photoFile.absolutePath)
-                    val orientation = exif.getAttributeInt(
-                        ExifInterface.TAG_ORIENTATION,
-                        ExifInterface.ORIENTATION_NORMAL
-                    )
+                    // Verify file exists
+                    if (!photoFile.exists() || !photoFile.canRead()) {
+                        onError(Exception("Photo file not accessible"))
+                        return
+                    }
                     
-                    val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                    // Read EXIF data before rotating (with error handling)
+                    var orientation = ExifInterface.ORIENTATION_NORMAL
+                    try {
+                        val exif = ExifInterface(photoFile.absolutePath)
+                        orientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION,
+                            ExifInterface.ORIENTATION_NORMAL
+                        )
+                    } catch (e: Exception) {
+                        // EXIF reading failed, use default orientation
+                        // This is not critical, continue with normal orientation
+                    }
+                    
+                    // Decode bitmap with options to avoid OutOfMemoryError
+                    val options = BitmapFactory.Options().apply {
+                        inJustDecodeBounds = true
+                    }
+                    BitmapFactory.decodeFile(photoFile.absolutePath, options)
+                    
+                    // Calculate sample size to reduce memory usage
+                    // Target max dimension of 1920px to balance quality and memory
+                    val maxDimension = 1920
+                    val scale = if (options.outWidth > options.outHeight) {
+                        (options.outWidth / maxDimension.toFloat()).toInt().coerceAtLeast(1)
+                    } else {
+                        (options.outHeight / maxDimension.toFloat()).toInt().coerceAtLeast(1)
+                    }
+                    
+                    // Decode with scaling
+                    options.inJustDecodeBounds = false
+                    options.inSampleSize = scale
+                    options.inPreferredConfig = Bitmap.Config.RGB_565 // Use less memory
+                    
+                    bitmap = BitmapFactory.decodeFile(photoFile.absolutePath, options)
+                    
+                    if (bitmap == null) {
+                        onError(Exception("Failed to decode photo"))
+                        return
+                    }
                     
                     // Rotate bitmap based on EXIF orientation
                     val rotatedBitmap = rotateBitmapIfNeeded(bitmap, orientation)
                     
                     onImageCaptured(rotatedBitmap)
                     photoFile.delete() // Clean up
+                } catch (e: OutOfMemoryError) {
+                    // Clean up bitmap if it exists
+                    bitmap?.recycle()
+                    onError(Exception("Not enough memory to process photo. Try again."))
                 } catch (e: Exception) {
+                    // Clean up bitmap if it exists
+                    bitmap?.recycle()
                     onError(e)
+                } finally {
+                    // Ensure file is cleaned up even if there's an error
+                    try {
+                        if (photoFile.exists()) {
+                            photoFile.delete()
+                        }
+                    } catch (e: Exception) {
+                        // Ignore cleanup errors
+                    }
                 }
             }
             
@@ -1034,7 +1087,17 @@ private fun captureImage(
     )
 }
 
-private fun rotateBitmapIfNeeded(bitmap: Bitmap, orientation: Int): Bitmap {
+private fun rotateBitmapIfNeeded(bitmap: Bitmap?, orientation: Int): Bitmap {
+    if (bitmap == null) {
+        throw IllegalArgumentException("Bitmap cannot be null")
+    }
+    
+    // If no rotation needed, return original
+    if (orientation == ExifInterface.ORIENTATION_NORMAL || 
+        orientation == ExifInterface.ORIENTATION_UNDEFINED) {
+        return bitmap
+    }
+    
     val matrix = Matrix()
     
     when (orientation) {
@@ -1066,8 +1129,12 @@ private fun rotateBitmapIfNeeded(bitmap: Bitmap, orientation: Int): Bitmap {
         )
         bitmap.recycle() // Free original bitmap memory
         rotatedBitmap
+    } catch (e: OutOfMemoryError) {
+        // If rotation fails due to memory, return original and log
+        bitmap
     } catch (e: Exception) {
-        bitmap // Return original if rotation fails
+        // Return original if rotation fails for any other reason
+        bitmap
     }
 }
 
