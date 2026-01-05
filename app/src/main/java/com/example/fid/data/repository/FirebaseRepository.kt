@@ -387,26 +387,79 @@ class FirebaseRepository {
         }
     }
     
-    fun getFrequentFoodItems(): Flow<List<FoodItem>> = callbackFlow {
-        val listener = firestore.collection("food_items")
+    fun getFrequentFoodItems(userId: Long): Flow<List<FoodItem>> = callbackFlow {
+        // Obtener alimentos frecuentes del usuario
+        // Incluir: alimentos personalizados del usuario Y alimentos globales que el usuario ha usado
+        var usedFoodNames = mutableSetOf<String>()
+        var foodItems = emptyList<FoodItem>()
+        
+        // Función auxiliar para filtrar y enviar
+        fun filterAndSendFrequentFoods() {
+            val userItems = foodItems.filter { item ->
+                val isUserCustom = item.createdByUserId == userId
+                val isGlobalAndUsed = item.createdByUserId == null && (
+                    usedFoodNames.contains(item.nameEs.lowercase().trim()) ||
+                    usedFoodNames.contains(item.nameEn.lowercase().trim()) ||
+                    usedFoodNames.contains(item.name.lowercase().trim())
+                )
+                isUserCustom || isGlobalAndUsed
+            }
+            
+            // Ordenar en memoria por lastUsed descendente y limitar a 20
+            val sortedItems = userItems
+                .sortedByDescending { it.lastUsed ?: 0L }
+                .take(20)
+            
+            trySend(sortedItems)
+        }
+        
+        // Listener para FoodEntry del usuario
+        val foodEntriesListener = firestore.collection("food_entries")
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { entriesSnapshot, entriesError ->
+                if (entriesError != null) {
+                    android.util.Log.e("FirebaseRepository", "Error obteniendo FoodEntry: ${entriesError.message}")
+                    return@addSnapshotListener
+                }
+                
+                val userEntries = entriesSnapshot?.documents?.mapNotNull { 
+                    it.toObject<FoodEntry>() 
+                } ?: emptyList()
+                
+                // Crear un conjunto de nombres de alimentos que el usuario ha usado
+                usedFoodNames = mutableSetOf<String>()
+                userEntries.forEach { entry ->
+                    if (entry.foodNameEs.isNotBlank()) usedFoodNames.add(entry.foodNameEs.lowercase().trim())
+                    if (entry.foodNameEn.isNotBlank()) usedFoodNames.add(entry.foodNameEn.lowercase().trim())
+                    if (entry.foodName.isNotBlank()) usedFoodNames.add(entry.foodName.lowercase().trim())
+                }
+                
+                // Filtrar y enviar alimentos frecuentes
+                filterAndSendFrequentFoods()
+            }
+        
+        // Listener para alimentos frecuentes
+        val foodItemsListener = firestore.collection("food_items")
             .whereEqualTo("isFrequent", true)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
                     return@addSnapshotListener
                 }
-                val items = snapshot?.documents?.mapNotNull { doc ->
+                
+                foodItems = snapshot?.documents?.mapNotNull { doc ->
                     val foodItem = doc.toObject<FoodItem>()
                     foodItem?.copy(id = doc.id.toLongOrNull() ?: 0L)
                 } ?: emptyList()
-                // Ordenar en memoria por lastUsed descendente y limitar a 20
-                val sortedItems = items
-                    .sortedByDescending { it.lastUsed ?: 0L }
-                    .take(20)
-                trySend(sortedItems)
+                
+                // Filtrar y enviar alimentos frecuentes
+                filterAndSendFrequentFoods()
             }
         
-        awaitClose { listener.remove() }
+        awaitClose { 
+            foodItemsListener.remove()
+            foodEntriesListener.remove()
+        }
     }
     
     suspend fun insertFoodItem(foodItem: FoodItem): Long {

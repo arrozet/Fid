@@ -59,14 +59,19 @@ fun ManualRegistrationScreen(navController: NavController) {
         }
     }
     
-    LaunchedEffect(Unit) {
-        // Obtener alimentos frecuentes
-        repository.getFrequentFoodItems().collect { foods ->
-            android.util.Log.d("ManualRegistration", "Alimentos frecuentes obtenidos: ${foods.size}")
-            foods.forEach { food ->
-                android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
+    LaunchedEffect(currentUser) {
+        // Obtener alimentos frecuentes del usuario actual
+        currentUser?.let { user ->
+            repository.getFrequentFoodItems(user.id).collect { foods ->
+                android.util.Log.d("ManualRegistration", "Alimentos frecuentes obtenidos: ${foods.size}")
+                foods.forEach { food ->
+                    android.util.Log.d("ManualRegistration", "  - ${food.getLocalizedName(context)}, ID: ${food.id}")
+                }
+                frequentFoods = foods
             }
-            frequentFoods = foods
+        } ?: run {
+            // Si no hay usuario, limpiar la lista
+            frequentFoods = emptyList()
         }
     }
     
