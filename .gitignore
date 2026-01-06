@@ -526,3 +526,5 @@ google-services.json
 *.hprof
 .env
 /.kotlin
+/docs/deliverable/code
+/docs/deliverable/Fid-Grupo_2J
